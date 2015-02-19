@@ -1,0 +1,427 @@
+{
+    "baseDirectory": "CharacterNew",
+    "type": [
+        {
+            "name": "Anthony",
+            "availableScene": [
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Park",
+                    "depth1": 5
+                },
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Living",
+                    "depth1": 5
+                }
+            ],
+            "numExpression": 9,
+            "numPose": 9,
+            "numStyle": 43
+        },
+        {
+            "name": "Barbara",
+            "availableScene": [
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Park",
+                    "depth1": 5
+                },
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Living",
+                    "depth1": 5
+                }
+            ],
+            "numExpression": 9,
+            "numPose": 9,
+            "numStyle": 43
+        },
+        {
+            "name": "Bob",
+            "availableScene": [
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Park",
+                    "depth1": 5
+                },
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Living",
+                    "depth1": 5
+                }
+            ],
+            "numExpression": 9,
+            "numPose": 4,
+            "numStyle": 43
+        },
+        {
+            "name": "Chang",
+            "availableScene": [
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Park",
+                    "depth1": 5
+                },
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Living",
+                    "depth1": 5
+                }
+            ],
+            "numExpression": 9,
+            "numPose": 9,
+            "numStyle": 43
+        },
+        {
+            "name": "Ding",
+            "availableScene": [
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Park",
+                    "depth1": 5
+                },
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Living",
+                    "depth1": 5
+                }
+            ],
+            "numExpression": 9,
+            "numPose": 9,
+            "numStyle": 43
+        },
+        {
+            "name": "Feng",
+            "availableScene": [
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Park",
+                    "depth1": 5
+                },
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Living",
+                    "depth1": 5
+                }
+            ],
+            "numExpression": 9,
+            "numPose": 9,
+            "numStyle": 43
+        },
+        {
+            "name": "Hua",
+            "availableScene": [
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Park",
+                    "depth1": 5
+                },
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Living",
+                    "depth1": 5
+                }
+            ],
+            "numExpression": 9,
+            "numPose": 9,
+            "numStyle": 44
+        },
+        {
+            "name": "Jenny",
+            "availableScene": [
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Park",
+                    "depth1": 5
+                },
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Living",
+                    "depth1": 5
+                }
+            ],
+            "numExpression": 9,
+            "numPose": 9,
+            "numStyle": 44
+        },
+        {
+            "name": "Jiang",
+            "availableScene": [
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Park",
+                    "depth1": 5
+                },
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Living",
+                    "depth1": 5
+                }
+            ],
+            "numExpression": 9,
+            "numPose": 9,
+            "numStyle": 43
+        },
+        {
+            "name": "John",
+            "availableScene": [
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Park",
+                    "depth1": 5
+                },
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Living",
+                    "depth1": 5
+                }
+            ],
+            "numExpression": 9,
+            "numPose": 9,
+            "numStyle": 43
+        },
+        {
+            "name": "Kate",
+            "availableScene": [
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Park",
+                    "depth1": 5
+                },
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Living",
+                    "depth1": 5
+                }
+            ],
+            "numExpression": 9,
+            "numPose": 4,
+            "numStyle": 43
+        },
+        {
+            "name": "Kevin",
+            "availableScene": [
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Park",
+                    "depth1": 5
+                },
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Living",
+                    "depth1": 5
+                }
+            ],
+            "numExpression": 9,
+            "numPose": 4,
+            "numStyle": 43
+        },
+        {
+            "name": "Mary",
+            "availableScene": [
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Park",
+                    "depth1": 5
+                },
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Living",
+                    "depth1": 5
+                }
+            ],
+            "numExpression": 9,
+            "numPose": 9,
+            "numStyle": 43
+        },
+        {
+            "name": "Mike",
+            "availableScene": [
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Park",
+                    "depth1": 5
+                },
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Living",
+                    "depth1": 5
+                }
+            ],
+            "numExpression": 9,
+            "numPose": 4,
+            "numStyle": 42
+        },
+        {
+            "name": "Paul",
+            "availableScene": [
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Park",
+                    "depth1": 5
+                },
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Living",
+                    "depth1": 5
+                }
+            ],
+            "numExpression": 9,
+            "numPose": 9,
+            "numStyle": 43
+        },
+        {
+            "name": "Rujia",
+            "availableScene": [
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Park",
+                    "depth1": 5
+                },
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Living",
+                    "depth1": 5
+                }
+            ],
+            "numExpression": 9,
+            "numPose": 4,
+            "numStyle": 44
+        },
+        {
+            "name": "Sarah",
+            "availableScene": [
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Park",
+                    "depth1": 5
+                },
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Living",
+                    "depth1": 5
+                }
+            ],
+            "numExpression": 9,
+            "numPose": 4,
+            "numStyle": 43
+        },
+        {
+            "name": "Susan",
+            "availableScene": [
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Park",
+                    "depth1": 5
+                },
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Living",
+                    "depth1": 5
+                }
+            ],
+            "numExpression": 9,
+            "numPose": 4,
+            "numStyle": 44
+        },
+        {
+            "name": "Tom",
+            "availableScene": [
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Park",
+                    "depth1": 5
+                },
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Living",
+                    "depth1": 5
+                }
+            ],
+            "numExpression": 9,
+            "numPose": 4,
+            "numStyle": 43
+        },
+        {
+            "name": "Xinlei",
+            "availableScene": [
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Park",
+                    "depth1": 5
+                },
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Living",
+                    "depth1": 5
+                }
+            ],
+            "numExpression": 9,
+            "numPose": 4,
+            "numStyle": 42
+        },
+        {
+            "name": "Yue",
+            "availableScene": [
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Park",
+                    "depth1": 5
+                },
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Living",
+                    "depth1": 5
+                }
+            ],
+            "numExpression": 9,
+            "numPose": 4,
+            "numStyle": 43
+        }
+    ],
+    "objectType": "human",
+    "dataType": "clipartObject"
+}

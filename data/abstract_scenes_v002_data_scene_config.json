@@ -1,0 +1,40 @@
+{
+    "dataType": "scene",
+    "baseDirectory": {
+                        "Living": "Living",
+                        "Park": "Park"
+                    },
+    "clipartObjJSONFile": [{"type": "human", "file": "abstract_scenes_v002_data_human.json"}, 
+                        {"type": "animal", "file": "abstract_scenes_v002_data_animal.json"},
+                        {"type": "largeObject", "file": "abstract_scenes_v002_data_large_object.json"},
+                        {"type": "smallObject", "file": "abstract_scenes_v002_data_small_object.json"}
+                        ],
+    "Park": {
+        "baseDir": "Park",
+        "bgImg": "BG1.png",
+        "startTab": "smallObject",
+        "zSizeDecay": 0.9,
+        "numObjTypeShow": {
+                            "human": 8,
+                            "animal": 12,
+                            "largeObject": 16,
+                            "smallObject": 20
+                            },
+        "objectTypeOrder": [ "human", "animal", "largeObject", "smallObject"],
+        "exTotal": 960
+    },
+    "Living": {
+        "baseDir": "Living",
+        "bgImg": "BG1.png",
+        "startTab": "largeObject",
+        "zSizeDecay": 0.95,
+        "numObjTypeShow": {
+                            "human": 8,
+                            "animal": 8,
+                            "largeObject": 20,
+                            "smallObject": 20
+                            },
+        "objectTypeOrder": [ "human", "animal", "largeObject", "smallObject"],
+        "exTotal": 930
+    }
+}

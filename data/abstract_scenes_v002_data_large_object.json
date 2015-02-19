@@ -1,0 +1,530 @@
+{
+    "baseDirectory": {
+        "Living": "Living",
+        "Park": "Park"
+    },
+    "type": [
+        {
+            "numPose": 2,
+            "baseDir": "Park",
+            "name": "bench",
+            "availableScene": [
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Park",
+                    "depth1": 7
+                }
+            ]
+        },
+        {
+            "numPose": 1,
+            "baseDir": "Park",
+            "name": "blanket",
+            "availableScene": [
+                {
+                    "numInstance": 5,
+                    "depth0": 1,
+                    "scene": "Park",
+                    "depth1": 7
+                }
+            ]
+        },
+        {
+            "numPose": 2,
+            "baseDir": "Park",
+            "name": "bike",
+            "availableScene": [
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Park",
+                    "depth1": 5
+                }
+            ]
+        },
+        {
+            "numPose": 2,
+            "baseDir": "Living",
+            "name": "Bookshelf",
+            "availableScene": [
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Living",
+                    "depth1": 5
+                }
+            ]
+        },
+        {
+            "numPose": 2,
+            "baseDir": "Park",
+            "name": "bush",
+            "availableScene": [
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Park",
+                    "depth1": 7
+                }
+            ]
+        },
+        {
+            "numPose": 2,
+            "baseDir": "Living",
+            "name": "Chair01",
+            "availableScene": [
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Living",
+                    "depth1": 7
+                }
+            ]
+        },
+        {
+            "numPose": 2,
+            "baseDir": "Living",
+            "name": "Chair02",
+            "availableScene": [
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Living",
+                    "depth1": 7
+                }
+            ]
+        },
+        {
+            "numPose": 3,
+            "baseDir": "Park",
+            "name": "cloud",
+            "availableScene": [
+                {
+                    "numInstance": 5,
+                    "depth0": 1,
+                    "scene": "Park",
+                    "depth1": 5
+                }
+            ]
+        },
+        {
+            "numPose": 1,
+            "baseDir": "Living",
+            "name": "CoatRack",
+            "availableScene": [
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Living",
+                    "depth1": 7
+                }
+            ]
+        },
+        {
+            "numPose": 2,
+            "baseDir": "Living",
+            "name": "CoffeeTable",
+            "availableScene": [
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Living",
+                    "depth1": 7
+                }
+            ]
+        },
+        {
+            "numPose": 2,
+            "baseDir": "Living",
+            "name": "Couch",
+            "availableScene": [
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Living",
+                    "depth1": 7
+                }
+            ]
+        },
+        {
+            "numPose": 2,
+            "baseDir": "Living",
+            "name": "Desk",
+            "availableScene": [
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Living",
+                    "depth1": 7
+                }
+            ]
+        },
+        {
+            "numPose": 2,
+            "baseDir": "Living",
+            "name": "DiningChair",
+            "availableScene": [
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Living",
+                    "depth1": 7
+                }
+            ]
+        },
+        {
+            "numPose": 2,
+            "baseDir": "Living",
+            "name": "DiningTable",
+            "availableScene": [
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Living",
+                    "depth1": 7
+                }
+            ]
+        },
+        {
+            "numPose": 3,
+            "baseDir": "Living",
+            "name": "Door",
+            "availableScene": [
+                {
+                    "numInstance": 5,
+                    "depth0": 1,
+                    "scene": "Living",
+                    "depth1": 5
+                }
+            ]
+        },
+        {
+            "numPose": 2,
+            "baseDir": "Living",
+            "name": "Endtable",
+            "availableScene": [
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Living",
+                    "depth1": 7
+                }
+            ]
+        },
+        {
+            "numPose": 1,
+            "baseDir": "Living",
+            "name": "Fireplace",
+            "availableScene": [
+                {
+                    "numInstance": 5,
+                    "depth0": 1,
+                    "scene": "Living",
+                    "depth1": 5
+                }
+            ]
+        },
+        {
+            "numPose": 2,
+            "baseDir": "Living",
+            "name": "Footstool",
+            "availableScene": [
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Living",
+                    "depth1": 7
+                }
+            ]
+        },
+        {
+            "numPose": 2,
+            "baseDir": "Park",
+            "name": "grill",
+            "availableScene": [
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Park",
+                    "depth1": 5
+                }
+            ]
+        },
+        {
+            "numPose": 1,
+            "baseDir": "Park",
+            "name": "log",
+            "availableScene": [
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Park",
+                    "depth1": 7
+                }
+            ]
+        },
+        {
+            "numPose": 1,
+            "baseDir": "Park",
+            "name": "monkeybars",
+            "availableScene": [
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Park",
+                    "depth1": 7
+                }
+            ]
+        },
+        {
+            "numPose": 2,
+            "baseDir": "Park",
+            "name": "moon",
+            "availableScene": [
+                {
+                    "numInstance": 5,
+                    "depth0": 2,
+                    "scene": "Park",
+                    "depth1": 5
+                }
+            ]
+        },
+        {
+            "numPose": 4,
+            "baseDir": "Living",
+            "name": "Picture",
+            "availableScene": [
+                {
+                    "numInstance": 5,
+                    "depth0": 1,
+                    "scene": "Living",
+                    "depth1": 6
+                }
+            ]
+        },
+        {
+            "numPose": 1,
+            "baseDir": "Living",
+            "name": "Plant",
+            "availableScene": [
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Living",
+                    "depth1": 7
+                }
+            ]
+        },
+        {
+            "numPose": 1,
+            "baseDir": "Park",
+            "name": "pond",
+            "availableScene": [
+                {
+                    "numInstance": 5,
+                    "depth0": 1,
+                    "scene": "Park",
+                    "depth1": 7
+                }
+            ]
+        },
+        {
+            "numPose": 1,
+            "baseDir": "Living",
+            "name": "Rug",
+            "availableScene": [
+                {
+                    "numInstance": 5,
+                    "depth0": 1,
+                    "scene": "Living",
+                    "depth1": 5
+                }
+            ]
+        },
+        {
+            "numPose": 2,
+            "baseDir": "Park",
+            "name": "sandbox",
+            "availableScene": [
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Park",
+                    "depth1": 7
+                }
+            ]
+        },
+        {
+            "numPose": 2,
+            "baseDir": "Park",
+            "name": "scooter",
+            "availableScene": [
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Park",
+                    "depth1": 5
+                }
+            ]
+        },
+        {
+            "numPose": 2,
+            "baseDir": "Park",
+            "name": "seesaw",
+            "availableScene": [
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Park",
+                    "depth1": 5
+                }
+            ]
+        },
+        {
+            "numPose": 1,
+            "baseDir": "Park",
+            "name": "sidewalk",
+            "availableScene": [
+                {
+                    "numInstance": 5,
+                    "depth0": 1,
+                    "scene": "Park",
+                    "depth1": 7
+                }
+            ]
+        },
+        {
+            "numPose": 2,
+            "baseDir": "Park",
+            "name": "slide",
+            "availableScene": [
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Park",
+                    "depth1": 7
+                }
+            ]
+        },
+        {
+            "numPose": 2,
+            "baseDir": "Living",
+            "name": "Sofa",
+            "availableScene": [
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Living",
+                    "depth1": 7
+                }
+            ]
+        },
+        {
+            "numPose": 2,
+            "baseDir": "Living",
+            "name": "Stool",
+            "availableScene": [
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Living",
+                    "depth1": 7
+                }
+            ]
+        },
+        {
+            "numPose": 1,
+            "baseDir": "Park",
+            "name": "sun",
+            "availableScene": [
+                {
+                    "numInstance": 5,
+                    "depth0": 2,
+                    "scene": "Park",
+                    "depth1": 5
+                }
+            ]
+        },
+        {
+            "numPose": 4,
+            "baseDir": "Park",
+            "name": "tree",
+            "availableScene": [
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Park",
+                    "depth1": 7
+                }
+            ]
+        },
+        {
+            "numPose": 4,
+            "baseDir": "Living",
+            "name": "TV",
+            "availableScene": [
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Living",
+                    "depth1": 7
+                }
+            ]
+        },
+        {
+            "numPose": 2,
+            "baseDir": "Living",
+            "name": "Table",
+            "availableScene": [
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Living",
+                    "depth1": 7
+                }
+            ]
+        },
+        {
+            "numPose": 3,
+            "baseDir": "Living",
+            "name": "Window02",
+            "availableScene": [
+                {
+                    "numInstance": 5,
+                    "depth0": 1,
+                    "scene": "Living",
+                    "depth1": 5
+                }
+            ]
+        },
+        {
+            "numPose": 3,
+            "baseDir": "Living",
+            "name": "Window03",
+            "availableScene": [
+                {
+                    "numInstance": 5,
+                    "depth0": 1,
+                    "scene": "Living",
+                    "depth1": 5
+                }
+            ]
+        },
+        {
+            "numPose": 3,
+            "baseDir": "Living",
+            "name": "Window05",
+            "availableScene": [
+                {
+                    "numInstance": 5,
+                    "depth0": 1,
+                    "scene": "Living",
+                    "depth1": 5
+                }
+            ]
+        }
+    ],
+    "objectType": "largeObject",
+    "dataType": "clipartObject"
+}

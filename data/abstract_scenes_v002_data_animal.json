@@ -1,0 +1,439 @@
+{
+    "baseDirectory": "Animals",
+    "type": [
+        {
+            "numPose": 1,
+            "name": "Bee",
+            "availableScene": [
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Park",
+                    "depth1": 5
+                }
+            ]
+        },
+        {
+            "numPose": 5,
+            "name": "Bird",
+            "availableScene": [
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Park",
+                    "depth1": 5
+                }
+            ]
+        },
+        {
+            "numPose": 5,
+            "name": "Bluejay",
+            "availableScene": [
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Park",
+                    "depth1": 5
+                }
+            ]
+        },
+        {
+            "numPose": 2,
+            "name": "Butterfly01",
+            "availableScene": [
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Park",
+                    "depth1": 5
+                }
+            ]
+        },
+        {
+            "numPose": 2,
+            "name": "Butterfly02",
+            "availableScene": [
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Park",
+                    "depth1": 5
+                }
+            ]
+        },
+        {
+            "numPose": 5,
+            "name": "Cat01",
+            "availableScene": [
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Park",
+                    "depth1": 5
+                },
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Living",
+                    "depth1": 4
+                }
+            ]
+        },
+        {
+            "numPose": 5,
+            "name": "Cat02",
+            "availableScene": [
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Park",
+                    "depth1": 5
+                },
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Living",
+                    "depth1": 4
+                }
+            ]
+        },
+        {
+            "numPose": 5,
+            "name": "Chipmunk",
+            "availableScene": [
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Park",
+                    "depth1": 5
+                }
+            ]
+        },
+        {
+            "numPose": 6,
+            "name": "Deer",
+            "availableScene": [
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Park",
+                    "depth1": 5
+                }
+            ]
+        },
+        {
+            "numPose": 5,
+            "name": "Dog01",
+            "availableScene": [
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Park",
+                    "depth1": 5
+                },
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Living",
+                    "depth1": 4
+                }
+            ]
+        },
+        {
+            "numPose": 5,
+            "name": "Dog02",
+            "availableScene": [
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Park",
+                    "depth1": 5
+                },
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Living",
+                    "depth1": 4
+                }
+            ]
+        },
+        {
+            "numPose": 5,
+            "name": "Duck01",
+            "availableScene": [
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Park",
+                    "depth1": 5
+                }
+            ]
+        },
+        {
+            "numPose": 4,
+            "name": "Duck02",
+            "availableScene": [
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Park",
+                    "depth1": 5
+                }
+            ]
+        },
+        {
+            "numPose": 4,
+            "name": "Eagle",
+            "availableScene": [
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Park",
+                    "depth1": 5
+                }
+            ]
+        },
+        {
+            "numPose": 5,
+            "name": "Finch",
+            "availableScene": [
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Park",
+                    "depth1": 5
+                }
+            ]
+        },
+        {
+            "numPose": 5,
+            "name": "Frog",
+            "availableScene": [
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Park",
+                    "depth1": 5
+                }
+            ]
+        },
+        {
+            "numPose": 4,
+            "name": "Hawk",
+            "availableScene": [
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Park",
+                    "depth1": 5
+                }
+            ]
+        },
+        {
+            "numPose": 5,
+            "name": "Kitten01",
+            "availableScene": [
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Park",
+                    "depth1": 5
+                },
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Living",
+                    "depth1": 4
+                }
+            ]
+        },
+        {
+            "numPose": 5,
+            "name": "Kitten02",
+            "availableScene": [
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Park",
+                    "depth1": 5
+                },
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Living",
+                    "depth1": 4
+                }
+            ]
+        },
+        {
+            "numPose": 2,
+            "name": "Koi",
+            "availableScene": [
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Park",
+                    "depth1": 5
+                }
+            ]
+        },
+        {
+            "numPose": 5,
+            "name": "Mouse",
+            "availableScene": [
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Park",
+                    "depth1": 5
+                },
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Living",
+                    "depth1": 4
+                }
+            ]
+        },
+        {
+            "numPose": 4,
+            "name": "Owl",
+            "availableScene": [
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Park",
+                    "depth1": 5
+                }
+            ]
+        },
+        {
+            "numPose": 5,
+            "name": "Pigeon",
+            "availableScene": [
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Park",
+                    "depth1": 5
+                }
+            ]
+        },
+        {
+            "numPose": 5,
+            "name": "Puppy01",
+            "availableScene": [
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Park",
+                    "depth1": 5
+                },
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Living",
+                    "depth1": 4
+                }
+            ]
+        },
+        {
+            "numPose": 5,
+            "name": "Puppy02",
+            "availableScene": [
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Park",
+                    "depth1": 5
+                },
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Living",
+                    "depth1": 4
+                }
+            ]
+        },
+        {
+            "numPose": 5,
+            "name": "Rabbit",
+            "availableScene": [
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Park",
+                    "depth1": 5
+                }
+            ]
+        },
+        {
+            "numPose": 5,
+            "name": "Racoon",
+            "availableScene": [
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Park",
+                    "depth1": 5
+                }
+            ]
+        },
+        {
+            "numPose": 5,
+            "name": "Rat",
+            "availableScene": [
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Park",
+                    "depth1": 5
+                },
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Living",
+                    "depth1": 4
+                }
+            ]
+        },
+        {
+            "numPose": 5,
+            "name": "Robin",
+            "availableScene": [
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Park",
+                    "depth1": 5
+                }
+            ]
+        },
+        {
+            "numPose": 5,
+            "name": "Squirrel",
+            "availableScene": [
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Park",
+                    "depth1": 5
+                }
+            ]
+        },
+        {
+            "numPose": 2,
+            "name": "Turtle",
+            "availableScene": [
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Park",
+                    "depth1": 5
+                }
+            ]
+        }
+    ],
+    "objectType": "animal",
+    "dataType": "clipartQbject"
+}

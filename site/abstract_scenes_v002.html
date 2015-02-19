@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+        <title>AMT: Clipart Illustrations</title>
+        <style type="text/css">
+            .xlink {
+                cursor: default;
+            }
+
+            .hlink {
+                cursor: help;
+            }
+            
+            .topBar {        
+                display: inline;
+                font-size: 1.5em;
+                margin-before: 0.83em;
+                margin-after: 0.83em;
+                margin-start: 0;
+                margin-end: 0;
+                font-weight: bold;
+            }
+
+            .buttonHolder {
+                text-align: center;
+                vertical-align: top;
+                margin: 0;
+                padding: 0;
+            }
+        </style>
+        <!--[if IE]><script type="text/javascript" src="excanvas.js"></script><![endif]-->    
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+        <link href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/themes/smoothness/jquery-ui.css" rel="stylesheet" type="text/css"/>
+        <script src="https://code.jquery.com/ui/1.11.3/jquery-ui.min.js"></script>     
+        <script src="./abstract_scenes_v002_head.js"></script>
+    </head>
+    <body class="noSelect">
+        <script src="./abstract_scenes_v002_main.js"></script>
+        
+        <div class="noSelect" align="left"><h2 style="color:black; margin:0 0 0 0;">Create a children's illustration (<b style="color:red;"><span id="titleScene">Park</span></b>)!</h2></div>
+        <script>document.getElementById('titleScene').innerHTML = titleStr;</script> <!--Hacky-->
+    
+        <div class="noSelect" align="left" style="width: 1120px; padding-left: 0px; margin: 0;">
+            <br/>
+            <div class="buttonHolder noSelect" style="margin: 0; padding-bottom: 5px;">
+                <input type='button' value='Hide Instructions' onclick='hideExamples();' id='examplesToggle'>
+            </div>
+
+            <div class="noSelect" id='examples'>
+                <div class="noSelect" id='instructions' align="left" style="color:black;">
+                    <p style="margin: 5px 0 0 0;">
+                        [Images may take some time to load]
+                        <b>[Spamming will get blocked]</b> <br />
+                        <p>
+                        Please help us create an illustration for a children's story book by creating a <b>realistic</b> scene from the clipart below.
+                        Use your imagination!<br />
+                        </p>
+                        <p>Clipart objects (5 instances each) may be added by dragging them onto the scene and removed by dragging them off.
+                        They may be <b style="color:red;">resized (CTRL + a/CTRL + z), 
+                        flipped (CTRL + c), sent backward (CTRL + s) or brought forward (CTRL + x)</b>.
+                        Please use at least <span id="minNumClipart">6 pieces</span> of clipart in each scene.
+                        </p>
+                        <p>
+                        <!-- TODO Make number of scenes this dynamically update -->
+                        You will be asked to complete 3 <b>different/independent</b> scenes.
+                        You can go back and forth between all of your scenes by pressing "Prev" and "Next" 
+                        When you finish your last one, a pop-up will ask you to submit.
+                        </p>
+                    </p>
+                    <div class="noSelect" style="padding-top:10px; padding-bottom:10px">Thanks for your work!</div>
+                </div>
+            
+            
+                <div class="noSelect" style="border-style: solid; border-color: darkred; background-color: darkred; color: white; margin-bottom:10px;">
+                    <span> Bad Examples from Park (Unrealistic) </span>
+                    <table class="noSelect" align="center" style="background-color:darkred;">
+                        <tr>
+                            <td><img src='http://ladoga.graphics.cs.cmu.edu/xinleic/genSents/Interface/bad/01.png' width=218></td>
+                            <td><img src='http://ladoga.graphics.cs.cmu.edu/xinleic/genSents/Interface/bad/02.png' width=218></td>
+                            <td><img src='http://ladoga.graphics.cs.cmu.edu/xinleic/genSents/Interface/bad/03.png' width=218></td>
+                            <td><img src='http://ladoga.graphics.cs.cmu.edu/xinleic/genSents/Interface/bad/04.png' width=218></td>
+                            <td><img src='http://ladoga.graphics.cs.cmu.edu/xinleic/genSents/Interface/bad/05.png' width=218></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            
+            <div class="noSelect" style="border-style:solid; border-color:lightgreen; background-color:lightgreen; color:black; margin-bottom:10px;">
+                <span><b>Random Good Examples from Turkers (to Inspire)</b> </span>
+                <table class="noSelect" align="center" style="background-color: lightgreen;">
+                    <tr id="goodimagewrapper"></tr>
+                </table>
+            </div>
+        
+            <div class="noSelect" align=left id="top_bar" style="background-color:lightblue">
+                <span id="counter" class="topBar noSelect" style="color:black;">Scene</span>
+                
+                <div class="buttonHolder noSelect" style="display:inline-block; padding-bottom:5px; padding-top:5px; padding-left:414px">
+                    <input id="prevButton" type="button" name="Prev" value="Prev" onclick="prev()">
+                    <input id="nextButton" type="button" name="Next" value="Next" onclick="next()">
+                </div>
+            </div>
+        </div>
+        <div style="text-align:left;" class="xlink">
+            <canvas id="scene_canvas" width=1120 height=730></canvas>
+        </div>
+        
+        <form id='mturk_form' action="MTURK_FORM_TO_SUBMIT" method="POST">
+            <input type="hidden" id="hitId" name="hitId" value='MTURK_HIT_ID'>
+            <input type="hidden" id="assignmentId" name="assignmentId" value='MTURK_ASSIGNMENT_ID'>
+            <input type="hidden" id="workerId" name="workerId" value='MTURK_WORKER_ID'>
+            <input type="hidden" id="hitDuration" name="hitDuration" value='HIT_DURATION'>
+            <input type="hidden" id="hitResult" name="hitResult" value='HIT_RESULT'>
+            <input type="hidden" id="hitComment" name="hitComment" value='HIT_COMMENT'>
+        </form>
+
+        <div id="dialog-modal" title="Message"></div>
+
+        <div id="dialog-confirm" style="display:none" title="Submit the HIT?">
+            <div>Comments are welcome!</div>
+            <textarea type="hidden" id="hit_comment" name="hit_comment" style="resize:none; height:65%; width:95%"></textarea>
+        </div>
+        
+        <script type="text/javascript">
+            hitID = decode(gup('hitId'));
+            assignmentID = decode(gup('assignmentId'));
+            workerID = decode(gup('workerId'));
+            
+            document.getElementById('hitId').value = hitID;
+            document.getElementById('assignmentId').value = assignmentID;
+            document.getElementById('workerId').value = workerID;
+            
+//             var submitAction; // Defined in the main JS code
+            var form = document.getElementById('mturk_form');
+            
+            // Gets whether it is sandbox or real AMT (or nothing)
+            var service = decode(gup('turkSubmitTo'));
+            
+            if (service.length > 0) {
+                submitAction = true;
+                form.action = service + '/mturk/externalSubmit';
+            } else {
+                submitAction = false;
+                form.action = '';
+            }
+
+            // So users can't drag the top bar if selected
+            $('.noSelect').disableSelection(); 
+            $(window).load(load_json(null));
+        </script>
+    </body>
+</html>
