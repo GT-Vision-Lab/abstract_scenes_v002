@@ -1,8 +1,4 @@
 {
-    "baseDirectory": {
-        "Living": "Living",
-        "Park": "Park"
-    },
     "type": [
         {
             "numPose": 4,
