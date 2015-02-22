@@ -44,7 +44,7 @@
     
         <div class="noSelect" align="left">
             <h2 style="color:black; margin:0 0 0 0;">Create a children's illustration 
-                (<b style="color:red;"><span id="titleScene">Park</span></b>)!
+                <span id="titleScene"></span>!
             </h2>
         </div>
     
@@ -184,9 +184,13 @@
             
             function update_instructions() {
                 if (curSceneType == "Living") {
-                    titleStr = "Living/Diving Room";
+                    titleStr = "(<b style='color:red;'>" + "Living/Diving Room" + "</b>)";
                 } else {
-                    titleStr = curSceneType
+                    if (curSceneType != undefined) {
+                        titleStr = "(<b style='color:red;'>" + curSceneType + "</b>)";
+                    } else {
+                        titleStr = "";
+                    }
                 }
                 
                 document.getElementById('titleScene').innerHTML = titleStr;
@@ -310,7 +314,7 @@
         Shouldn't need to be changed much.-->
         <script src="./abstract_scenes_v002_main.js"></script>
                 
-        <script> $(window).load(load_json(null))</script>;
+        <script> $(window).load(init())</script>;
         
     </body>
 </html>
