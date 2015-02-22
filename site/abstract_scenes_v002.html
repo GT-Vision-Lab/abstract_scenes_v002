@@ -134,17 +134,23 @@
 
         <script>
             // select good examples
-            var selectedGood = Array(5);
+            var selectedGood = Array(NUM_GOOD_EXAMPLES);
             var exampleHTML = ' ';
             
             // To draw good example images on the instructions
 
             // Select good examples to show workers
             function select_good() {
-                for (i = 0; i < 5; i++) {
+                ex_total_temp = ex_total_options[curSceneType];
+                
+                if (ex_total_temp != undefined) {
+                    ex_total = ex_total_temp;
+                }
+                
+                for (i = 0; i < NUM_GOOD_EXAMPLES; i++) {
                     var found = true;
                     while (found == true) {
-                        selectedGood[i] = get_random_int(0, EX_TOTAL);
+                        selectedGood[i] = get_random_int(0, ex_total);
                         found = false;
                         for (j = 0; j < i; j++) {
                             if (selectedGood[j] == selectedGood[i]) {
@@ -154,7 +160,7 @@
                         }
                     }
                 }
-                // alert(selectedGood);
+                
                 var goodImageHTML = '';
                 for (i = 0; i < 5; i++) {
                     goodImageHTML += "<td><img src='" + exampleBaseURL + "GoodPark/" + selectedGood[i] + ".png' width=218></td>";
@@ -185,11 +191,13 @@
                 
                 document.getElementById('titleScene').innerHTML = titleStr;
                 document.getElementById('counter').innerHTML = 
-                        "Scene " + (curScene+1) + "/" + numScenes;
+                        "Scene " + (curScene+1) + "/" + numScene;
                 if (document.getElementById('exToggle').value == 'Hide Instructions' ) {
                     document.getElementById('minNumClipart').innerHTML = 
                         MIN_NUM_OBJ + " piece" + ( (MIN_NUM_OBJ==1) ? "" : "s");
                 }
+                
+                select_good();
             }
             
             update_instructions();
@@ -219,7 +227,7 @@
                 submitAction = false;
                 form.action = '';
             }
-            console.log(assignmentID)
+            
             if (assignmentID == "ASSIGNMENT_ID_NOT_AVAILABLE") {
                 // If we're previewing, disable the button and give it a helpful message
                 $('#prevButton').attr("disabled","disabled");
