@@ -20,8 +20,7 @@
                             "largeObject": 16,
                             "smallObject": 20
                             },
-        "objectTypeOrder": [ "human", "animal", "largeObject", "smallObject"],
-        "exTotal": 960
+        "objectTypeOrder": [ "human", "animal", "largeObject", "smallObject"]
     },
     "Living": {
         "baseDir": "Living",
@@ -34,7 +33,6 @@
                             "largeObject": 20,
                             "smallObject": 20
                             },
-        "objectTypeOrder": [ "human", "animal", "largeObject", "smallObject"],
-        "exTotal": 930
+        "objectTypeOrder": [ "human", "animal", "largeObject", "smallObject"]
     }
 }

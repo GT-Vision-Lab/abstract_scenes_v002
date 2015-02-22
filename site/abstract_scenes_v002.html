@@ -34,19 +34,24 @@
         <!--[if IE]><script type="text/javascript" src="excanvas.js"></script><![endif]-->    
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
         <link href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/themes/smoothness/jquery-ui.css" rel="stylesheet" type="text/css"/>
-        <script src="https://code.jquery.com/ui/1.11.3/jquery-ui.min.js"></script>     
+        <script src="https://code.jquery.com/ui/1.11.3/jquery-ui.min.js"></script>
+        
+        <!--The "head" JS extracts information from the URL that is going to be needed
+        to set up the HIT early. (This gets loaded before the body.)-->
         <script src="./abstract_scenes_v002_head.js"></script>
     </head>
     <body class="noSelect">
-        <script src="./abstract_scenes_v002_main.js"></script>
-        
-        <div class="noSelect" align="left"><h2 style="color:black; margin:0 0 0 0;">Create a children's illustration (<b style="color:red;"><span id="titleScene">Park</span></b>)!</h2></div>
-        <script>document.getElementById('titleScene').innerHTML = titleStr;</script> <!--Hacky-->
+    
+        <div class="noSelect" align="left">
+            <h2 style="color:black; margin:0 0 0 0;">Create a children's illustration 
+                (<b style="color:red;"><span id="titleScene">Park</span></b>)!
+            </h2>
+        </div>
     
         <div class="noSelect" align="left" style="width: 1120px; padding-left: 0px; margin: 0;">
             <br/>
             <div class="buttonHolder noSelect" style="margin: 0; padding-bottom: 5px;">
-                <input type='button' value='Hide Instructions' onclick='hideExamples();' id='examplesToggle'>
+                <input type='button' value='Hide Instructions' onclick='hideExamples();' id='exToggle'>
             </div>
 
             <div class="noSelect" id='examples'>
@@ -73,7 +78,6 @@
                     <div class="noSelect" style="padding-top:10px; padding-bottom:10px">Thanks for your work!</div>
                 </div>
             
-            
                 <div class="noSelect" style="border-style: solid; border-color: darkred; background-color: darkred; color: white; margin-bottom:10px;">
                     <span> Bad Examples from Park (Unrealistic) </span>
                     <table class="noSelect" align="center" style="background-color:darkred;">
@@ -99,17 +103,28 @@
                 <span id="counter" class="topBar noSelect" style="color:black;">Scene</span>
                 
                 <div class="buttonHolder noSelect" style="display:inline-block; padding-bottom:5px; padding-top:5px; padding-left:414px">
-                    <input id="prevButton" type="button" name="Prev" value="Prev" onclick="prev()">
-                    <input id="nextButton" type="button" name="Next" value="Next" onclick="next()">
+                    <input id="prevButton" type="button" name="Prev" value="Prev">
+                    <input id="nextButton" type="button" name="Next" value="Next">
                 </div>
             </div>
         </div>
+        
+<!--         Dialog box for any messages (e.g., answer doesn't meet requirements) that come up. -->
+        <div id="dialog-modal" title="Message"></div>
+
+<!--         Dialog box that pops up to allow users to submit the HIT. -->
+        <div id="dialog-confirm" style="display:none" title="Submit the HIT?">
+            <div>Comments are welcome!</div>
+            <textarea type="hidden" id="hit_comment" name="hit_comment" style="resize:none; height:65%; width:95%"></textarea>
+        </div>
+        
+<!--         The canvas to draw the clipart interface on. Do not remove. -->
         <div style="text-align:left;" class="xlink">
             <canvas id="scene_canvas" width=1120 height=730></canvas>
         </div>
         
+<!--         The form to keep track of the AMT data. Do not remove. -->
         <form id='mturk_form' action="MTURK_FORM_TO_SUBMIT" method="POST">
-            <input type="hidden" id="hitId" name="hitId" value='MTURK_HIT_ID'>
             <input type="hidden" id="assignmentId" name="assignmentId" value='MTURK_ASSIGNMENT_ID'>
             <input type="hidden" id="workerId" name="workerId" value='MTURK_WORKER_ID'>
             <input type="hidden" id="hitDuration" name="hitDuration" value='HIT_DURATION'>
@@ -117,23 +132,81 @@
             <input type="hidden" id="hitComment" name="hitComment" value='HIT_COMMENT'>
         </form>
 
-        <div id="dialog-modal" title="Message"></div>
-
-        <div id="dialog-confirm" style="display:none" title="Submit the HIT?">
-            <div>Comments are welcome!</div>
-            <textarea type="hidden" id="hit_comment" name="hit_comment" style="resize:none; height:65%; width:95%"></textarea>
-        </div>
-        
-        <script type="text/javascript">
-            hitID = decode(gup('hitId'));
-            assignmentID = decode(gup('assignmentId'));
-            workerID = decode(gup('workerId'));
+        <script>
+            // select good examples
+            var selectedGood = Array(5);
+            var exampleHTML = ' ';
             
-            document.getElementById('hitId').value = hitID;
+            // To draw good example images on the instructions
+
+            // Select good examples to show workers
+            function select_good() {
+                for (i = 0; i < 5; i++) {
+                    var found = true;
+                    while (found == true) {
+                        selectedGood[i] = get_random_int(0, EX_TOTAL);
+                        found = false;
+                        for (j = 0; j < i; j++) {
+                            if (selectedGood[j] == selectedGood[i]) {
+                                found = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+                // alert(selectedGood);
+                var goodImageHTML = '';
+                for (i = 0; i < 5; i++) {
+                    goodImageHTML += "<td><img src='" + exampleBaseURL + "GoodPark/" + selectedGood[i] + ".png' width=218></td>";
+                }
+
+                document.getElementById('goodimagewrapper').innerHTML = goodImageHTML;
+            }
+
+            function hideExamples() {
+                exampleHTML = document.getElementById('examples').innerHTML;
+                document.getElementById('examples').innerHTML = ' ';
+                document.getElementById('exToggle').value = 'Show Instructions';
+                document.getElementById('exToggle').onclick = showExamples;
+            }
+
+            function showExamples() {
+                document.getElementById('examples').innerHTML = exampleHTML;
+                document.getElementById('exToggle').value = 'Hide Instructions';
+                document.getElementById('exToggle').onclick = hideExamples;
+            }
+            
+            function update_instructions() {
+                if (curSceneType == "Living") {
+                    titleStr = "Living/Diving Room";
+                } else {
+                    titleStr = curSceneType
+                }
+                
+                document.getElementById('titleScene').innerHTML = titleStr;
+                document.getElementById('counter').innerHTML = 
+                        "Scene " + (curScene+1) + "/" + numScenes;
+                if (document.getElementById('exToggle').value == 'Hide Instructions' ) {
+                    document.getElementById('minNumClipart').innerHTML = 
+                        MIN_NUM_OBJ + " piece" + ( (MIN_NUM_OBJ==1) ? "" : "s");
+                }
+            }
+            
+            update_instructions();
+        </script>
+        
+        <!--Some code to extract HIT information from the URL and set the form accordingly.
+        This shouldn't need to be changed.-->
+        <script type="text/javascript">
+            hitID = gup('hitId');
+            assignmentID = gup('assignmentId');
+            workerID = gup('workerId');
+            
             document.getElementById('assignmentId').value = assignmentID;
             document.getElementById('workerId').value = workerID;
             
-//             var submitAction; // Defined in the main JS code
+            // Used in main to decide to submit form or not (i.e., not loaded via AMT).
+            var submitAction; 
             var form = document.getElementById('mturk_form');
             
             // Gets whether it is sandbox or real AMT (or nothing)
@@ -146,10 +219,90 @@
                 submitAction = false;
                 form.action = '';
             }
+            console.log(assignmentID)
+            if (assignmentID == "ASSIGNMENT_ID_NOT_AVAILABLE") {
+                // If we're previewing, disable the button and give it a helpful message
+                $('#prevButton').attr("disabled","disabled");
+                $('#nextButton').attr("disabled","disabled");
+                $('#prevButton').attr("value", "You must ACCEPT the HIT before you can start the real task.");
+            } else {
+                $('#nextButton').bind('click', function() {next();});
+                $('#prevButton').bind('click', function() {prev();});
+            }
 
             // So users can't drag the top bar if selected
-            $('.noSelect').disableSelection(); 
-            $(window).load(load_json(null));
+            $('.noSelect').disableSelection();
+            
+            $("#dialog-modal").dialog({
+                autoOpen: false,
+                height: 250,
+                modal: true,
+                buttons: {
+                    'OK':function() {
+                        $( this ).dialog( "close" );
+                    },
+                }
+            });
+            add_dialog();
+            $("#dialog-modal" ).hide();
+            
+            // ===========================================================
+            // add dialog for the website
+            // ===========================================================
+            function add_dialog() {
+                $("#dialog-confirm").dialog({
+                    autoOpen: false,
+                    resizable: true,
+                    height:240,
+                    modal: true,
+                    buttons: {
+                        "Yes": function() {
+                            $(this).dialog("close");
+                            submit_form();
+                        },
+                        Cancel: function() {
+                            $(this).dialog("close");
+                        }
+                    }
+                });
+                $(".ui-dialog").css('position', 'absolute');
+            }
+            
+            // ===========================================================
+            // add dialog for the website (like minimum requirements)
+            // ===========================================================
+            function render_dialog(errorMsg) {
+                if ( errorMsg == "expression" ) {
+                    var text = "Please pick facial expressions for people. Thanks!";
+                } else if (errorMsg == "minClipart") {
+                    var text = "Please use at least " + 
+                                MIN_NUM_OBJ + " piece" + ((MIN_NUM_OBJ==1) ? "" : "s") + 
+                                " of clipart. Thanks!";
+                } else if (errorMsg == "minType") {
+                    var text = "Please use at least " + 
+                                MIN_PER_TYPE + " piece" + ((MIN_PER_TYPE==1) ? "" : "s") + 
+                                " of clipart from each type. Thanks!";
+                }
+                
+                $("#dialog-modal").text(text);
+                $("#dialog-modal").dialog('open');
+            }
+
+            // ===========================================================
+            // disable paste on input text // More as reference for future use
+            // ===========================================================
+            $(document).ready(function() {
+                $(document).on("paste","#dialog-confirm", function(e) {
+                    e.preventDefault();
+                });
+            });
         </script>
+        
+        <!--Contains the clipart interface. 
+        Shouldn't need to be changed much.-->
+        <script src="./abstract_scenes_v002_main.js"></script>
+                
+        <script> $(window).load(load_json(null))</script>;
+        
     </body>
 </html>
