@@ -35,12 +35,14 @@ class RenderScenes(object):
         self.overwrite = self.opts['--overwrite']
 
         if (self.opts['--interface_dir'] == 'USE_DEF'):
-            base_url_interface = os.path.join('..', '..', 'interface')
+            #base_url_interface = os.path.join('..', '..', 'interface')
+            base_url_interface = '/srv/share/abstract_scenes_v002/interface/'
         else:
             base_url_interface = self.opts['--interface_dir']
             
         if (self.opts['--config_dir'] == 'USE_DEF'):
-            config_folder = dir_path(os.path.join('..', '..', 'data'))
+            #config_folder = dir_path(os.path.join('..', '..', 'data'))
+            config_folder = '/srv/share/abstract_scenes_v002/data/'
         else:
             config_folder = self.opts['--config_dir']
 
@@ -253,8 +255,8 @@ def main():
         --overwrite         Overwrite files even if they exist
     '''
     
-    #USE_DEF for --interface_dir is ../../interface/ (except done system-agnostically in Python
-    #USE_DEF for --config_dir is ../../data/
+    #USE_DEF for --interface_dir is /srv/share/abstract_scenes_v002/interface/
+    #USE_DEF for --config_dir is /srv/share/abstract_scenes_v002/data/
     #USE_DEF for --config_file is abstract_scenes_v002_data_scene_config.json
     
     # 1. set up command line interface
