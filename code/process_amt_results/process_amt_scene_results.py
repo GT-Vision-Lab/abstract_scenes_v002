@@ -1,3 +1,4 @@
+# coding: utf-8
 import sys
 import csv
 import json
@@ -52,11 +53,10 @@ def process_amt_results(filename, output_dir, overwrite,
                                          scene_data_single['hitIdx'], 
                                          filename_ext)
         indv_output_file = dir_join(indv_output_dir, new_fn)
-        if (not os.path.isfile(indv_output_file) or overwrite==True): # Skip if already exists and no
-            print(indv_output_file)
+        # Skip if already exists and no overwrite flag
+        if (not os.path.isfile(indv_output_file) or overwrite==True):
             save_json(scene_data_single, indv_output_file)
         counter += 1
-    
     
     no_scene_data_name = '{0}_{1}{2}'.format(filename_base, 'noSceneData', filename_ext)
     no_scene_data_fn = dir_join(output_dir, no_scene_data_name)
