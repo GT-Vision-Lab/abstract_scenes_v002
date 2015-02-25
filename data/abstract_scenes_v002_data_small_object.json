@@ -356,6 +356,19 @@
         },
         {
             "numPose": 2,
+            "baseDir": "Living",
+            "name": "GameSystem",
+            "availableScene": [
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Living",
+                    "depth1": 4
+                }
+            ]
+        },
+        {
+            "numPose": 2,
             "baseDir": "Park",
             "name": "hamburger",
             "availableScene": [

@@ -62,11 +62,23 @@ var ATTR2_ROW = ATTR_ROW + ATTR_HEIGHT + CLIPART_BUFFER;
 var ATTR2_COL = CANVAS_COL;
 var ATTR2_WIDTH = 700;
 var ATTR2_HEIGHT = 82;
+
+// Adding buttons for pages within tabs
+var tabPage = 0;
+var tabPageUpRect = {x1: 20, x2:155,
+                     y1: 5,  y2:55};
+var tabPageDownRect = {x1: 180, x2: 315, 
+                       y1: 5,   y2: 55};
+var tabPageUpImg;
+var tabPageDownImg;
+
 // Grid size of shown clipart objects
 var NUM_CLIPART_VERT = 5;
-var NUM_CLIPART_HORZ = 4;
-var CLIPART_SKIP = (CLIPART_HEIGHT - CLIPART_BUFFER) / NUM_CLIPART_VERT;
+var NUM_CLIPART_HORZ = 5;
+var CLIPART_SKIP = (CLIPART_WIDTH - CLIPART_BUFFER) / NUM_CLIPART_HORZ;
 var CLIPART_SIZE = CLIPART_SKIP - 2 * CLIPART_BUFFER;
+var CLIPART_OBJECT_OFFSET_COL = 0;
+var CLIPART_OBJECT_OFFSET_ROW = 50;
 // Number of clip art to show of the other objects
 var CLIPART_OBJECT_COL = CLIPART_COL + CLIPART_SKIP * NUM_CLIPART_HORZ + 24;
 // Button size
@@ -107,7 +119,7 @@ var buttonH = 0;
 
 // Set in reset_scene()
 var selectedIdx = -9999;
-var selectedIns = -9999; 
+var selectedIns = -9999;
 var lastIdx = -9999;
 var lastIns = -9999; 
 var lastX = 0;
@@ -184,6 +196,14 @@ function init() {
     slideMarkImg.onload = draw_canvas;
     // noLeftImg.onload = draw_canvas;
     // numBorderImg.onload = draw_canvas;
+    
+    // Tab page button images
+    tabPageUpImg=new Image();
+    tabPageUpImg.src = baseURLInterface + 'previous_button.png';
+    tabPageUpImg.onload=draw_canvas;
+    tabPageDownImg=new Image();
+    tabPageDownImg.src = baseURLInterface + 'next_button.png';
+    tabPageDownImg.onload=draw_canvas;
 
     reset_scene();
     draw_canvas();
@@ -904,7 +924,7 @@ function submit_form() {
     var duration = ($.now()-init_time)/1000;
     duration = duration.toString();
     var comment;
-    $('#dialog-confirm textarea').each( function(){ comment = this.value; });
+    $('#dialog-confirm textarea').each( function() { comment = this.value; });
     
     // process answers
     // pack user's response in a dictionary structure and send to the server in JSON format
@@ -1006,6 +1026,7 @@ function load_obj_category_data() {
         
         selectedTab = sceneConfigData[sceneTypeList[curScene]].startTab;
         selectedTabIdx = objectTypeToIdx[selectedTab];
+        tabPage = 0;
         
         // SA: TODO Currently objectTypeOrder.length is assumed
         // to be the number of tabs, which is hardcoded to 4.
@@ -1183,15 +1204,17 @@ function draw_clipart() {
     
         for (r = 0; r < NUM_CLIPART_VERT; r++) {
             for (c = 0; c < NUM_CLIPART_HORZ; c++) {
-                var idx = r * NUM_CLIPART_HORZ + c;
+                var idx = r * NUM_CLIPART_HORZ + c + tabPage;
 
                 // Only do something if there is an object of that type for selected idx 
                 if ( idx < numObjTypeShow[curType] ) {
                     idx += clipartIdxStart[selectedTabIdx]; // to that page
                     if (selectedIdx == idx) { // Draws the "select" box background
                         ctx.drawImage(selectedImg, 
-                                      CLIPART_COL + c * CLIPART_SKIP + CLIPART_BUFFER / 2, 
-                                      CLIPART_ROW + r * CLIPART_SKIP + CLIPART_BUFFER / 2, 
+                                      CLIPART_COL + c * CLIPART_SKIP +
+                                      (CLIPART_BUFFER / 2) + CLIPART_OBJECT_OFFSET_COL, 
+                                      CLIPART_ROW + r * CLIPART_SKIP +
+                                      (CLIPART_BUFFER / 2) + CLIPART_OBJECT_OFFSET_ROW, 
                                       CLIPART_SKIP, CLIPART_SKIP);
                     }
                     
@@ -1206,9 +1229,11 @@ function draw_clipart() {
                             indexCR = curAvailableObj[idx].instance[curAvailableObj[idx].smallestUnusedInstanceIdx].expressionID;
                         } else {
                             ctx.drawImage(noLeftImg, 
-                                        CLIPART_COL + c * CLIPART_SKIP + CLIPART_BUFFER / 2, 
-                                        CLIPART_ROW + r * CLIPART_SKIP + CLIPART_BUFFER / 2, 
-                                        CLIPART_SKIP, CLIPART_SKIP);
+                                          CLIPART_COL + c * CLIPART_SKIP +
+                                          (CLIPART_BUFFER / 2) + CLIPART_OBJECT_OFFSET_COL, 
+                                          CLIPART_ROW + r * CLIPART_SKIP +
+                                          (CLIPART_BUFFER / 2) + CLIPART_OBJECT_OFFSET_ROW, 
+                                          CLIPART_SKIP, CLIPART_SKIP);
                             continue;
                         }
 
@@ -1234,11 +1259,15 @@ function draw_clipart() {
                         var yo = CLIPART_ROW + r * CLIPART_SKIP + CLIPART_BUFFER + rowOffset;
 
                         ctx.drawImage(curPeopleExprImgs[idx][indexCR], 0, 0, w, h, 
-                                    Math.floor(xo), Math.floor(yo), newW, newH);
+                                      Math.floor(xo) + CLIPART_OBJECT_OFFSET_COL, 
+                                      Math.floor(yo) + CLIPART_OBJECT_OFFSET_ROW, 
+                                      newW, newH);
                         xo = CLIPART_COL + (c + 1) * CLIPART_SKIP - 1;
                         yo = CLIPART_ROW + (r + 1) * CLIPART_SKIP - locationOffset;
-                        ctx.drawImage(numBorderImg, 
-                                    Math.floor(xo - Size + 1), Math.floor(yo - Size + 1), Size, Size);
+                        ctx.drawImage(numBorderImg,
+                                      Math.floor(xo - Size + 1) + CLIPART_OBJECT_OFFSET_COL, 
+                                      Math.floor(yo - Size + 1) + CLIPART_OBJECT_OFFSET_ROW, 
+                                      Size, Size);
 
                         ctx.save();
                         ctx.textAlign = 'center';
@@ -1248,7 +1277,9 @@ function draw_clipart() {
                         var optionsH = Size;
                         xo = CLIPART_COL + (c + 1) * CLIPART_SKIP;
                         yo = CLIPART_ROW + (r + 1) * CLIPART_SKIP;
-                        ctx.fillText(left, Math.floor(xo - optionsW), Math.floor(yo - optionsH));
+                        ctx.fillText(left, 
+                                     Math.floor(xo - optionsW) + CLIPART_OBJECT_OFFSET_COL, 
+                                     Math.floor(yo - optionsH) + CLIPART_OBJECT_OFFSET_ROW);
                         ctx.restore();
                         
                     } else {
@@ -1256,9 +1287,11 @@ function draw_clipart() {
                             indexCR = curAvailableObj[idx].instance[curAvailableObj[idx].smallestUnusedInstanceIdx].poseID;
                         } else {
                             ctx.drawImage(noLeftImg, 
-                                        CLIPART_COL + c * CLIPART_SKIP + CLIPART_BUFFER / 2, 
-                                        CLIPART_ROW + r * CLIPART_SKIP + CLIPART_BUFFER / 2, 
-                                        CLIPART_SKIP, CLIPART_SKIP);
+                                          CLIPART_COL + c * CLIPART_SKIP +
+                                          (CLIPART_BUFFER / 2) + CLIPART_OBJECT_OFFSET_COL, 
+                                          CLIPART_ROW + r * CLIPART_SKIP +
+                                          (CLIPART_BUFFER / 2) + CLIPART_OBJECT_OFFSET_ROW, 
+                                          CLIPART_SKIP, CLIPART_SKIP);
                             continue;
                         }
 
@@ -1284,11 +1317,15 @@ function draw_clipart() {
                         var yo = CLIPART_ROW + r * CLIPART_SKIP + CLIPART_BUFFER + rowOffset;
 
                         ctx.drawImage(curClipartImgs[idx][indexCR], 0, 0, w, h, 
-                                    Math.floor(xo), Math.floor(yo), newW, newH);
+                                      Math.floor(xo) + CLIPART_OBJECT_OFFSET_COL, 
+                                      Math.floor(yo) + CLIPART_OBJECT_OFFSET_ROW, 
+                                      newW, newH);
                         xo = CLIPART_COL + (c + 1) * CLIPART_SKIP - 1;
                         yo = CLIPART_ROW + (r + 1) * CLIPART_SKIP - locationOffset;
                         ctx.drawImage(numBorderImg, 
-                                    Math.floor(xo - Size + 1), Math.floor(yo - Size + 1), Size, Size);
+                                      Math.floor(xo - Size + 1) + CLIPART_OBJECT_OFFSET_COL, 
+                                      Math.floor(yo - Size + 1) + CLIPART_OBJECT_OFFSET_ROW, 
+                                      Size, Size);
 
                         ctx.save();
                         ctx.textAlign = 'center';
@@ -1298,11 +1335,30 @@ function draw_clipart() {
                         var optionsH = Size;
                         xo = CLIPART_COL + (c + 1) * CLIPART_SKIP;
                         yo = CLIPART_ROW + (r + 1) * CLIPART_SKIP;
-                        ctx.fillText(left, Math.floor(xo - optionsW), Math.floor(yo - optionsH));
+                        ctx.fillText(left, 
+                                     Math.floor(xo - optionsW) + CLIPART_OBJECT_OFFSET_COL, 
+                                     Math.floor(yo - optionsH) + CLIPART_OBJECT_OFFSET_ROW);
                         ctx.restore();
                     }
                 }
             }
+        }
+        
+        // Draw tab page buttons
+        if (tabPage_more_above()) {
+            ctx.drawImage(tabPageUpImg, 
+                          tabPageUpRect.x1 + CLIPART_COL, 
+                          tabPageUpRect.y1 + CLIPART_ROW, 
+                          rect_width(tabPageUpRect), 
+                          rect_height(tabPageUpRect));
+        }
+        
+        if (tabPage_more_below()) {
+            ctx.drawImage(tabPageDownImg, 
+                          tabPageDownRect.x1 + CLIPART_COL, 
+                          tabPageDownRect.y1 + CLIPART_ROW, 
+                          rect_width(tabPageDownRect), 
+                          rect_height(tabPageDownRect));
         }
         
         if (selectedIdx != notUsed) {
@@ -1518,13 +1574,16 @@ function mousedown_canvas(event) {
         
         selectedTabIdx = Math.floor(tabsX / Math.floor(CLIPART_WIDTH / NUM_TABS));
         selectedTab = objectTypeOrder[selectedTabIdx];
+        tabPage = 0;
         //log_user_data("tab"); // SA: TODO Add?
         draw_canvas();
     }
 
     // Select clipart objects to add to canvas
-    var clipartX = cx - CLIPART_COL - canvas_fix.offsetLeft;
-    var clipartY = cy - CLIPART_ROW - canvas_fix.offsetTop;
+    var clipartX = cx - CLIPART_COL - 
+                   canvas_fix.offsetLeft - CLIPART_OBJECT_OFFSET_COL;
+    var clipartY = cy - CLIPART_ROW - 
+                   canvas_fix.offsetTop - CLIPART_OBJECT_OFFSET_ROW;
 
     if (clipartX < CLIPART_SKIP * NUM_CLIPART_HORZ && clipartX > 0 && 
             clipartY < CLIPART_SKIP * NUM_CLIPART_VERT && clipartY > 0 &&
@@ -1532,7 +1591,7 @@ function mousedown_canvas(event) {
 
         selectedIdx = Math.floor(clipartY / CLIPART_SKIP);
         selectedIdx *= NUM_CLIPART_HORZ;
-        selectedIdx += Math.floor(clipartX / CLIPART_SKIP);
+        selectedIdx += Math.floor(clipartX / CLIPART_SKIP) + tabPage;
 
         // SA: TODO Fix it so selectedTabIdx corresponds to objectTypeOrder
         // Currently, the menu positions are hardcoded (by the menu image), which is sub-optimal.
@@ -1586,6 +1645,24 @@ function mousedown_canvas(event) {
             }
             curLoadAll[selectedIdx] = 2; // all loaded
         }
+    }
+
+    var clipartX = cx - CLIPART_COL - canvas_fix.offsetLeft;
+    var clipartY = cy - CLIPART_ROW - canvas_fix.offsetTop;
+    
+    // Check if it's interacting with tab page buttons
+    if (is_in_rect(clipartX, clipartY, tabPageUpRect) && 
+        tabPage_more_above()) {
+        
+        tabPage = tabPage - NUM_CLIPART_VERT * NUM_CLIPART_HORZ;
+        draw_canvas();
+    }
+    
+    if (is_in_rect(clipartX, clipartY, tabPageDownRect) && 
+        tabPage_more_below()) {
+        
+        tabPage = tabPage + NUM_CLIPART_VERT * NUM_CLIPART_HORZ;
+        draw_canvas();
     }
 
     // Select clipart attributes
@@ -1696,7 +1773,9 @@ function mousedown_canvas(event) {
         var scaleSliderX = cx - CANVAS_COL - canvas_fix.offsetLeft - SCALE_COL;
         var scaleSliderY = cy - canvas_fix.offsetTop - SCALE_ROW;
 
-        if (scaleSliderX >= 0 && scaleSliderX < SCALE_WIDTH && scaleSliderY >= CANVAS_COL - SCALE_COL && scaleSliderY < SCALE_HEIGHT) {
+        if (scaleSliderX >= 0 && scaleSliderX < SCALE_WIDTH && 
+            scaleSliderY >= CANVAS_COL - SCALE_COL && scaleSliderY < SCALE_HEIGHT) {
+            
             if (selectedIdx != notUsed) {
                 var position = Math.floor(scaleSliderX / (SCALE_WIDTH / (2 * (numZSize - 1))));
                 position += 1;
@@ -1713,7 +1792,9 @@ function mousedown_canvas(event) {
         var flipButtonX = cx - CANVAS_COL - canvas_fix.offsetLeft - FLIP_COL;
         var flipButtonY = cy - canvas_fix.offsetTop - FLIP_ROW;
 
-        if (flipButtonX >= 0 && flipButtonX < buttonW * 2 && flipButtonY >= 0 && flipButtonY < buttonH) {
+        if (flipButtonX >= 0 && flipButtonX < buttonW * 2 && 
+            flipButtonY >= 0 && flipButtonY < buttonH) {
+            
             if (selectedIdx != notUsed) {
                 curAvailableObj[selectedIdx].instance[selectedIns].flip = Math.floor(flipButtonX / buttonW);
                 log_user_data("flip");
@@ -1797,6 +1878,42 @@ function mousemove_canvas(event) {
             draw_canvas();
         }
     }
+}
+
+// Check if possible to change tab page
+function tabPage_more_above() {
+    return ((tabPage - 
+            NUM_CLIPART_VERT*NUM_CLIPART_HORZ) >= 0);
+}
+
+function tabPage_more_below() {
+    return ((tabPage + 
+             NUM_CLIPART_VERT*NUM_CLIPART_HORZ) < numObjTypeShow[selectedTab]);
+}
+
+// rect functions
+// A general function to check if (x,y) is in rect
+function is_in_rect(x, y, rect) {
+    return (x >= rect.x1 && 
+            x < rect.x2 && 
+            y >= rect.y1 && 
+            y < rect.y2);
+}
+
+// A general function to get rect relative to another rect
+function relative_to_rect(rect1, rect) {
+    return {x1: rect1.x1 - rect.x1,
+            x2: rect1.x2 - rect.x1,
+            y1: rect1.y1 - rect.y1,
+            y2: rect1.y2 - rect.y2};
+}
+
+function rect_height(rect) {
+    return (rect.y2 - rect.y1)
+}
+
+function rect_width(rect) {
+    return (rect.x2 - rect.x1);
 }
 
 // ===========================================================
