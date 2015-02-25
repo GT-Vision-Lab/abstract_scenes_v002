@@ -219,6 +219,7 @@ function reset_scene() {
         notUsed = sceneConfigData[curSceneType].notUsed;
         defZSize = sceneConfigData[curSceneType].defZSize;
         minNumObj = sceneConfigData[curSceneType].minNumObj;
+        maxNumObj = sceneConfigData[curSceneType].maxNumObj;
         minPerCatType = sceneConfigData[curSceneType].minPerCatType;
         numZSize = sceneConfigData[curSceneType].numZSize;
         numDepth0 = sceneConfigData[curSceneType].numDepth0;
@@ -882,6 +883,12 @@ function validate_scene() {
         validScene = false;
         return validScene;
     }
+    
+    if (numAvailableObjectsUsed > maxNumObj) {
+        render_dialog("maxClipart");
+        validScene = false;
+        return validScene;
+    }        
     
     return validScene;
 }
