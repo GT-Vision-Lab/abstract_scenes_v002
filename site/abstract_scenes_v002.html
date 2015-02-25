@@ -141,31 +141,41 @@
 
             // Select good examples to show workers
             function select_good() {
-                ex_total_temp = ex_total_options[curSceneType];
-                
-                if (ex_total_temp != undefined) {
-                    ex_total = ex_total_temp;
-                }
-                
-                for (i = 0; i < NUM_GOOD_EXAMPLES; i++) {
-                    var found = true;
-                    while (found == true) {
-                        selectedGood[i] = get_random_int(0, ex_total);
-                        found = false;
-                        for (j = 0; j < i; j++) {
-                            if (selectedGood[j] == selectedGood[i]) {
-                                found = true;
-                                break;
+            
+                var goodImageHTML = '';
+                if (curSceneTypeBase == 'Living' ||
+                    curSceneTypeBase == 'Park' ) {
+                                        
+                    ex_total_temp = ex_total_options[curSceneTypeBase];
+                    
+                    if (ex_total_temp != undefined) {
+                        ex_total = ex_total_temp;
+                    }
+                    
+                    for (i = 0; i < NUM_GOOD_EXAMPLES; i++) {
+                        var found = true;
+                        while (found == true) {
+                            selectedGood[i] = get_random_int(0, ex_total);
+                            found = false;
+                            for (j = 0; j < i; j++) {
+                                if (selectedGood[j] == selectedGood[i]) {
+                                    found = true;
+                                    break;
+                                }
                             }
                         }
                     }
-                }
-                
-                var goodImageHTML = '';
-                for (i = 0; i < 5; i++) {
-                    goodImageHTML += "<td><img src='" + exampleBaseURL + "GoodPark/" + selectedGood[i] + ".png' width=218></td>";
-                }
 
+                    if (curSceneTypeBase == 'Living') {
+                        dirName = "GoodIndoor/";
+                    } else if (curSceneTypeBase == 'Park') {
+                        dirName = "GoodPark/";
+                    }
+                    
+                    for (i = 0; i < 5; i++) {
+                        goodImageHTML += "<td><img src='" + exampleBaseURL + dirName + selectedGood[i] + ".png' width=218></td>";
+                    }
+                }
                 document.getElementById('goodimagewrapper').innerHTML = goodImageHTML;
             }
 
@@ -183,11 +193,11 @@
             }
             
             function update_instructions() {
-                if (curSceneType == "Living") {
+                if (curSceneTypeBase == "Living") {
                     titleStr = "(<b style='color:red;'>" + "Living/Diving Room" + "</b>)";
                 } else {
-                    if (curSceneType != undefined) {
-                        titleStr = "(<b style='color:red;'>" + curSceneType + "</b>)";
+                    if (curSceneTypeBase != undefined) {
+                        titleStr = "(<b style='color:red;'>" + curSceneTypeBase + "</b>)";
                     } else {
                         titleStr = "";
                     }

@@ -24,50 +24,6 @@
         "numDepth1": 10,
         "numFlip": 2,
         "numObjTypeShow": {
-                            "human": 21,
-                            "animal": 31,
-                            "largeObject": 17,
-                            "smallObject": 34
-                            },
-        "objectTypeOrder": [ "human", "animal", "largeObject", "smallObject"]
-    },
-    "Living": {
-        "baseDir": "Living",
-        "bgImg": "BG1.png",
-        "startTab": "largeObject",
-        "imgPadNum": 2,
-        "notUsed": -9999,
-        "zSizeDecay": 0.95,
-        "defZSize": 2,
-        "numZSize": 5,
-        "minNumObj": 6,
-        "minPerCatType": 1,
-        "numDepth0": 3,
-        "numDepth1": 10,
-        "numFlip": 2,
-        "numObjTypeShow": {
-                            "human": 21,
-                            "animal": 10,
-                            "largeObject": 23,
-                            "smallObject": 39
-                            },
-        "objectTypeOrder": [ "human", "animal", "largeObject", "smallObject"]
-    },
-    "ParkSubset": {
-        "baseDir": "Park",
-        "bgImg": "BG1.png",
-        "startTab": "smallObject",
-        "imgPadNum": 2,
-        "notUsed": -9999,
-        "zSizeDecay": 0.9,
-        "defZSize": 2,
-        "numZSize": 5,
-        "minNumObj": 6,
-        "minPerCatType": 1,
-        "numDepth0": 3,
-        "numDepth1": 10,
-        "numFlip": 2,
-        "numObjTypeShow": {
                             "human": 8,
                             "animal": 12,
                             "largeObject": 16,
@@ -75,7 +31,7 @@
                             },
         "objectTypeOrder": [ "human", "animal", "largeObject", "smallObject"]
     },
-    "LivingSubset": {
+    "Living": {
         "baseDir": "Living",
         "bgImg": "BG1.png",
         "startTab": "largeObject",
@@ -97,7 +53,51 @@
                             },
         "objectTypeOrder": [ "human", "animal", "largeObject", "smallObject"]
     },
-    "ParkAll": {
+    "Park-Subset": {
+        "baseDir": "Park",
+        "bgImg": "BG1.png",
+        "startTab": "smallObject",
+        "imgPadNum": 2,
+        "notUsed": -9999,
+        "zSizeDecay": 0.9,
+        "defZSize": 2,
+        "numZSize": 5,
+        "minNumObj": 6,
+        "minPerCatType": 1,
+        "numDepth0": 3,
+        "numDepth1": 10,
+        "numFlip": 2,
+        "numObjTypeShow": {
+                            "human": 8,
+                            "animal": 12,
+                            "largeObject": 16,
+                            "smallObject": 20
+                            },
+        "objectTypeOrder": [ "human", "animal", "largeObject", "smallObject"]
+    },
+    "Living-Subset": {
+        "baseDir": "Living",
+        "bgImg": "BG1.png",
+        "startTab": "largeObject",
+        "imgPadNum": 2,
+        "notUsed": -9999,
+        "zSizeDecay": 0.95,
+        "defZSize": 2,
+        "numZSize": 5,
+        "minNumObj": 6,
+        "minPerCatType": 1,
+        "numDepth0": 3,
+        "numDepth1": 10,
+        "numFlip": 2,
+        "numObjTypeShow": {
+                            "human": 8,
+                            "animal": 8,
+                            "largeObject": 20,
+                            "smallObject": 20
+                            },
+        "objectTypeOrder": [ "human", "animal", "largeObject", "smallObject"]
+    },
+    "Park-All": {
         "baseDir": "Park",
         "bgImg": "BG1.png",
         "startTab": "smallObject",
@@ -119,7 +119,7 @@
                             },
         "objectTypeOrder": [ "human", "animal", "largeObject", "smallObject"]
     },
-    "LivingAll": {
+    "Living-All": {
         "baseDir": "Living",
         "bgImg": "BG1.png",
         "startTab": "largeObject",

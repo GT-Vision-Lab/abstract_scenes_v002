@@ -24,12 +24,14 @@ var baseURLInterface = baseURL + "../interface/";
 var dataURL = baseURL + "../data/";
 var sceneJSONURL = baseURL + "../scenes/json/";
 
+var AVAIL_SCENE_TYPES = ["Living-All", "Park-All"];
+
 // Xinlei instruction example related
 // Keep for Xinlei's examples
 var exampleBaseURL = "http://ladoga.graphics.cs.cmu.edu/xinleic/genSents/Interface/";
 var ex_total_options = {
                         "Park": 960,
-                        "Living": 930
+                        "Living": 930,
                         };
 // Some random default numbers...
 var NUM_GOOD_EXAMPLES = 5;
@@ -96,8 +98,8 @@ if (sceneJSONFile.length > 0) {
 
         if (sceneTypeStr == "" && numSceneStr == "") {
             // Default "demo" settings
-            numScene = 2;
-            sceneTypeList = ["Living", "Park"];
+            sceneTypeList = AVAIL_SCENE_TYPES;
+            numScene = sceneTypeList.length;
         } else {
             if (sceneTypeStr != "") {
                 sceneType = sceneTypeStr;
@@ -120,11 +122,13 @@ if (sceneJSONFile.length > 0) {
     sceneData = Array(numScene);
 }
 
+var curSceneTypeBase = extract_scene_type_base(curSceneType)
+
 var titleStr;
-if (curSceneType == "Living") {
+if (curSceneTypeBase == "Living") {
     titleStr = "Living/Diving Room";
 } else {
-    titleStr = curSceneType;
+    titleStr = curSceneTypeBase;
 }
 
 var sceneConfigFile;
@@ -216,11 +220,10 @@ function load_scene_json(loaded_data, filename) {
                             console.log(curSceneFile);
                             console.log("Loading scene JSON " + 
                             curSceneFile +" failed.");
-                            load_scene_json({"scene": {"sceneType": "Park"},
+                            randSceneType = get_random_int(0, AVAIL_SCENE_TYPES.length);
+                            load_scene_json({"scene": {"sceneType": AVAIL_SCENE_TYPES[randSceneType]},
                                              "failed": true}, curSceneFile);
 //                             sceneJSONData[curSceneFile] = null;
-                            
-                            
                         } );    
     } else {
         sceneJSONData[filename] = loaded_data;
@@ -235,4 +238,9 @@ function load_scene_json(loaded_data, filename) {
 //         load_obj_category_data();
         update_instructions();
     }
+}
+
+function extract_scene_type_base(sceneName) {
+        nameParts = sceneName.split('-');
+        return nameParts[0];
 }

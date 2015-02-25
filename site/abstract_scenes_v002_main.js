@@ -25,14 +25,14 @@ var sceneConfigData;
 
 // Keeps track of the per-category information about the data.
 // I.e., what's in the data_<object category>.json files.
-var objectData = {};
+var objectData;
 
 // Data for the current (rendered) scene
 var curSceneData;
 var curAvailableObj;
-var curUserSequence = {};
-var curClipartImgs = [];
-var curPeopleExprImgs = [];
+var curUserSequence;
+var curClipartImgs;
+var curPeopleExprImgs;
 var curDepth0Used;
 var curDepth1Used;
 var curInitHistory;
@@ -159,7 +159,6 @@ function init() {
     document.onkeydown = handle_key_down;
     document.onkeyup = handle_key_up;
 
-    
     // Load all of the images for menus
     selectedImg = new Image();
     selectedImg.src = baseURLInterface + 'selected.png';
@@ -198,12 +197,12 @@ function init() {
     // numBorderImg.onload = draw_canvas;
     
     // Tab page button images
-    tabPageUpImg=new Image();
+    tabPageUpImg = new Image();
     tabPageUpImg.src = baseURLInterface + 'previous_button.png';
-    tabPageUpImg.onload=draw_canvas;
-    tabPageDownImg=new Image();
+    tabPageUpImg.onload = draw_canvas;
+    tabPageDownImg = new Image();
     tabPageDownImg.src = baseURLInterface + 'next_button.png';
-    tabPageDownImg.onload=draw_canvas;
+    tabPageDownImg.onload = draw_canvas;
 
     reset_scene();
     draw_canvas();
@@ -214,6 +213,7 @@ function reset_scene() {
     if ( sceneTypeList.length > 0 && sceneConfigData != undefined) {
         curSceneData = sceneData[curScene];
         curSceneType = sceneTypeList[curScene];
+        curSceneTypeBase = extract_scene_type_base(curSceneType)
         
         imgPadNum = sceneConfigData[curSceneType].imgPadNum;
         notUsed = sceneConfigData[curSceneType].notUsed;
@@ -273,6 +273,7 @@ function reset_scene() {
             curDepth0Used = curSceneData.depth0Used;
             curDepth1Used = curSceneData.depth1Used;
             curSceneType = curSceneData.sceneType;
+            curSceneTypeBase = extract_scene_type_base(curSceneType)
             curInitHistory = curSceneData.initHistory;
             
         } else { // Randomly or from previous JSON initialization
@@ -398,17 +399,18 @@ function rand_obj_init(histStr) {
     for (var objectType in objectData) {
         if (objectData.hasOwnProperty(objectType)) {
             curObjectType = objectData[objectType];
-            numSelObj = numObjTypeShow[curObjectType.objectType];
             var validIdxs = [];
             for ( var k = 0; k < curObjectType.type.length; k++ ) {
                 for ( var m = 0; m < curObjectType.type[k].availableScene.length; m++ ) {
-                    if ( curObjectType.type[k].availableScene[m].scene == curSceneType ) {
+                    if ( curObjectType.type[k].availableScene[m].scene == curSceneTypeBase ) {
                         validIdxs.push([k, m])
                     }
                 }
             }
+
             var numValidTypes = validIdxs.length;
-            
+            numSelObj = numObjTypeShow[curObjectType.objectType];
+
             for ( var j = 0; j < numSelObj; j++ ) {
                 var found = true;
                 while (found) {
@@ -886,31 +888,33 @@ function validate_scene() {
 
 function log_user_data(msg) {
     
-    // TODO Safety here in case of things not being loaded yet?
-    curUserSequence.selectedIdx.push(selectedIdx);
-    curUserSequence.selectedIns.push(selectedIns);
-    // SA: TODO Verify that this is correct/reasonable
-    if ( selectedIdx != notUsed && selectedIns != notUsed) {
-        curUserSequence.poseID.push(curAvailableObj[selectedIdx].instance[selectedIns].poseID);
-        curUserSequence.expressionID.push(curAvailableObj[selectedIdx].instance[selectedIns].expressionID);
-        curUserSequence.present.push(curAvailableObj[selectedIdx].instance[selectedIns].present);
-        curUserSequence.x.push(curAvailableObj[selectedIdx].instance[selectedIns].x);
-        curUserSequence.y.push(curAvailableObj[selectedIdx].instance[selectedIns].y);
-        curUserSequence.z.push(curAvailableObj[selectedIdx].instance[selectedIns].z);
-        curUserSequence.flip.push(curAvailableObj[selectedIdx].instance[selectedIns].flip);
-        curUserSequence.depth1.push(curAvailableObj[selectedIdx].instance[selectedIns].depth1);
-    } else {
-        curUserSequence.poseID.push(notUsed);
-        curUserSequence.expressionID.push(notUsed);
-        curUserSequence.present.push(notUsed);
-        curUserSequence.x.push(notUsed);
-        curUserSequence.y.push(notUsed);
-        curUserSequence.z.push(notUsed);
-        curUserSequence.flip.push(notUsed);
-        curUserSequence.depth1.push(notUsed);
-    }
-    if (msg != undefined) {
-        console.log(msg + ": " + curUserSequence.flip.length);
+    if ( curUserSequence != undefined ) {
+        // TODO Safety here in case of things not being loaded yet?
+        curUserSequence.selectedIdx.push(selectedIdx);
+        curUserSequence.selectedIns.push(selectedIns);
+        // SA: TODO Verify that this is correct/reasonable
+        if ( selectedIdx != notUsed && selectedIns != notUsed) {
+            curUserSequence.poseID.push(curAvailableObj[selectedIdx].instance[selectedIns].poseID);
+            curUserSequence.expressionID.push(curAvailableObj[selectedIdx].instance[selectedIns].expressionID);
+            curUserSequence.present.push(curAvailableObj[selectedIdx].instance[selectedIns].present);
+            curUserSequence.x.push(curAvailableObj[selectedIdx].instance[selectedIns].x);
+            curUserSequence.y.push(curAvailableObj[selectedIdx].instance[selectedIns].y);
+            curUserSequence.z.push(curAvailableObj[selectedIdx].instance[selectedIns].z);
+            curUserSequence.flip.push(curAvailableObj[selectedIdx].instance[selectedIns].flip);
+            curUserSequence.depth1.push(curAvailableObj[selectedIdx].instance[selectedIns].depth1);
+        } else {
+            curUserSequence.poseID.push(notUsed);
+            curUserSequence.expressionID.push(notUsed);
+            curUserSequence.present.push(notUsed);
+            curUserSequence.x.push(notUsed);
+            curUserSequence.y.push(notUsed);
+            curUserSequence.z.push(notUsed);
+            curUserSequence.flip.push(notUsed);
+            curUserSequence.depth1.push(notUsed);
+        }
+        if (msg != undefined) {
+            console.log(msg + ": " + curUserSequence.flip.length);
+        }
     }
 }
 
@@ -990,6 +994,7 @@ function load_object_config(data) {
     
     if (jsonIdx == -1) {
         sceneConfigData = data;
+        objectData = {};
         jsonIdx += 1;
     } else {
         objectData[data.objectType] = data;
@@ -1011,11 +1016,68 @@ function load_object_config(data) {
 }
 
 function load_obj_category_data() {
-        
-    if (sceneTypeList.length > 0 && sceneConfigData != undefined) {
-        objectTypeOrder = sceneConfigData[sceneTypeList[curScene]].objectTypeOrder;
-        numObjTypeShow = sceneConfigData[sceneTypeList[curScene]].numObjTypeShow;
 
+    // Make sure the sceneTypeList is all valid scene types
+    if (sceneTypeList.length > 0 && sceneConfigData != undefined) {
+        
+        var validSceneTypeList = [];
+        sceneTypeList.forEach( function(d) {
+            if (sceneConfigData.hasOwnProperty(d)) {
+                validSceneTypeList.push(d);
+            }
+        })
+        sceneTypeList = validSceneTypeList;
+        numScene = sceneTypeList.length;
+        
+        if (numScene == 0) {
+            var sceneTypeListIdx = get_random_int(0, AVAIL_SCENE_TYPES.length);
+            sceneTypeList = [AVAIL_SCENE_TYPES[sceneTypeListIdx]]
+            numScene = sceneTypeList.length;
+            console.log('Invalid scene type entered. ' +
+                        'Defaulting to one scene of ' +
+                        sceneTypeList[0] + '.');
+        }
+        
+        update_instructions();
+    }
+    
+    if (sceneTypeList.length > 0 && sceneConfigData != undefined) {
+        var numSelObj;
+        
+        curSceneType = sceneTypeList[curScene];
+        curSceneTypeBase = extract_scene_type_base(curSceneType)
+        objectTypeOrder = sceneConfigData[curSceneType].objectTypeOrder;
+        numObjTypeShow = sceneConfigData[curSceneType].numObjTypeShow;
+        
+        // In case scene config is bad, we overwrite values
+        // that suggest putting more objects than available for
+        // that category and prevents an infinite loop
+        
+        for (var objectType in objectData) {
+            if (objectData.hasOwnProperty(objectType)) {
+                sumPoses = 0;
+                curObjectType = objectData[objectType];
+                var validIdxs = [];
+                for ( var k = 0; k < curObjectType.type.length; k++ ) {
+                    for ( var m = 0; m < curObjectType.type[k].availableScene.length; m++ ) {
+                        sumPoses += curObjectType.type[k].numPose;
+                        if ( curObjectType.type[k].availableScene[m].scene == curSceneTypeBase ) {
+                            validIdxs.push([k, m])
+                        }
+                    }
+                }
+                var numValidTypes = validIdxs.length;
+                numSelObj = numObjTypeShow[curObjectType.objectType];
+                if (numSelObj > numValidTypes) {
+                    console.log(curSceneType + " asked for too many " + 
+                                curObjectType.objectType + 
+                                " objects. Overwriting with the max.")
+                }
+                numSelObj = Math.min(numSelObj, numValidTypes);
+                numObjTypeShow[curObjectType.objectType] = numSelObj;
+            }
+        }
+        
         // Need to initialize this otherwise interface won't load properly
         numAvailableObjects = 0;
         objectTypeToIdx = {};
@@ -1024,13 +1086,19 @@ function load_obj_category_data() {
             objectTypeToIdx[objectTypeOrder[i]] = i;
         }
         
-        selectedTab = sceneConfigData[sceneTypeList[curScene]].startTab;
+        selectedTab = sceneConfigData[curSceneType].startTab;
         selectedTabIdx = objectTypeToIdx[selectedTab];
         tabPage = 0;
         
         // SA: TODO Currently objectTypeOrder.length is assumed
         // to be the number of tabs, which is hardcoded to 4.
         NUM_TABS = objectTypeOrder.length;
+    } else {
+        numAvailableObjects = 0;
+        selectedTab = 'human';
+        selectedTabIdx = 0;
+        tabPage = 0;
+        NUM_TABS = 4;
     }
 }
 
