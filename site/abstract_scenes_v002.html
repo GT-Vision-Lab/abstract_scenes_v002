@@ -311,6 +311,10 @@
                     var text = "Please use at least " + 
                                 minPerCatType + " piece" + ((minPerCatType==1) ? "" : "s") + 
                                 " of clipart from each type. Thanks!";
+                } else if (errorMsg == "loadedScene") {
+                    var text = "Please make at least " + 
+                                minSceneChange + " change" + ((minSceneChange==1) ? "" : "s") + 
+                                " to the original scene. Thanks!";
                 }
                 
                 $("#dialog-modal").text(text);

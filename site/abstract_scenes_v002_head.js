@@ -42,6 +42,8 @@ var ex_total = NUM_GOOD_EXAMPLES+1;
 // Will be overwritten in reset_scene()
 var minNumObj = 1; // How many clipart objects they need to use.
 var maxNumObj = 20; // How many clipart objects they should at most use.
+var minPosChange = 10; // How many pixels does object need to move to count as change.
+var minSceneChange = 3; // How many things need to change if initializing from JSON.
 var minPerCatType = 1; // How many clipart of each type is required (unused).
 var imgPadNum; // How many zeros to pad image-related names
 var defZSize;

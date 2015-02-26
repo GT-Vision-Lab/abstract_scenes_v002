@@ -221,6 +221,8 @@ function reset_scene() {
         minNumObj = sceneConfigData[curSceneType].minNumObj;
         maxNumObj = sceneConfigData[curSceneType].maxNumObj;
         minPerCatType = sceneConfigData[curSceneType].minPerCatType;
+        minPosChange = sceneConfigData[curSceneType].minPosChange;
+        minSceneChange = sceneConfigData[curSceneType].minSceneChange;
         numZSize = sceneConfigData[curSceneType].numZSize;
         numDepth0 = sceneConfigData[curSceneType].numDepth0;
         numDepth1 = sceneConfigData[curSceneType].numDepth1;
@@ -326,7 +328,9 @@ function reset_scene() {
 function json_obj_init() {
     
     sceneFilename = sceneJSONFile[curScene];
-    curSceneData = sceneJSONData[sceneFilename].scene;
+//     curSceneData = sceneJSONData[sceneFilename].scene;    
+    // Hack to create a new object so we can detect changes
+    curSceneData = JSON.parse(JSON.stringify(sceneJSONData[sceneFilename].scene));
     curAvailableObj = curSceneData.availableObject;
     curClipartImgs = Array(numAvailableObjects);
     curPeopleExprImgs = Array(numObjTypeShow['human']);
@@ -825,6 +829,107 @@ function next() {
     }
 }
 
+
+function num_differences_instance(originalInst, currentInst) {
+    var isDiff = 0;
+    
+    // Check if certain properties are different
+    if (originalInst.present != currentInst.present) {
+        console.log("Presence changed");
+        isDiff += 1;
+    }
+    
+    if (originalInst.flip != currentInst.flip) {
+        console.log("Flip changed");
+        isDiff += 1;
+    }
+    
+    if (originalInst.z != currentInst.z) {
+        console.log("Z changed");
+        isDiff += 1;
+    }
+    
+    if (originalInst.type == 'human') {
+        if (originalInst.expressionID != currentInst.expressionID) {
+            console.log("Expression changed");
+            isDiff += 1;
+        }
+    }
+    
+    if (originalInst.poseID != currentInst.poseID) {
+        console.log("poseID changed");
+        isDiff += 1;
+    }
+
+//     // depth0 currently can't change
+//     if (originalInst.depth0 != currentInst.depth0) {
+//         isDiff += 1;
+//         return isDiff;
+//     }
+    
+    // SA: I don't think depth1 changing is very reliable
+    // as an indicator of change and might be too exploitable.
+    // I'm not sure which situations changing it would
+    // significantly change the scene.
+//     if (originalInst.depth1 != currentInst.depth1) {
+//         console.log("Depth1 changed");
+//         isDiff += 1;
+//         return isDiff;
+//     }
+    
+    // If not deformable, check x and y positions
+    if (originalInst.deformable == false) {
+        
+        var distChange = euclidean_dist(originalInst.x, currentInst.x,
+                                        originalInst.y, currentInst.y);
+        
+        if (distChange > minPosChange) {
+            console.log("Position changed by " + distChange);
+            isDiff += 1;
+        }
+        
+    } else { // TODO Deformable, so do different comparision
+
+    }
+
+//     debugger;
+    return isDiff;
+}
+
+function euclidean_dist(x1, x2, y1, y2) {
+    return dist = Math.sqrt(Math.pow((x2 - x1), 2) + 
+                            Math.pow((y2 - y1), 2));
+}
+
+function num_different_object(originalObj, currentObj) {
+    var numObjChanges = 0;
+    
+    for (var i = 0; i < originalObj.instance.length; i++) {
+        numObjChanges += num_differences_instance(originalObj.instance[i],
+                                            currentObj.instance[i]);
+    }
+    
+    return numObjChanges;
+}
+
+function is_different_from_init_scene() {
+    var isDiff = false;
+    var numChanges = 0;
+    
+    var curSceneFile = sceneJSONFile[curScene];
+    var origAvailObj = sceneJSONData[curSceneFile].scene.availableObject;
+    for (var i = 0; i < origAvailObj.length; i++) {
+        numChanges += num_different_object(origAvailObj[i], 
+                                             curAvailableObj[i]);
+    }
+    
+    if (numChanges >= minSceneChange) {
+        isDiff = true;
+    }
+//     debugger;
+    return isDiff;
+}
+
 function validate_scene() {
     
     var numAvailableObjectsUsed;
@@ -832,6 +937,14 @@ function validate_scene() {
     
     if (!restrictInput) {
         return validScene;
+    }
+    
+    if (loadSceneJSON) {
+        if (!is_different_from_init_scene()) {
+            render_dialog("loadedScene");
+            validScene = false;
+            return validScene;
+        }
     }
 
 //     ////////////////////// NO REQUIREMENT FOR CATEGORY //////////////////////
