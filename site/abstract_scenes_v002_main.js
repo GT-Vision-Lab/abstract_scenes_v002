@@ -1776,13 +1776,15 @@ function mousedown_canvas(event) {
     if (clipartX < CLIPART_SKIP * NUM_CLIPART_HORZ && clipartX > 0 && 
             clipartY < CLIPART_SKIP * NUM_CLIPART_VERT && clipartY > 0 &&
             loadedObjectsAndBG == true) {
-
+        
+        var prevSelectedIdx = selectedIdx;
         selectedIdx = Math.floor(clipartY / CLIPART_SKIP);
         selectedIdx *= NUM_CLIPART_HORZ;
         selectedIdx += Math.floor(clipartX / CLIPART_SKIP) + tabPage;
 
         // SA: TODO Fix it so selectedTabIdx corresponds to objectTypeOrder
-        // Currently, the menu positions are hardcoded (by the menu image), which is sub-optimal.
+        // Currently, the menu positions are hardcoded (by the menu image), which is sub-optimal.        
+    
         if (selectedIdx < numObjTypeShow[objectTypeOrder[selectedTabIdx]]) {
             selectedIdx += clipartIdxStart[selectedTabIdx];
 
@@ -1810,6 +1812,12 @@ function mousedown_canvas(event) {
                 // log_user_data("Transition to scene?"); // SA: TODO Add?
                 draw_canvas();
             }
+        } else {
+            // If the user clicks in the select object part of menu
+            // but it's not a valid object, then leave selectedIdx
+            // at it's previous value. Much better UX, since a
+            // selected object (in the scene) stays selected.
+            selectedIdx = prevSelectedIdx;
         }
 
         if (selectedIdx != notUsed && selectedTabIdx == 0 && curLoadAll[selectedIdx] == 1) {
