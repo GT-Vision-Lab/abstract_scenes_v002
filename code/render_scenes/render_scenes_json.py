@@ -1,4 +1,6 @@
-# coding: utf-8
+ #!/usr/bin/python
+ # -*- coding: utf-8 -*-
+ 
 import json
 from PIL import Image, ImageFilter
 from os import path

@@ -25,7 +25,7 @@ var sceneConfigData;
 
 // Keeps track of the per-category information about the data.
 // I.e., what's in the data_<object category>.json files.
-var objectData;
+var objectData = {};
 
 // Data for the current (rendered) scene
 var curSceneData;
@@ -33,6 +33,8 @@ var curAvailableObj;
 var curUserSequence;
 var curClipartImgs;
 var curPeopleExprImgs;
+var curPaperdollExprImgs = [];
+var curPaperdollPartImgs = [];
 var curDepth0Used;
 var curDepth1Used;
 var curInitHistory;
@@ -42,54 +44,62 @@ var loadedObjectsAndBG = false;
 // global variables for the page
 ////// MULTIPLE OBJECTS FOR THE CURRENT SCENE ///////
 // Various variables setting up the appearence of the interface
-var CANVAS_WIDTH = 700;
+var CANVAS_WIDTH = 800;
 var CANVAS_HEIGHT = 400;
-var CANVAS_ROW = 106;
+var CANVAS_ROW = 30;
 var CANVAS_COL = 20;
-var TAB_WIDTH = 334;
-var TAB_HEIGHT = 62;
-var CLIPART_WIDTH = TAB_WIDTH;
-var CLIPART_HEIGHT = CANVAS_HEIGHT;
-var CLIPART_ROW = CANVAS_ROW;
-var CLIPART_COL = CANVAS_WIDTH + 50;
+var TAB_WIDTH = 0;
+var TAB_HEIGHT = 0;
+var CLIPART_WIDTH = 0;
+var CLIPART_HEIGHT = 0;
+var CLIPART_ROW = 0;
+var CLIPART_COL = 0;
 var CLIPART_BUFFER = 10;
 // the row of canvas and the buffer, looks like the starting point
-var ATTR_ROW = CANVAS_ROW + CANVAS_HEIGHT + CLIPART_BUFFER; 
-var ATTR_COL = CANVAS_COL; // so row should be the vertial direction
-var ATTR_WIDTH = 700;
-var ATTR_HEIGHT = 82;
-var ATTR2_ROW = ATTR_ROW + ATTR_HEIGHT + CLIPART_BUFFER;
-var ATTR2_COL = CANVAS_COL;
-var ATTR2_WIDTH = 700;
-var ATTR2_HEIGHT = 82;
+var ATTR_ROW = 0; 
+var ATTR_COL = 0;
+var ATTR_WIDTH = 0;
+var ATTR_HEIGHT = 0;
+var ATTR_TYPE_COL = 0;
+var ATTR_TYPE_ROW = 0;
+var ATTR_TYPE_WIDTH = 0;
+var ATTR_TYPE_HEIGHT = 0;
 
 // Adding buttons for pages within tabs
 var tabPage = 0;
-var tabPageUpRect = {x1: 20, x2:155,
-                     y1: 5,  y2:55};
-var tabPageDownRect = {x1: 180, x2: 315, 
-                       y1: 5,   y2: 55};
+// SA: Added new offsets since Larry changed things
+var tabColOffset = 45;
+var tabRowOffset = 70;
+var tabPageUpRect = {x1: 20 + tabColOffset, x2:155 + tabColOffset,
+                     y1: 5 + tabRowOffset,  y2:55 + tabRowOffset};
+var tabPageDownRect = {x1: 180 + tabColOffset, x2: 315 + tabColOffset, 
+                       y1: 5 + tabRowOffset,   y2: 55 + tabRowOffset};
 var tabPageUpImg;
 var tabPageDownImg;
 
 // Grid size of shown clipart objects
 var NUM_CLIPART_VERT = 5;
 var NUM_CLIPART_HORZ = 5;
-var CLIPART_SKIP = (CLIPART_WIDTH - CLIPART_BUFFER) / NUM_CLIPART_HORZ;
+var CLIPART_SKIP = 80;
 var CLIPART_SIZE = CLIPART_SKIP - 2 * CLIPART_BUFFER;
 var CLIPART_OBJECT_OFFSET_COL = 0;
-var CLIPART_OBJECT_OFFSET_ROW = 50;
+var CLIPART_OBJECT_OFFSET_ROW = 70;
+var MAX_NUM_ATTR = 8;
 // Number of clip art to show of the other objects
 var CLIPART_OBJECT_COL = CLIPART_COL + CLIPART_SKIP * NUM_CLIPART_HORZ + 24;
+
 // Button size
-var SCALE_COL = 97;
-var SCALE_ROW = 65;
-var SCALE_WIDTH = 170;
+var SCALE_COL = 0;
+var SCALE_ROW = 0;
+var SCALE_WIDTH = 120;
 var SCALE_HEIGHT = 29;
-var FLIP_COL = 350;
-var FLIP_ROW = 54;
-var ScaleSliderDown = false;
+var FLIP_COL = 0;
+var FLIP_ROW = 0;
+var scaleSliderDown = false;
+var flipDown = false;
+var attrSelectorDown = false;
 var wasOnCanvas = false;
+var selectedAttributeType = 0;
 
 var i, j, k, l, m;
 var bgImg;
@@ -97,7 +107,6 @@ var selectedImg;
 var buttonImg;
 var tabsImg;
 var objectBoxImg;
-var titleImg;
 var attrBoxImg;
 var attr2BoxImg;
 var slideBarImg;
@@ -120,8 +129,10 @@ var buttonH = 0;
 // Set in reset_scene()
 var selectedIdx = -9999;
 var selectedIns = -9999;
+var selectedPart = 'null';
 var lastIdx = -9999;
-var lastIns = -9999; 
+var lastIns = -9999;
+var selectPaperdollPose = false;
 var lastX = 0;
 var lastY = 0;
 var lastZ = 0; 
@@ -156,6 +167,7 @@ function init() {
     canvas_fix.onmousemove = mousemove_canvas;
     canvas_fix.onmousedown = mousedown_canvas;
     canvas_fix.onmouseup = mouseup_canvas;
+    
     document.onkeydown = handle_key_down;
     document.onkeyup = handle_key_up;
 
@@ -164,16 +176,6 @@ function init() {
     selectedImg.src = baseURLInterface + 'selected.png';
     buttonImg = new Image();
     buttonImg.src = baseURLInterface + 'buttons.png';
-    titleImg = new Image();
-    titleImg.src = baseURLInterface + 'title.png';
-    tabsImg = new Image();
-    tabsImg.src = baseURLInterface + 'tabs.png';
-    objectBoxImg = new Image();
-    objectBoxImg.src = baseURLInterface + 'objectBox.png';
-    attrBoxImg = new Image();
-    attrBoxImg.src = baseURLInterface + 'attrBox.png';
-    attr2BoxImg = new Image();
-    attr2BoxImg.src = baseURLInterface + 'attrBox.png';
     slideBarImg = new Image();
     slideBarImg.src = baseURLInterface + 'slidebar.png';
     slideMarkImg = new Image();
@@ -185,16 +187,8 @@ function init() {
     
     // Call draw_canvas() when respective img is dled
     buttonImg.onload = draw_canvas;
-    // selectedImg.onload = draw_canvas;
-    titleImg.onload = draw_canvas;
-    tabsImg.onload = draw_canvas;
-    objectBoxImg.onload = draw_canvas;
-    attrBoxImg.onload = draw_canvas;
-    attr2BoxImg.onload = draw_canvas;
     slideBarImg.onload = draw_canvas;
     slideMarkImg.onload = draw_canvas;
-    // noLeftImg.onload = draw_canvas;
-    // numBorderImg.onload = draw_canvas;
     
     // Tab page button images
     tabPageUpImg = new Image();
@@ -335,6 +329,9 @@ function json_obj_init() {
     curClipartImgs = Array(numAvailableObjects);
     curPeopleExprImgs = Array(numObjTypeShow['human']);
     
+    curPaperdollExprImgs = Array(numObjTypeShow['paperdoll']);
+    curPaperdollPartImgs = Array(numObjTypeShow['paperdoll']);
+    
 //     // Don't overwrite user tracking history
 //     curUserSequence = curSceneData.userSequence;
     // Overwrite old user tracking history
@@ -474,6 +471,16 @@ function rand_obj_init(histStr) {
                     } else if (curObjectType.objectType == "largeObject" || curObjectType.objectType == "smallObject") {
                         // SA: Do we want this at instance-level?
                         objInstance.baseDir = curObjectType.type[idxValidType].baseDir;
+                    } else if (curObjectType.objectType == "paperdoll") {
+                        objInstance.numExpression = curObjectType.type[idxValidType].numExpression;
+                        objInstance.expressionID = 0; // No face
+                        objInstance.body = curObjectType.type[idxValidType].body; // No face
+                        objInstance.partIdxList = curObjectType.type[idxValidType].partIdxList;
+                        objInstance.globalScale = curObjectType.type[idxValidType].globalScale;
+                        objInstance.paperdollGRotation = Array(curObjectType.type[idxValidType].body.length);
+                        objInstance.paperdollLRotation = Array(curObjectType.type[idxValidType].body.length);
+                        objInstance.paperdollX = Array(curObjectType.type[idxValidType].body.length);
+                        objInstance.paperdollY = Array(curObjectType.type[idxValidType].body.length);
                     }
                     
                     curDepth0Used[objInstance.depth0]++; // just the count
@@ -606,6 +613,67 @@ function json_obj_load_first_imgs() {
 }
 
 function rand_obj_load_first_imgs() {
+    
+        for (i = 0; i < numAvailableObjects; i++) {
+        // Assume paperdoll are the first objects: should fix
+        if (i < numObjTypeShow['paperdoll']) {
+            // Load paperdoll heads/expression
+            curClipartImgs[i] = Array(curAvailableObj[i].instance[0].numExpression);
+            curPaperdollExprImgs[i] = Array(curAvailableObj[i].instance[0].numExpression);
+            for (j = 0; j < curAvailableObj[i].instance[0].numExpression; j++) {
+                curClipartImgs[i][j] = new Image();
+                curClipartImgs[i][j].src =
+                    paperdoll_expr_img_filename_expr(curAvailableObj[i].instance[0], j);
+
+                curPaperdollExprImgs[i][j] = new Image();
+                curPaperdollExprImgs[i][j].src =
+                    paperdoll_expr_img_filename_expr(curAvailableObj[i].instance[0], j);
+
+            }
+
+            // Load paperdoll part images
+            curPaperdollPartImgs[i] = Array(curAvailableObj[i].instance[0].body.length);
+            for (j = 0; j < curAvailableObj[i].instance[0].body.length; j++) {
+                curPaperdollPartImgs[i][j] = new Image();
+                curPaperdollPartImgs[i][j].src =
+                    paperdoll_part_img_filename_expr(curAvailableObj[i].instance[0], curAvailableObj[i].instance[0].body[j].part);
+
+            }
+
+            // Randomly init part rotations
+            for (k = 0; k < curAvailableObj[i].numInstance;k++) {
+                for (j = 0; j < curAvailableObj[i].instance[0].body.length; j++) {
+                    curAvailableObj[i].instance[k].paperdollGRotation[j] = (2.0*Math.random() - 1.0) * 0.5;
+                    curAvailableObj[i].instance[k].paperdollLRotation[j] = (2.0 * Math.random() - 1.0) * 0.5;
+                    curAvailableObj[i].instance[k].paperdollX[j] = 0;
+                    curAvailableObj[i].instance[k].paperdollY[j] = 0;
+
+                    // Don't rotate the head
+                    if (curAvailableObj[i].instance[k].body[j].part == 'Head') {
+                        curAvailableObj[i].instance[k].paperdollGRotation[j] = 0;
+                        curAvailableObj[i].instance[k].paperdollLRotation[j] = 0;
+                    }
+
+                    // Don't rotate the torso
+                    if (curAvailableObj[i].instance[k].body[j].part == 'Torso') {
+                        curAvailableObj[i].instance[k].paperdollGRotation[j] = 0;
+                        curAvailableObj[i].instance[k].paperdollLRotation[j] = 0;
+                    }
+                }
+            }
+        } else {
+            curClipartImgs[i] = Array(curAvailableObj[i].instance[0].numPose);
+            for (j = 0; j < curAvailableObj[i].instance[0].numPose; j++) {
+                curClipartImgs[i][j] = new Image();
+                curClipartImgs[i][j].src =
+                    obj_img_filename_pose(curAvailableObj[i].instance[0], j);
+            }
+
+            curClipartImgs[i][curAvailableObj[i].instance[0].poseID].onload = draw_clipart;
+        }
+    }
+    
+    /*
     // Load the clip art images
     for (i = 0; i < numObjTypeShow['human']; i++) {
         curLoadAll[i] = 0; // set the variable to be zero
@@ -695,6 +763,7 @@ function rand_obj_load_first_imgs() {
             curPeopleExprImgs[i][j].onload = draw_clipart;
         }
     }
+    */
 }
 
 
@@ -722,6 +791,48 @@ function expr_img_filename_expr(obj, exprID) {
         filename = null;
     }
     
+    return filename;
+}
+
+function paperdoll_expr_img_filename_expr(obj, exprID) {
+
+    var filename;
+
+    if (exprID == null) {
+        exprID = obj['expressionID'];
+    }
+
+    if (obj['type'] == 'paperdoll') {
+        humanFolder = objectData['paperdoll']['baseDirectory'];
+        name = obj['name'] +
+               zero_pad((exprID + 1), imgPadNum) +
+               '.' + CLIPART_IMG_FORMAT;
+
+        filename = baseURLInterface +
+                    humanFolder + '/' + name;
+    } else {
+        filename = null;
+    }
+
+    return filename;
+}
+
+function paperdoll_part_img_filename_expr(obj, partName) {
+
+    var filename;
+
+    if (obj['type'] == 'paperdoll') {
+        humanFolder = objectData['paperdoll']['baseDirectory'];
+        name = obj['name'] + '/' + 
+               partName +
+               '.' + CLIPART_IMG_FORMAT;
+
+        filename = baseURLInterface +
+                    humanFolder + '/' + name;
+    } else {
+        filename = null;
+    }
+
     return filename;
 }
 
@@ -1232,27 +1343,119 @@ function draw_canvas() {
         CANVAS_WIDTH = bgImg.width;
         CANVAS_HEIGHT = bgImg.height;
     }
-    TAB_WIDTH = tabsImg.width;
-    TAB_HEIGHT = tabsImg.height / NUM_TABS;
-    ATTR_ROW = CANVAS_ROW + CANVAS_HEIGHT + CLIPART_BUFFER;
+    SCALE_ROW = CANVAS_ROW + CANVAS_HEIGHT + 1.5*CLIPART_BUFFER;
+    SCALE_COL = CANVAS_COL + 340 + CLIPART_BUFFER;
+    FLIP_ROW = SCALE_ROW - 8;
+    FLIP_COL = SCALE_COL + 200;
+    ATTR_ROW = SCALE_ROW + 38 + CLIPART_BUFFER;
     ATTR_COL = CANVAS_COL;
-    ATTR_WIDTH = CANVAS_WIDTH + TAB_WIDTH + 8;
+    ATTR_WIDTH = CANVAS_WIDTH;
     ATTR_HEIGHT = CLIPART_SKIP + 2 * CLIPART_BUFFER;
-    ATTR2_ROW = ATTR_ROW + ATTR_HEIGHT + CLIPART_BUFFER / 2;
-    ATTR2_COL = CANVAS_COL;
-    ATTR2_WIDTH = CANVAS_WIDTH + TAB_WIDTH + 8;
-    ATTR2_HEIGHT = ATTR_HEIGHT;
-    CLIPART_WIDTH = objectBoxImg.width;
-    CLIPART_HEIGHT = CANVAS_HEIGHT;
+
+    ATTR_TYPE_WIDTH = 100;
+    ATTR_TYPE_HEIGHT = 30;
+    ATTR_TYPE_COL = ATTR_COL;
+    ATTR_TYPE_ROW = ATTR_ROW - ATTR_TYPE_HEIGHT;
+
+
     CLIPART_COL = CANVAS_COL + CANVAS_WIDTH + CLIPART_BUFFER;
     CLIPART_ROW = CANVAS_ROW;
-    SIZE_HEIGHT = slideMarkImg.height;
+    CLIPART_WIDTH = CLIPART_SKIP * NUM_CLIPART_HORZ + 2 * CLIPART_BUFFER;
+    TAB_WIDTH = CLIPART_WIDTH / 4;
+    TAB_HEIGHT = 60;
+    CLIPART_HEIGHT = ATTR_ROW + ATTR_HEIGHT - (CLIPART_ROW + TAB_HEIGHT);
     
     //draw the image
     ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
     draw_scene();
     draw_clipart();
     draw_buttons();
+}
+
+function draw_paper_doll(objIdx, instIdx) {
+    var paperdoll = curAvailableObj[objIdx].instance[instIdx];
+    var numBodyParts = paperdoll.body.length;
+    var scale = paperdoll.globalScale * curZScale[paperdoll.z];
+
+    for (partIdx = 0; partIdx < numBodyParts; partIdx++) {
+    //for (partIdx = 0; partIdx < 1; partIdx++) {
+        var parent = paperdoll.body[partIdx].parent;
+        var parentIdx = paperdoll.partIdxList[parent];
+
+        var w = curPaperdollPartImgs[objIdx][partIdx].width;
+        var h = curPaperdollPartImgs[objIdx][partIdx].height;
+
+        paperdoll.paperdollX[partIdx] = paperdoll.x / scale;
+        paperdoll.paperdollY[partIdx] = paperdoll.y / scale;
+
+        if (parentIdx >= 0) {
+            var wp = curPaperdollPartImgs[objIdx][parentIdx].width;
+            var hp = curPaperdollPartImgs[objIdx][parentIdx].height;
+            var prevR = paperdoll.paperdollGRotation[parentIdx];
+            if (paperdoll.flip == 1) {
+                var rotMatrix = [];
+                rotMatrix.push(Math.cos(prevR));
+                rotMatrix.push(-Math.sin(prevR));
+                rotMatrix.push(Math.sin(prevR));
+                rotMatrix.push(Math.cos(prevR));
+
+                var x = (wp - paperdoll.body[partIdx].parentX) - (wp - paperdoll.body[parentIdx].childX);
+                var y = paperdoll.body[partIdx].parentY - paperdoll.body[parentIdx].childY;
+                paperdoll.paperdollX[partIdx] = rotMatrix[0] * x + rotMatrix[1] * y + paperdoll.paperdollX[parentIdx];
+                paperdoll.paperdollY[partIdx] = rotMatrix[2] * x + rotMatrix[3] * y + paperdoll.paperdollY[parentIdx];
+                paperdoll.paperdollGRotation[partIdx] = prevR - paperdoll.paperdollLRotation[partIdx];
+            } else {
+                var rotMatrix = [];
+                rotMatrix.push(Math.cos(prevR));
+                rotMatrix.push(-Math.sin(prevR));
+                rotMatrix.push(Math.sin(prevR));
+                rotMatrix.push(Math.cos(prevR));
+
+                var x = paperdoll.body[partIdx].parentX - paperdoll.body[parentIdx].childX;
+                var y = paperdoll.body[partIdx].parentY - paperdoll.body[parentIdx].childY;
+                paperdoll.paperdollX[partIdx] = rotMatrix[0] * x + rotMatrix[1] * y + paperdoll.paperdollX[parentIdx];
+                paperdoll.paperdollY[partIdx] = rotMatrix[2] * x + rotMatrix[3] * y + paperdoll.paperdollY[parentIdx];
+                paperdoll.paperdollGRotation[partIdx] = prevR + paperdoll.paperdollLRotation[partIdx];
+            }
+        }
+
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        if (paperdoll.flip == 1) {
+            ctx.setTransform(-1, 0, 0, 1, 0, 0);
+
+            ctx.translate(-CANVAS_COL, CANVAS_ROW);
+            ctx.scale(scale, scale);
+            ctx.translate(-paperdoll.paperdollX[partIdx], paperdoll.paperdollY[partIdx]);
+            ctx.rotate(-paperdoll.paperdollGRotation[partIdx]);
+            ctx.translate(-paperdoll.body[partIdx].childX, -paperdoll.body[partIdx].childY);
+        } else {
+            ctx.translate(CANVAS_COL, CANVAS_ROW);
+            ctx.scale(scale, scale);
+            ctx.translate(paperdoll.paperdollX[partIdx], paperdoll.paperdollY[partIdx]);
+            ctx.rotate(paperdoll.paperdollGRotation[partIdx]);
+            ctx.translate(-paperdoll.body[partIdx].childX, -paperdoll.body[partIdx].childY);
+        }
+
+        if (paperdoll.body[partIdx].part == 'Head') {
+            w = curPaperdollExprImgs[objIdx][0].width;
+            h = curPaperdollExprImgs[objIdx][0].height;
+            ctx.drawImage(curPaperdollExprImgs[objIdx][paperdoll.poseID], 0, 0, w, h, 0, 0, w, h);
+        } else
+            ctx.drawImage(curPaperdollPartImgs[objIdx][partIdx], 0, 0, w, h, 0, 0, w, h);
+        
+        if(objIdx == selectedIdx && instIdx == selectedIns && selectPaperdollPose) {
+            if (paperdoll.body[partIdx].handleRadius > 0) {
+                ctx.lineWidth = 4;
+                ctx.fillStyle = "rgba(50, 255, 50, 0.5)";;
+                ctx.beginPath();
+                ctx.arc(w/2, h/2, paperdoll.body[partIdx].handleRadius, 0, 2 * Math.PI);
+                ctx.stroke();
+                ctx.fill();
+            }
+        }
+
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+    }
 }
 
 function draw_scene() {
@@ -1277,13 +1480,16 @@ function draw_scene() {
                         continue;
                     }
                     
-                    for (i = 0; i < numObjTypeShow['human']; i++) {
+                    // SA: TODO Update to be compatible with both
+                    for (i = 0; i < numObjTypeShow['paperdoll']; i++) {
                         if (curAvailableObj[i].instance[0].depth0 == k) {
                             for (m = 0; m < curAvailableObj[i].numInstance; m++) {
                                 if (curAvailableObj[i].instance[m].present == true && 
                                     curAvailableObj[i].instance[m].z == j && 
                                     curAvailableObj[i].instance[m].depth1 == l) {
                                     
+                                    draw_paper_doll(i, m);
+                                    /*
                                     var scale = curZScale[curAvailableObj[i].instance[m].z]
                                     var indexP = curAvailableObj[i].instance[m].poseID*curAvailableObj[i].instance[m].numExpression +
                                                 curAvailableObj[i].instance[m].expressionID;
@@ -1317,13 +1523,14 @@ function draw_scene() {
                                                     w * scale, h * scale);
                                         ctx.setTransform(1, 0, 0, 1, 0, 0);
                                     }
+                                    */
                                 }
                             }
                         }
                     }
 
                     // remain the same for objects
-                    for (i = numObjTypeShow['human']; i < numAvailableObjects; i++) {
+                    for (i = numObjTypeShow['paperdoll']; i < numAvailableObjects; i++) {
                         if (curAvailableObj[i].instance[0].depth0 == k) {
                             for (m = 0; m < curAvailableObj[i].numInstance; m++) {
                                 if (curAvailableObj[i].instance[m].present == true && 
@@ -1373,22 +1580,90 @@ function draw_scene() {
     ctx.fillStyle = 'grey';
     ctx.fillRect(0, 10, canvas_fix.width, 5);
 
-    ctx.drawImage(titleImg, CANVAS_COL, 15);
+}
+
+function draw_tab(x, y, w, h, rad) {
+    ctx.lineWidth = 2;
+
+    ctx.beginPath();
+    ctx.moveTo(x, y + h);           // Create a starting point
+    ctx.lineTo(x, y + rad);          // Create a horizontal line
+    ctx.arcTo(x, y, x + rad, y, rad); // Create an arc
+    ctx.lineTo(x + w - rad, y);         // Continue with vertical line
+    ctx.arcTo(x + w, y, x + w, y + rad, rad); // Create an arc
+    ctx.lineTo(x + w, y + h);         // Continue with vertical line
+    ctx.fill();
+    ctx.stroke();
+
 }
 
 function draw_clipart() {
     
-    var w = tabsImg.width;
-    var h = tabsImg.height / NUM_TABS;
+    var w = TAB_WIDTH * 4;
+    var h = TAB_HEIGHT;
 
-    ctx.drawImage(tabsImg, 0, h * selectedTabIdx, w, h, CLIPART_COL, CLIPART_ROW - TAB_HEIGHT + 10, w, h);
-    ctx.drawImage(objectBoxImg, 0, 0, objectBoxImg.width, objectBoxImg.height, CLIPART_COL, CLIPART_ROW, CLIPART_WIDTH, CLIPART_HEIGHT);
-    ctx.drawImage(attrBoxImg, 0, 0, attrBoxImg.width, attrBoxImg.height, ATTR_COL, ATTR_ROW, ATTR_WIDTH, ATTR_HEIGHT);
-    ctx.drawImage(attr2BoxImg, 0, 0, attr2BoxImg.width, attr2BoxImg.height, ATTR2_COL, ATTR2_ROW, ATTR2_WIDTH, ATTR2_HEIGHT);
+    // Draw the clipart tabs
+    ctx.fillStyle = "#B4B4B4";
+    draw_tab(CLIPART_COL, CLIPART_ROW, TAB_WIDTH, TAB_HEIGHT, 8);
+    draw_tab(CLIPART_COL + TAB_WIDTH, CLIPART_ROW, TAB_WIDTH, TAB_HEIGHT, 8);
+    draw_tab(CLIPART_COL + 2 * TAB_WIDTH, CLIPART_ROW, TAB_WIDTH, TAB_HEIGHT, 8);
+    draw_tab(CLIPART_COL + 3 * TAB_WIDTH, CLIPART_ROW, TAB_WIDTH, TAB_HEIGHT, 8);
+
+    ctx.lineWidth = 2;
+    ctx.fillStyle = "#D9D9D9";
+    ctx.fillRect(CLIPART_COL, CLIPART_ROW + TAB_HEIGHT, CLIPART_WIDTH, CLIPART_HEIGHT);
+    ctx.fillStyle = "#494646";
+    ctx.strokeRect(CLIPART_COL, CLIPART_ROW + TAB_HEIGHT + 1, CLIPART_WIDTH, CLIPART_HEIGHT - 1);
+
+    ctx.fillStyle = "#D9D9D9";
+    ctx.fillRect(ATTR_COL, ATTR_ROW, ATTR_WIDTH, ATTR_HEIGHT);
+    ctx.lineWidth = 2;
+    ctx.fillStyle = "#494646";
+    ctx.strokeRect(ATTR_COL, ATTR_ROW, ATTR_WIDTH, ATTR_HEIGHT);
+
+    // Draw the selected tab
+    ctx.fillStyle = "#D9D9D9";
+    draw_tab(CLIPART_COL + selectedTabIdx * TAB_WIDTH, CLIPART_ROW, TAB_WIDTH, TAB_HEIGHT + 2, 8);
+
+    // Add the tab labels
+    ctx.font = "18px Arial";
+    ctx.fillStyle = "#000000";
+    ctx.textAlign = "center";
+    
+    // SA: TODO Make this dependent on objectTypeOrder
+    ctx.fillText("People", CLIPART_COL + TAB_WIDTH / 2, CLIPART_ROW + TAB_HEIGHT / 2 + 8);
+    ctx.fillText("Animals", CLIPART_COL + 3 * TAB_WIDTH / 2, CLIPART_ROW + TAB_HEIGHT / 2 + 8);
+    ctx.fillText("Large", CLIPART_COL + 5 * TAB_WIDTH / 2, CLIPART_ROW + TAB_HEIGHT / 2 - 3);
+    ctx.fillText("objects", CLIPART_COL + 5 * TAB_WIDTH / 2, CLIPART_ROW + TAB_HEIGHT / 2 + 17);
+    ctx.fillText("Small", CLIPART_COL + 7 * TAB_WIDTH / 2, CLIPART_ROW + TAB_HEIGHT / 2  - 3);
+    ctx.fillText("objects", CLIPART_COL + 7 * TAB_WIDTH / 2, CLIPART_ROW + TAB_HEIGHT / 2 + 17);
 
     if (loadedObjectsAndBG == true) {
 
         curType = objectData[selectedTab].objectType;
+        curSelectedType = curType;
+
+        if (selectedIdx >= 0) {
+            curSelectedType = curAvailableObj[selectedIdx].instance[selectedIns].type;
+        }
+
+        ctx.fillStyle = "#000000";
+        ctx.font = "18px Arial";
+        ctx.lineWidth = 0;
+        ctx.textAlign = "center";
+        var attrLabel = "Type";
+        
+        if (curSelectedType == "animal") {
+            attrLabel = "Pose";
+        } else if (curSelectedType == "paperdoll") {
+            attrLabel = "Expression";
+        }
+        
+        ctx.fillStyle = "#D9D9D9";
+        draw_tab(ATTR_TYPE_COL, ATTR_TYPE_ROW, ATTR_TYPE_WIDTH, ATTR_TYPE_HEIGHT + 1, 8);
+
+        ctx.fillStyle = "#000000";
+        ctx.fillText(attrLabel, ATTR_TYPE_COL + ATTR_TYPE_WIDTH/2, ATTR_TYPE_ROW + 24);
     
         for (r = 0; r < NUM_CLIPART_VERT; r++) {
             for (c = 0; c < NUM_CLIPART_HORZ; c++) {
@@ -1401,7 +1676,7 @@ function draw_clipart() {
                         ctx.drawImage(selectedImg, 
                                       CLIPART_COL + c * CLIPART_SKIP +
                                       (CLIPART_BUFFER / 2) + CLIPART_OBJECT_OFFSET_COL, 
-                                      CLIPART_ROW + r * CLIPART_SKIP +
+                                      CLIPART_ROW + TAB_HEIGHT + r * CLIPART_SKIP +
                                       (CLIPART_BUFFER / 2) + CLIPART_OBJECT_OFFSET_ROW, 
                                       CLIPART_SKIP, CLIPART_SKIP);
                     }
@@ -1419,7 +1694,7 @@ function draw_clipart() {
                             ctx.drawImage(noLeftImg, 
                                           CLIPART_COL + c * CLIPART_SKIP +
                                           (CLIPART_BUFFER / 2) + CLIPART_OBJECT_OFFSET_COL, 
-                                          CLIPART_ROW + r * CLIPART_SKIP +
+                                          CLIPART_ROW + TAB_HEIGHT + r * CLIPART_SKIP +
                                           (CLIPART_BUFFER / 2) + CLIPART_OBJECT_OFFSET_ROW, 
                                           CLIPART_SKIP, CLIPART_SKIP);
                             continue;
@@ -1444,14 +1719,15 @@ function draw_clipart() {
                         var rowOffset = (CLIPART_SIZE - newH) / 2 + CLIPART_BUFFER / 2;
                         var colOffset = (CLIPART_SIZE - newW) / 2 + CLIPART_BUFFER / 2;
                         var xo = CLIPART_COL + c * CLIPART_SKIP + CLIPART_BUFFER + colOffset;
-                        var yo = CLIPART_ROW + r * CLIPART_SKIP + CLIPART_BUFFER + rowOffset;
+                        var yo = CLIPART_ROW + TAB_HEIGHT + r * CLIPART_SKIP + CLIPART_BUFFER + rowOffset;
 
                         ctx.drawImage(curPeopleExprImgs[idx][indexCR], 0, 0, w, h, 
                                       Math.floor(xo) + CLIPART_OBJECT_OFFSET_COL, 
                                       Math.floor(yo) + CLIPART_OBJECT_OFFSET_ROW, 
                                       newW, newH);
+                        
                         xo = CLIPART_COL + (c + 1) * CLIPART_SKIP - 1;
-                        yo = CLIPART_ROW + (r + 1) * CLIPART_SKIP - locationOffset;
+                        yo = CLIPART_ROW + TAB_HEIGHT + (r + 1) * CLIPART_SKIP - locationOffset;
                         ctx.drawImage(numBorderImg,
                                       Math.floor(xo - Size + 1) + CLIPART_OBJECT_OFFSET_COL, 
                                       Math.floor(yo - Size + 1) + CLIPART_OBJECT_OFFSET_ROW, 
@@ -1477,7 +1753,7 @@ function draw_clipart() {
                             ctx.drawImage(noLeftImg, 
                                           CLIPART_COL + c * CLIPART_SKIP +
                                           (CLIPART_BUFFER / 2) + CLIPART_OBJECT_OFFSET_COL, 
-                                          CLIPART_ROW + r * CLIPART_SKIP +
+                                          CLIPART_ROW + TAB_HEIGHT + r * CLIPART_SKIP +
                                           (CLIPART_BUFFER / 2) + CLIPART_OBJECT_OFFSET_ROW, 
                                           CLIPART_SKIP, CLIPART_SKIP);
                             continue;
@@ -1502,14 +1778,15 @@ function draw_clipart() {
                         var rowOffset = (CLIPART_SIZE - newH) / 2 + CLIPART_BUFFER / 2;
                         var colOffset = (CLIPART_SIZE - newW) / 2 + CLIPART_BUFFER / 2;
                         var xo = CLIPART_COL + c * CLIPART_SKIP + CLIPART_BUFFER + colOffset;
-                        var yo = CLIPART_ROW + r * CLIPART_SKIP + CLIPART_BUFFER + rowOffset;
+                        var yo = CLIPART_ROW + TAB_HEIGHT + r * CLIPART_SKIP + CLIPART_BUFFER + rowOffset;
 
                         ctx.drawImage(curClipartImgs[idx][indexCR], 0, 0, w, h, 
                                       Math.floor(xo) + CLIPART_OBJECT_OFFSET_COL, 
                                       Math.floor(yo) + CLIPART_OBJECT_OFFSET_ROW, 
                                       newW, newH);
+                        
                         xo = CLIPART_COL + (c + 1) * CLIPART_SKIP - 1;
-                        yo = CLIPART_ROW + (r + 1) * CLIPART_SKIP - locationOffset;
+                        yo = CLIPART_ROW + TAB_HEIGHT + (r + 1) * CLIPART_SKIP - locationOffset;
                         ctx.drawImage(numBorderImg, 
                                       Math.floor(xo - Size + 1) + CLIPART_OBJECT_OFFSET_COL, 
                                       Math.floor(yo - Size + 1) + CLIPART_OBJECT_OFFSET_ROW, 
@@ -1522,7 +1799,7 @@ function draw_clipart() {
                         var optionsW = ctx.measureText("0").width;
                         var optionsH = Size;
                         xo = CLIPART_COL + (c + 1) * CLIPART_SKIP;
-                        yo = CLIPART_ROW + (r + 1) * CLIPART_SKIP;
+                        yo = CLIPART_ROW + TAB_HEIGHT + (r + 1) * CLIPART_SKIP;
                         ctx.fillText(left, 
                                      Math.floor(xo - optionsW) + CLIPART_OBJECT_OFFSET_COL, 
                                      Math.floor(yo - optionsH) + CLIPART_OBJECT_OFFSET_ROW);
@@ -1551,55 +1828,58 @@ function draw_clipart() {
         
         if (selectedIdx != notUsed) {
             if (selectedIdx < numObjTypeShow['human']) {
-                // people
-                for (i = 0; i < curAvailableObj[selectedIdx].instance[0].numPose; i++) {
-                    // just to show it is selected
-                    if (i == curAvailableObj[selectedIdx].instance[selectedIns].poseID) {
-                        ctx.drawImage(selectedImg, 
-                                    ATTR_COL + i * CLIPART_SKIP + CLIPART_BUFFER / 2, 
-                                    ATTR_ROW + CLIPART_BUFFER, 
-                                    CLIPART_SKIP, CLIPART_SKIP);
+                                // people
+                if (selectedAttributeType == 0) { // Pose SA: TODO UPDATE
+                    for (i = 0; i < curAvailableObj[selectedIdx].instance[0].numPose; i++) {
+                        // just to show it is selected
+                        if (i == curAvailableObj[selectedIdx].instance[selectedIns].poseID) {
+                            ctx.drawImage(selectedImg, 
+                                        ATTR_COL + i * CLIPART_SKIP + CLIPART_BUFFER / 2, 
+                                        ATTR_ROW + CLIPART_BUFFER, 
+                                        CLIPART_SKIP, CLIPART_SKIP);
+                        }
+                        var indexP = i * curAvailableObj[selectedIdx].instance[0].numExpression
+
+                        var w = curClipartImgs[selectedIdx][indexP].width;
+                        var h = curClipartImgs[selectedIdx][indexP].height;
+
+                        var newW = Math.min(w, CLIPART_SIZE * w / Math.max(w, h));
+                        var newH = Math.min(h, CLIPART_SIZE * h / Math.max(w, h));
+
+                        var rowOffset = (CLIPART_SIZE - newH) / 2 + CLIPART_BUFFER / 2;
+                        var colOffset = (CLIPART_SIZE - newW) / 2 + CLIPART_BUFFER / 2;
+
+                        var xo = ATTR_COL + i * CLIPART_SKIP + CLIPART_BUFFER + colOffset;
+                        var yo = ATTR_ROW + CLIPART_BUFFER + rowOffset;
+
+                        // only draw the first one
+                        ctx.drawImage(curClipartImgs[selectedIdx][indexP], 0, 0, w, h, 
+                                    Math.floor(xo), Math.floor(yo), newW, newH);
                     }
-                    var indexP = i * curAvailableObj[selectedIdx].instance[0].numExpression
-
-                    var w = curClipartImgs[selectedIdx][indexP].width;
-                    var h = curClipartImgs[selectedIdx][indexP].height;
-
-                    var newW = Math.min(w, CLIPART_SIZE * w / Math.max(w, h));
-                    var newH = Math.min(h, CLIPART_SIZE * h / Math.max(w, h));
-
-                    var rowOffset = (CLIPART_SIZE - newH) / 2 + CLIPART_BUFFER / 2;
-                    var colOffset = (CLIPART_SIZE - newW) / 2 + CLIPART_BUFFER / 2;
-
-                    var xo = ATTR_COL + i * CLIPART_SKIP + CLIPART_BUFFER + colOffset;
-                    var yo = ATTR_ROW + CLIPART_BUFFER + rowOffset;
-
-                    // only draw the first one
-                    ctx.drawImage(curClipartImgs[selectedIdx][indexP], 0, 0, w, h, 
-                                Math.floor(xo), Math.floor(yo), newW, newH);
-                }
-                // then expressions
-                for (i = 1; i < curAvailableObj[selectedIdx].instance[0].numExpression; i++) {
-                    // just to show it is selected
-                    if (i == curAvailableObj[selectedIdx].instance[selectedIns].expressionID)
-                        ctx.drawImage(selectedImg, 
-                                    ATTR2_COL + (i - 1) * CLIPART_SKIP + CLIPART_BUFFER / 2, 
-                                    ATTR2_ROW + CLIPART_BUFFER, 
-                                    CLIPART_SKIP, CLIPART_SKIP);
-
-                    var w = curPeopleExprImgs[selectedIdx][i].width;
-                    var h = curPeopleExprImgs[selectedIdx][i].height;
-                    var newW = Math.min(w, CLIPART_SIZE * w / Math.max(w, h));
-                    var newH = Math.min(h, CLIPART_SIZE * h / Math.max(w, h));
-
-                    var rowOffset = (CLIPART_SIZE - newH) / 2 + CLIPART_BUFFER / 2;
-                    var colOffset = (CLIPART_SIZE - newW) / 2 + CLIPART_BUFFER / 2;
-
-                    var xo = ATTR2_COL + (i - 1) * CLIPART_SKIP + CLIPART_BUFFER + colOffset;
-                    var yo = ATTR2_ROW + CLIPART_BUFFER + rowOffset;
-
-                    // only draw the first one
-                    ctx.drawImage(curPeopleExprImgs[selectedIdx][i], 0, 0, w, h, Math.floor(xo), Math.floor(yo), newW, newH);
+                    // SA: TODO Good to remove?
+                    // then expressions
+//                     for (i = 1; i < curAvailableObj[selectedIdx].instance[0].numExpression; i++) {
+//                         // just to show it is selected
+//                         if (i == curAvailableObj[selectedIdx].instance[selectedIns].expressionID)
+//                             ctx.drawImage(selectedImg, 
+//                                         ATTR2_COL + (i - 1) * CLIPART_SKIP + CLIPART_BUFFER / 2, 
+//                                         ATTR2_ROW + CLIPART_BUFFER, 
+//                                         CLIPART_SKIP, CLIPART_SKIP);
+// 
+//                         var w = curPeopleExprImgs[selectedIdx][i].width;
+//                         var h = curPeopleExprImgs[selectedIdx][i].height;
+//                         var newW = Math.min(w, CLIPART_SIZE * w / Math.max(w, h));
+//                         var newH = Math.min(h, CLIPART_SIZE * h / Math.max(w, h));
+// 
+//                         var rowOffset = (CLIPART_SIZE - newH) / 2 + CLIPART_BUFFER / 2;
+//                         var colOffset = (CLIPART_SIZE - newW) / 2 + CLIPART_BUFFER / 2;
+// 
+//                         var xo = ATTR2_COL + (i - 1) * CLIPART_SKIP + CLIPART_BUFFER + colOffset;
+//                         var yo = ATTR2_ROW + CLIPART_BUFFER + rowOffset;
+// 
+//                         // only draw the first one
+//                         ctx.drawImage(curPeopleExprImgs[selectedIdx][i], 0, 0, w, h, Math.floor(xo), Math.floor(yo), newW, newH);
+//                     }
                 }
             } else { // Not human
                 for (i = 0; i < curAvailableObj[selectedIdx].instance[0].numPose; i++) {
@@ -1631,6 +1911,17 @@ function draw_clipart() {
 
 function draw_buttons() {
     
+    ctx.fillStyle = 'grey';
+    ctx.fillRect(0, 10, canvas_fix.width, 5);
+
+
+    ctx.fillStyle = "#000000";
+    ctx.font = "20px Arial";
+    ctx.fillText("Size", SCALE_COL - 40, SCALE_ROW + 20);
+    ctx.fillText("Flip", FLIP_COL - 30, SCALE_ROW + 20);
+//   ctx.fillText("Flip" + numObjTypeShow['animal'], FLIP_COL - 40, FLIP_ROW);
+//   numObjTypeShow['paperdoll'];
+    
     buttonW = buttonImg.width / 2;
     buttonH = buttonImg.height / 5;
     w = buttonW;
@@ -1643,12 +1934,12 @@ function draw_buttons() {
         var hSlide = slideBarImg.height;
 
         ctx.drawImage(slideBarImg, 0, 0, wSlide, hSlide, 
-                      CANVAS_COL + SCALE_COL, 
+                      SCALE_COL, 
                       SCALE_ROW + (SCALE_HEIGHT - hSlide) / 2, 
                       SCALE_WIDTH, hSlide);
         if (selectedIdx != notUsed && loadedObjectsAndBG == true) {
             ctx.drawImage(slideMarkImg, 0, 0, wMark, hMark, 
-                          CANVAS_COL + SCALE_COL + 
+                          SCALE_COL + 
                           curAvailableObj[selectedIdx].instance[selectedIns].z * (SCALE_WIDTH / (numZSize - 1)) - 
                           wMark / 2, 
                           SCALE_ROW, wMark, SCALE_HEIGHT);
@@ -1658,17 +1949,17 @@ function draw_buttons() {
             if (selectedIdx != notUsed && loadedObjectsAndBG == true) {
                 if (i == curAvailableObj[selectedIdx].instance[selectedIns].flip) {
                     ctx.drawImage(buttonImg, w, (i + 3) * h, w, h, 
-                                  i * w + CANVAS_COL + FLIP_COL, 
+                                  i * w + FLIP_COL, 
                                   FLIP_ROW, w, h);
                 }
                 else {
                     ctx.drawImage(buttonImg, 0, (i + 3) * h, w, h, 
-                                  i * w + CANVAS_COL + FLIP_COL, 
+                                  i * w + FLIP_COL, 
                                   FLIP_ROW, w, h);
                 }
             } else {
                 ctx.drawImage(buttonImg, 0, (i + 3) * h, w, h, 
-                              i * w + CANVAS_COL + FLIP_COL, 
+                              i * w + FLIP_COL, 
                               FLIP_ROW, w, h);
             }
         }
@@ -1715,21 +2006,30 @@ function mouseup_canvas(event) {
             draw_canvas();
         }
     }
-
-    ScaleSliderDown = false;
+    
+    attrSelectorDown = false;
+    flipDown = false;
+    scaleSliderDown = false;
 }
 
 function mousedown_canvas(event) {
     
+    var redrawCanvas = false;
+        
     // XL: Handle bug related to user moving outside of canvas
     // and letting object be lost to the void.
-    if ( moveClipart == true ) {
+    if (moveClipart == true) {
         mouseup_canvas(event);
     }
     
+    if (selectPaperdollPose == true) {
+        selectPaperdollPose = false;
+        redrawCanvas = true;
+    }
+
     var ev = event || window.event;
 
-    ScaleSliderDown = false;
+    scaleSliderDown = false;
 
     if (ev.pageX) {
         cx = ev.pageX;
@@ -1752,9 +2052,25 @@ function mousedown_canvas(event) {
             cy += document.body.scrollTop;
         }
     }
+    
+    // Select attribute type - not currently used
+/*  var attrTypeX = cx - ATTR_TYPE_COL - canvas_fix.offsetLeft;
+    var attrTypeY = cy - ATTR_TYPE_ROW - canvas_fix.offsetTop;
+
+    if (attrTypeY > 0 && attrTypeY < ATTR_TYPE_HEIGHT && loadedObjectsAndBG == true)
+    {
+        var attrSelectedIdx = Math.floor(attrTypeX / ATTR_TYPE_WIDTH);
+        if (attrSelectedIdx >= 0 && attrSelectedIdx <= 2)
+        {
+            selectedAttributeType = attrSelectedIdx;
+            redrawCanvas = true;
+        }
+    }
+*/
+
     // Select clipart object type using tabs
     var tabsX = cx - CLIPART_COL - canvas_fix.offsetLeft;
-    var tabsY = cy - (CLIPART_ROW - TAB_HEIGHT) - canvas_fix.offsetTop;
+    var tabsY = cy - (CLIPART_ROW) - canvas_fix.offsetTop;
 
     if (tabsX < CLIPART_WIDTH && tabsX > 0 && 
         tabsY < TAB_HEIGHT && tabsY > 0 &&
@@ -1764,14 +2080,16 @@ function mousedown_canvas(event) {
         selectedTab = objectTypeOrder[selectedTabIdx];
         tabPage = 0;
         //log_user_data("tab"); // SA: TODO Add?
-        draw_canvas();
+        redrawCanvas = true;
     }
 
     // Select clipart objects to add to canvas
     var clipartX = cx - CLIPART_COL - 
-                   canvas_fix.offsetLeft - CLIPART_OBJECT_OFFSET_COL;
+                   canvas_fix.offsetLeft - 
+                   CLIPART_OBJECT_OFFSET_COL;
     var clipartY = cy - CLIPART_ROW - 
-                   canvas_fix.offsetTop - CLIPART_OBJECT_OFFSET_ROW;
+                   canvas_fix.offsetTop - TAB_HEIGHT - 
+                   CLIPART_OBJECT_OFFSET_ROW;
 
     if (clipartX < CLIPART_SKIP * NUM_CLIPART_HORZ && clipartX > 0 && 
             clipartY < CLIPART_SKIP * NUM_CLIPART_VERT && clipartY > 0 &&
@@ -1787,6 +2105,11 @@ function mousedown_canvas(event) {
     
         if (selectedIdx < numObjTypeShow[objectTypeOrder[selectedTabIdx]]) {
             selectedIdx += clipartIdxStart[selectedTabIdx];
+            
+            if (selectedIdx < numObjTypeShow['paperdoll']) {
+                selectPaperdollPose = true;
+                selectedPart = 'Torso';
+            }
 
             if (curAvailableObj[selectedIdx].smallestUnusedInstanceIdx == curAvailableObj[selectedIdx].numInstance) {
                 // deselect it
@@ -1810,7 +2133,7 @@ function mousedown_canvas(event) {
                 wasOnCanvas = false;
                 moveClipart = true;
                 // log_user_data("Transition to scene?"); // SA: TODO Add?
-                draw_canvas();
+                redrawCanvas = true;
             }
         } else {
             // If the user clicks in the select object part of menu
@@ -1867,29 +2190,35 @@ function mousedown_canvas(event) {
 
     if (selectedIdx != notUsed &&
             loadedObjectsAndBG == true) {
-        var numAttr = curAvailableObj[selectedIdx].instance[0].numPose;
-        
-        if (attrX < CLIPART_SKIP * numAttr && attrX > 0 && attrY < CLIPART_SKIP && attrY > 0) {
-            curAvailableObj[selectedIdx].instance[selectedIns].poseID = Math.floor(attrX / CLIPART_SKIP);
-            log_user_data("pose");
-            draw_canvas();
+        if (selectedAttributeType == 0) {
+            var numAttr = curAvailableObj[selectedIdx].instance[0].numPose;
+            if (numAttr > MAX_NUM_ATTR) {
+                numAttr = MAX_NUM_ATTR;
+            }
+
+            if (attrX < CLIPART_SKIP * numAttr && attrX > 0 && attrY < CLIPART_SKIP && attrY > 0) {
+                curAvailableObj[selectedIdx].instance[selectedIns].poseID = Math.floor(attrX / CLIPART_SKIP);
+                log_user_data("pose");
+                redrawCanvas = true;
+                attrSelectorDown = true;
+            }
         }
     }
 
-    // Select the 2nd clipart attributes for people expressions
-    var attr2X = cx - ATTR2_COL - canvas_fix.offsetLeft;
-    var attr2Y = cy - ATTR2_ROW - canvas_fix.offsetTop;
-
-    if (selectedIdx != notUsed &&
-            loadedObjectsAndBG == true) {
-        var numAttr = curAvailableObj[selectedIdx].instance[0].numExpression; // the total number
-
-        if (attr2X < CLIPART_SKIP * (numAttr - 1) && attr2X > 0 && attr2Y < CLIPART_SKIP && attr2Y > 0) {
-            curAvailableObj[selectedIdx].instance[selectedIns].expressionID = Math.floor(attr2X / CLIPART_SKIP) + 1; 
-            log_user_data("expression");
-            draw_canvas();
-        }
-    }
+//     // Select the 2nd clipart attributes for people expressions
+//     var attr2X = cx - ATTR2_COL - canvas_fix.offsetLeft;
+//     var attr2Y = cy - ATTR2_ROW - canvas_fix.offsetTop;
+// 
+//     if (selectedIdx != notUsed &&
+//             loadedObjectsAndBG == true) {
+//         var numAttr = curAvailableObj[selectedIdx].instance[0].numExpression; // the total number
+// 
+//         if (attr2X < CLIPART_SKIP * (numAttr - 1) && attr2X > 0 && attr2Y < CLIPART_SKIP && attr2Y > 0) {
+//             curAvailableObj[selectedIdx].instance[selectedIns].expressionID = Math.floor(attr2X / CLIPART_SKIP) + 1; 
+//             log_user_data("expression");
+//             draw_canvas();
+//         }
+//     }
 
     // Select clipart on the canvas
     var canvasX = cx - CANVAS_COL - canvas_fix.offsetLeft;
@@ -1899,6 +2228,10 @@ function mousedown_canvas(event) {
         if (canvasX < CANVAS_WIDTH && canvasX > 0 && 
             canvasY < CANVAS_HEIGHT && canvasY > 0) {
 
+            if (selectedIdx != notUsed) {
+                redrawCanvas = true;
+            }
+            
             selectedIdx = notUsed;
             selectedIns = notUsed;
 
@@ -1917,29 +2250,63 @@ function mousedown_canvas(event) {
                             if ( curAvailableObj[i].instance[0].depth0 == k && curAvailableObj[i].instance[0].depth1 == l) {
                                 for (m = 0; m < curAvailableObj[i].numInstance; m++) {
                                     if (curAvailableObj[i].instance[m].present == true && curAvailableObj[i].instance[m].z == j) {
-                                        var scale = curZScale[curAvailableObj[i].instance[m].z];
+                                        
+                                        if (i < numObjTypeShow['paperdoll']) {
+                                            // Handle the paperdolls in a separate function
+                                            check_paperdoll_selection(canvasX, canvasY, i, m);
+                                        } else {
+                                            var scale = curZScale[curAvailableObj[i].instance[m].z];
+                                            var w0 = curClipartImgs[i][curAvailableObj[i].instance[m].poseID].width;
+                                            var h0 = curClipartImgs[i][curAvailableObj[i].instance[m].poseID].height;
+                                            var w = Math.floor(scale * w0);
+                                            var h = Math.floor(scale * h0);
 
-                                        // so it assumes all clip art images are of the same size??
-                                        var w = scale * curClipartImgs[i][0].width;
-                                        var h = scale * curClipartImgs[i][0].height;
-                                        var rowOffset = -h / 2;
-                                        var colOffset = -w / 2;
+                                            var rowOffset = -h / 2;
+                                            var colOffset = -w / 2;
 
-                                        var x = curAvailableObj[i].instance[m].x + colOffset;
-                                        var y = curAvailableObj[i].instance[m].y + rowOffset;
-                                        if (canvasX >= x && canvasX < x + w && canvasY >= y && canvasY < y + h) {
-                                            selectedIdx = i;
-                                            selectedIns = m;
-                                            // log_user_data("mousedown_selected"); // Doesn't seem necessary
+                                            var x = curAvailableObj[i].instance[m].x + colOffset;
+                                            var y = curAvailableObj[i].instance[m].y + rowOffset;
+
+                                            if (canvasX >= x && canvasX < x + w && 
+                                                canvasY >= y && canvasY < y + h) {
+
+                                                // Make sure the piece of clipart is actually visible below the mouse click
+                                                var newCanvas = document.createElement('canvas');
+                                                newCanvas.width = w;
+                                                newCanvas.height = h;
+                                                var c = newCanvas.getContext("2d");
+                                                c.drawImage(curClipartImgs[i][curAvailableObj[i].instance[m].poseID],
+                                                    0, 0, curClipartImgs[i][curAvailableObj[i].instance[m].poseID].width, curClipartImgs[i][curAvailableObj[i].instance[m].poseID].height,
+                                                    0, 0, w, h);
+
+                                                // create a new pixel array
+                                                imageData = c.getImageData(0, 0, w, h);
+                                                var imgX = Math.floor(canvasX - x);
+                                                if (curAvailableObj[i].instance[m].flip == 1)
+                                                    imgX = w - 1 - imgX;
+                                                var imgY = Math.floor(canvasY - y);
+                                                var alpha = imageData.data[(imgX + imgY * w) * 4 + 3];
+
+                                                // Is the clipart visible?
+                                                if (alpha > 0) {
+                                                    mouse_offset_X = (x + w / 2) - canvasX;
+                                                    mouse_offset_Y = (y + h / 2) - canvasY;
+
+                                                    selectedIdx = i;
+                                                    selectedIns = m;
+                                                }
+                                                // log_user_data("mousedown_selected"); // Doesn't seem necessary
                                             
-                                            mouse_offset_X = (x + w / 2) - canvasX;
-                                            mouse_offset_Y = (y + h / 2) - canvasY;
-                                            
-                                            // SA: TODO Should clicking on a selected object (on canvas) change tab?
-                                            // Uncommenting below will enable that feature.
-                                            // selectedTab = curAvailableObj[selectedIdx].instance[selectedIns].type;
-                                            // selectedTabIdx = objectTypeToIdx[selectedTab];
-                                            // log_user_data("tab"); // SA: TODO Add?
+                                                // SA: TODO Should this be here?
+                                                mouse_offset_X = (x + w / 2) - canvasX;
+                                                mouse_offset_Y = (y + h / 2) - canvasY;
+
+                                                // SA: TODO Should clicking on a selected object (on canvas) change tab?
+                                                // Uncommenting below will enable that feature.
+                                                // selectedTab = curAvailableObj[selectedIdx].instance[selectedIns].type;
+                                                // selectedTabIdx = objectTypeToIdx[selectedTab];
+                                                // log_user_data("tab"); // SA: TODO Add?
+                                            }
                                         }
                                     }
                                 }
@@ -1948,7 +2315,7 @@ function mousedown_canvas(event) {
                     }
                 }
             }
-
+            
             if (selectedIdx >= 0) {
                 if (moveClipart === true) {
                     curAvailableObj[selectedIdx].instance[selectedIns].x = canvasX + mouse_offset_X;
@@ -1961,17 +2328,15 @@ function mousedown_canvas(event) {
                     // log_user_data("mousedown_else"); // Doesn't seem necessary?
                     moveClipart = true;
                 }
-                draw_canvas();
+                redrawCanvas = true;
             }
         }
 
         // Scale clipart objects
-        var scaleSliderX = cx - CANVAS_COL - canvas_fix.offsetLeft - SCALE_COL;
+        var scaleSliderX = cx - canvas_fix.offsetLeft - SCALE_COL;
         var scaleSliderY = cy - canvas_fix.offsetTop - SCALE_ROW;
 
-        if (scaleSliderX >= 0 && scaleSliderX < SCALE_WIDTH && 
-            scaleSliderY >= CANVAS_COL - SCALE_COL && scaleSliderY < SCALE_HEIGHT) {
-            
+        if (scaleSliderX >= 0 && scaleSliderX < SCALE_WIDTH && scaleSliderY >= 0 && scaleSliderY < SCALE_HEIGHT) {
             if (selectedIdx != notUsed) {
                 var position = Math.floor(scaleSliderX / (SCALE_WIDTH / (2 * (numZSize - 1))));
                 position += 1;
@@ -1979,28 +2344,96 @@ function mousedown_canvas(event) {
                 position = Math.floor(position);
                 curAvailableObj[selectedIdx].instance[selectedIns].z = Math.max(0, Math.min(numZSize - 1, position));
     //             log_user_data("scale"); // Isn't needed, gets logged via mouse-up
-                draw_canvas();
-                ScaleSliderDown = true;
+                redrawCanvas = true;
+                scaleSliderDown = true;
             }
         }
 
         // Flip clipart objects
-        var flipButtonX = cx - CANVAS_COL - canvas_fix.offsetLeft - FLIP_COL;
+        var flipButtonX = cx - canvas_fix.offsetLeft - FLIP_COL;
         var flipButtonY = cy - canvas_fix.offsetTop - FLIP_ROW;
 
-        if (flipButtonX >= 0 && flipButtonX < buttonW * 2 && 
-            flipButtonY >= 0 && flipButtonY < buttonH) {
-            
+        if (flipButtonX >= 0 && flipButtonX < buttonW * 2 && flipButtonY >= 0 && flipButtonY < buttonH) {
             if (selectedIdx != notUsed) {
                 curAvailableObj[selectedIdx].instance[selectedIns].flip = Math.floor(flipButtonX / buttonW);
                 log_user_data("flip");
-                draw_canvas();
+                redrawCanvas = true;
+                flipDown = true;
             }
         }
     } else {
         console.log("Should I be here?");
 //         debugger;
         load_obj_category_data();
+    }
+
+    if (redrawCanvas == true) {
+        draw_canvas();
+    }
+}
+
+
+function check_paperdoll_selection(canvasX, canvasY, objIdx, instIdx) {
+    var paperdoll = curAvailableObj[objIdx].instance[instIdx];
+    var numBodyParts = paperdoll.body.length;
+    var scale = paperdoll.globalScale * curZScale[paperdoll.z];
+
+    for (partIdx = 0; partIdx < numBodyParts; partIdx++) {
+        var w = curPaperdollPartImgs[objIdx][partIdx].width;
+        var h = curPaperdollPartImgs[objIdx][partIdx].height;
+        var ws = Math.floor(scale * curPaperdollPartImgs[objIdx][partIdx].width);
+        var hs = Math.floor(scale * curPaperdollPartImgs[objIdx][partIdx].height);
+
+        var x0 = canvasX / scale - paperdoll.paperdollX[partIdx];
+        var y0 = canvasY / scale - paperdoll.paperdollY[partIdx];
+
+        var rotMatrix = [];
+        rotMatrix.push(Math.cos(-paperdoll.paperdollGRotation[partIdx]));
+        rotMatrix.push(-Math.sin(-paperdoll.paperdollGRotation[partIdx]));
+        rotMatrix.push(Math.sin(-paperdoll.paperdollGRotation[partIdx]));
+        rotMatrix.push(Math.cos(-paperdoll.paperdollGRotation[partIdx]));
+
+        var x1 = rotMatrix[0] * x0 + rotMatrix[1] * y0 + paperdoll.body[partIdx].childX;
+        var y1 = rotMatrix[2] * x0 + rotMatrix[3] * y0 + paperdoll.body[partIdx].childY;
+
+        x1 *= scale;
+        y1 *= scale;
+
+        if (x1 >= 0 && x1 < ws && y1 >= 0 && y1 < hs) {
+
+            // Make sure the piece of clipart is actually visible below the mouse click
+            var newCanvas = document.createElement('canvas');
+            newCanvas.width = ws;
+            newCanvas.height = hs;
+            var c = newCanvas.getContext("2d");
+            c.drawImage(curPaperdollPartImgs[objIdx][partIdx],
+                        0, 0, w, h,
+                        0, 0, ws, hs);
+
+            // create a new pixel array
+            imageData = c.getImageData(0, 0, ws, hs);
+            var imgX = Math.floor(x1);
+            if (paperdoll.flip == 1) {
+                imgX = ws - 1 - imgX;
+            }
+            var imgY = Math.floor(y1);
+            var alpha = imageData.data[(imgX + imgY * ws) * 4 + 3];
+
+            // If the piece of clipart visible?
+            if (alpha > 0) {
+                selectedIdx = objIdx;
+                selectedIns = instIdx;
+                if (paperdoll.body[partIdx].clickTransfer == 'null') {
+                    selectedPart = paperdoll.body[partIdx].part;
+                } else {
+                    selectedPart = paperdoll.body[partIdx].clickTransfer;
+                }
+
+                mouse_offset_X = (curAvailableObj[objIdx].instance[instIdx].x) - canvasX;
+                mouse_offset_Y = (curAvailableObj[objIdx].instance[instIdx].y) - canvasY;
+                selectPaperdollPose = true;
+            }
+        }
     }
 }
 
@@ -2052,16 +2485,76 @@ function mousemove_canvas(event) {
         wasOnCanvas = true;
 
         if (selectedIdx != notUsed && moveClipart === true) {
-            curAvailableObj[selectedIdx].instance[selectedIns].x = canvasX + mouse_offset_X;
-            curAvailableObj[selectedIdx].instance[selectedIns].y = canvasY + mouse_offset_Y;
-            curAvailableObj[selectedIdx].instance[selectedIns].present = true;
-//             log_user_data("mousemove_select"); // Changes too frequently with mouse movement
-            draw_canvas();
+            if (selectedIdx < numObjTypeShow['paperdoll']) {
+                curAvailableObj[selectedIdx].instance[selectedIns].present = true;
+                var paperdollInst = curAvailableObj[selectedIdx].instance[selectedIns];
+                
+                if (selectedPart == 'Torso') {
+                    paperdollInst.x = canvasX + mouse_offset_X;
+                    paperdollInst.y = canvasY + mouse_offset_Y;
+                    paperdollInst.present = true;
+                } else {
+                    if (selectedPart == 'Head') {
+                        var x0 = canvasX - paperdollInst.x;
+                        var y0 = canvasY - paperdollInst.y;
+
+                        paperdollInst.paperdollGRotation[0] = Math.atan2(x0, -y0);
+                    } else {
+                        selectedPartIdx = paperdollInst.partIdxList[selectedPart];
+                        selectedParentIdx = paperdollInst.partIdxList[paperdollInst.body[selectedPartIdx].parent];
+
+                        var scale = paperdollInst.globalScale * curZScale[paperdollInst.z];
+                        var x0 = canvasX/scale - paperdollInst.paperdollX[selectedPartIdx];
+                        var y0 = canvasY/scale - paperdollInst.paperdollY[selectedPartIdx];
+
+                        if (paperdollInst.flip == 1) {
+                            paperdollInst.paperdollLRotation[selectedPartIdx] = -Math.atan2(-x0, y0);
+
+                            if (paperdollInst.parent != 'null') {
+                                paperdollInst.paperdollLRotation[selectedPartIdx] += paperdollInst.paperdollGRotation[selectedParentIdx];
+                            }
+                        } else {
+                            paperdollInst.paperdollLRotation[selectedPartIdx] = Math.atan2(-x0, y0);
+
+                            if (paperdollInst.parent != 'null') {
+                                paperdollInst.paperdollLRotation[selectedPartIdx] -= paperdollInst.paperdollGRotation[selectedParentIdx];
+                            }
+                        }
+                    }
+                }
+                draw_canvas();
+            } else {
+                curAvailableObj[selectedIdx].instance[selectedIns].x = canvasX + mouse_offset_X;
+                curAvailableObj[selectedIdx].instance[selectedIns].y = canvasY + mouse_offset_Y;
+                curAvailableObj[selectedIdx].instance[selectedIns].present = true;
+    //             log_user_data("mousemove_select"); // Changes too frequently with mouse movement
+                draw_canvas();
+            }
         }
     }
 
-    if (ScaleSliderDown == true) {
-        var scaleSliderX = cx - CANVAS_COL - canvas_fix.offsetLeft - SCALE_COL;
+    if (attrSelectorDown == true) {
+        var attrX = cx - ATTR_COL - canvas_fix.offsetLeft;
+        var attrY = cy - ATTR_ROW - canvas_fix.offsetTop;
+
+        if (selectedIdx != notUsed &&
+                loadedObjectsAndBG == true) {
+            if (selectedAttributeType == 0) {
+                var numAttr = curAvailableObj[selectedIdx].instance[0].numPose;
+                if (numAttr > MAX_NUM_ATTR)
+                    numAttr = MAX_NUM_ATTR;
+
+                if (attrX < CLIPART_SKIP * numAttr && attrX > 0 && attrY < CLIPART_SKIP && attrY > 0) {
+                    curAvailableObj[selectedIdx].instance[selectedIns].poseID = Math.floor(attrX / CLIPART_SKIP);
+                    log_user_data("pose");
+                    draw_canvas();
+                }
+            }
+        }
+    }
+
+    if (scaleSliderDown == true) {
+        var scaleSliderX = cx - canvas_fix.offsetLeft - SCALE_COL;
         var scaleSliderY = cy - canvas_fix.offsetTop - SCALE_ROW;
 
         if (selectedIdx != notUsed && loadedObjectsAndBG == true) {
@@ -2072,6 +2565,21 @@ function mousemove_canvas(event) {
             curAvailableObj[selectedIdx].instance[selectedIns].z = Math.max(0, Math.min(numZSize - 1, position));
             // log_user_data("zScale slider movement"); // Doesn't seem necessary
             draw_canvas();
+        }
+    }
+
+    if (flipDown == true) {
+        var flipButtonX = cx - canvas_fix.offsetLeft - FLIP_COL;
+        var flipButtonY = cy - canvas_fix.offsetTop - FLIP_ROW;
+
+        if (flipButtonX >= 0 && flipButtonX < buttonW * 2 && 
+            flipButtonY >= 0 && flipButtonY < buttonH) {
+            
+            if (selectedIdx != notUsed) {
+                curAvailableObj[selectedIdx].instance[selectedIns].flip = Math.floor(flipButtonX / buttonW);
+                log_user_data("flip");
+                draw_canvas();
+            }
         }
     }
 }

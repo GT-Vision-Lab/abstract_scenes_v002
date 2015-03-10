@@ -4,10 +4,11 @@
                         "Living": "Living",
                         "Park": "Park"
                     },
-    "clipartObjJSONFile": [{"type": "human", "file": "abstract_scenes_v002_data_human.json"}, 
-                        {"type": "animal", "file": "abstract_scenes_v002_data_animal.json"},
-                        {"type": "largeObject", "file": "abstract_scenes_v002_data_large_object.json"},
-                        {"type": "smallObject", "file": "abstract_scenes_v002_data_small_object.json"}
+    "clipartObjJSONFile": [ 
+                            {"type": "paperdoll", "file": "abstract_scenes_v002_data_paperdoll.json"},
+                            {"type": "animal", "file": "abstract_scenes_v002_data_animal.json"},
+                            {"type": "largeObject", "file": "abstract_scenes_v002_data_large_object.json"},
+                            {"type": "smallObject", "file": "abstract_scenes_v002_data_small_object.json"}
                         ],
     "Park": {
         "baseDir": "Park",
@@ -27,12 +28,12 @@
         "numDepth1": 10,
         "numFlip": 2,
         "numObjTypeShow": {
-                            "human": 8,
+                            "paperdoll": 2,
                             "animal": 12,
                             "largeObject": 16,
                             "smallObject": 20
                             },
-        "objectTypeOrder": [ "human", "animal", "largeObject", "smallObject"]
+        "objectTypeOrder": [ "paperdoll", "animal", "largeObject", "smallObject"]
     },
     "Living": {
         "baseDir": "Living",
@@ -52,14 +53,14 @@
         "numDepth1": 10,
         "numFlip": 2,
         "numObjTypeShow": {
-                            "human": 8,
+                            "paperdoll": 2,
                             "animal": 8,
                             "largeObject": 20,
                             "smallObject": 20
                             },
-        "objectTypeOrder": [ "human", "animal", "largeObject", "smallObject"]
+        "objectTypeOrder": [ "paperdoll", "animal", "largeObject", "smallObject"]
     },
-    "Park-Subset": {
+    "Park-XinleiSubset": {
         "baseDir": "Park",
         "bgImg": "BG1.png",
         "startTab": "smallObject",
@@ -77,14 +78,14 @@
         "numDepth1": 10,
         "numFlip": 2,
         "numObjTypeShow": {
-                            "human": 8,
+                            "paperdoll": 8,
                             "animal": 12,
                             "largeObject": 16,
                             "smallObject": 20
                             },
-        "objectTypeOrder": [ "human", "animal", "largeObject", "smallObject"]
+        "objectTypeOrder": [ "paperdoll", "animal", "largeObject", "smallObject"]
     },
-    "Living-Subset": {
+    "Living-XinleiSubset": {
         "baseDir": "Living",
         "bgImg": "BG1.png",
         "startTab": "largeObject",
@@ -102,12 +103,12 @@
         "numDepth1": 10,
         "numFlip": 2,
         "numObjTypeShow": {
-                            "human": 8,
+                            "paperdoll": 8,
                             "animal": 8,
                             "largeObject": 20,
                             "smallObject": 20
                             },
-        "objectTypeOrder": [ "human", "animal", "largeObject", "smallObject"]
+        "objectTypeOrder": [ "paperdoll", "animal", "largeObject", "smallObject"]
     },
     "Park-All": {
         "baseDir": "Park",
@@ -127,12 +128,12 @@
         "numDepth1": 10,
         "numFlip": 2,
         "numObjTypeShow": {
-                            "human": 21,
+                            "paperdoll": 2,
                             "animal": 31,
                             "largeObject": 17,
                             "smallObject": 34
                             },
-        "objectTypeOrder": [ "human", "animal", "largeObject", "smallObject"]
+        "objectTypeOrder": [ "paperdoll", "animal", "largeObject", "smallObject"]
     },
     "Living-All": {
         "baseDir": "Living",
@@ -152,11 +153,11 @@
         "numDepth1": 10,
         "numFlip": 2,
         "numObjTypeShow": {
-                            "human": 21,
+                            "paperdoll": 2,
                             "animal": 10,
                             "largeObject": 23,
                             "smallObject": 39
                             },
-        "objectTypeOrder": [ "human", "animal", "largeObject", "smallObject"]
+        "objectTypeOrder": [ "paperdoll", "animal", "largeObject", "smallObject"]
     }
 }
