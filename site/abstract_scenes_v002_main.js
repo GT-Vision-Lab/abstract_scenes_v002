@@ -105,10 +105,6 @@ var i, j, k, l, m;
 var bgImg;
 var selectedImg;
 var buttonImg;
-var tabsImg;
-var objectBoxImg;
-var attrBoxImg;
-var attr2BoxImg;
 var slideBarImg;
 var slideMarkImg;
 var noLeftImg;
@@ -650,6 +646,12 @@ function rand_obj_load_first_imgs() {
 
                     // Don't rotate the head
                     if (curAvailableObj[i].instance[k].body[j].part == 'Head') {
+                        curAvailableObj[i].instance[k].paperdollGRotation[j] = 0;
+                        curAvailableObj[i].instance[k].paperdollLRotation[j] = 0;
+                    }
+                    
+                    // Don't rotate the hair
+                    if (curAvailableObj[i].instance[k].body[j].part == 'Hair') {
                         curAvailableObj[i].instance[k].paperdollGRotation[j] = 0;
                         curAvailableObj[i].instance[k].paperdollLRotation[j] = 0;
                     }
@@ -1378,7 +1380,6 @@ function draw_paper_doll(objIdx, instIdx) {
     var scale = paperdoll.globalScale * curZScale[paperdoll.z];
 
     for (partIdx = 0; partIdx < numBodyParts; partIdx++) {
-    //for (partIdx = 0; partIdx < 1; partIdx++) {
         var parent = paperdoll.body[partIdx].parent;
         var parentIdx = paperdoll.partIdxList[parent];
 
@@ -1440,8 +1441,9 @@ function draw_paper_doll(objIdx, instIdx) {
             w = curPaperdollExprImgs[objIdx][0].width;
             h = curPaperdollExprImgs[objIdx][0].height;
             ctx.drawImage(curPaperdollExprImgs[objIdx][paperdoll.poseID], 0, 0, w, h, 0, 0, w, h);
-        } else
+        } else {
             ctx.drawImage(curPaperdollPartImgs[objIdx][partIdx], 0, 0, w, h, 0, 0, w, h);
+        }
         
         if(objIdx == selectedIdx && instIdx == selectedIns && selectPaperdollPose) {
             if (paperdoll.body[partIdx].handleRadius > 0) {
@@ -1583,8 +1585,8 @@ function draw_scene() {
 }
 
 function draw_tab(x, y, w, h, rad) {
+    
     ctx.lineWidth = 2;
-
     ctx.beginPath();
     ctx.moveTo(x, y + h);           // Create a starting point
     ctx.lineTo(x, y + rad);          // Create a horizontal line
@@ -1917,7 +1919,7 @@ function draw_buttons() {
 
     ctx.fillStyle = "#000000";
     ctx.font = "20px Arial";
-    ctx.fillText("Size", SCALE_COL - 40, SCALE_ROW + 20);
+    ctx.fillText("Scene Depth", SCALE_COL - 80, SCALE_ROW + 20);
     ctx.fillText("Flip", FLIP_COL - 30, SCALE_ROW + 20);
 //   ctx.fillText("Flip" + numObjTypeShow['animal'], FLIP_COL - 40, FLIP_ROW);
 //   numObjTypeShow['paperdoll'];

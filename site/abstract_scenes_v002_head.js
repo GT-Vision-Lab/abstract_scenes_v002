@@ -25,7 +25,7 @@ var dataURL = baseURL + "../data/";
 var sceneJSONURL = baseURL + "../scenes/json/";
 
 var AVAIL_SCENE_TYPES = ["Living-All", "Park-All"];
-// var AVAIL_SCENE_TYPES = ["Living", "Park"]; // SA: For Larry integration
+var AVAIL_SCENE_TYPES = ["Living", "Park"]; // SA: For Larry integration
 
 // Xinlei instruction example related
 // Keep for Xinlei's examples
