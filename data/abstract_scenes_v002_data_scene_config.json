@@ -5,6 +5,7 @@
                         "Park": "Park"
                     },
     "clipartObjJSONFile": [ 
+                            {"type": "human", "file": "abstract_scenes_v002_data_human.json"},
                             {"type": "paperdoll", "file": "abstract_scenes_v002_data_paperdoll.json"},
                             {"type": "animal", "file": "abstract_scenes_v002_data_animal.json"},
                             {"type": "largeObject", "file": "abstract_scenes_v002_data_large_object.json"},
@@ -28,12 +29,13 @@
         "numDepth1": 10,
         "numFlip": 2,
         "numObjTypeShow": {
+                            "human": 2,
                             "paperdoll": 2,
                             "animal": 12,
                             "largeObject": 16,
                             "smallObject": 20
                             },
-        "objectTypeOrder": [ "paperdoll", "animal", "largeObject", "smallObject"]
+        "objectTypeOrder": [ "human", "animal", "largeObject", "smallObject"]
     },
     "Living": {
         "baseDir": "Living",
@@ -53,12 +55,13 @@
         "numDepth1": 10,
         "numFlip": 2,
         "numObjTypeShow": {
+                            "human": 2,
                             "paperdoll": 2,
                             "animal": 2,
                             "largeObject": 2,
-                            "smallObject": 2
+                            "smallObject": 25
                             },
-        "objectTypeOrder": [ "largeObject", "paperdoll", "smallObject", "animal"]
+        "objectTypeOrder": [ "largeObject", "paperdoll", "human", "smallObject", "animal"]
     },
     "Park-XinleiSubset": {
         "baseDir": "Park",
