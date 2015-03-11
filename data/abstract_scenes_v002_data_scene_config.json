@@ -59,7 +59,7 @@
                             "paperdoll": 2,
                             "animal": 2,
                             "largeObject": 2,
-                            "smallObject": 25
+                            "smallObject": 30
                             },
         "objectTypeOrder": [ "largeObject", "paperdoll", "human", "smallObject", "animal"]
     },

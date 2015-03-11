@@ -252,9 +252,22 @@
             ]
         },
         {
-            "numType": 11,
+            "numType": 9,
             "baseDir": "Living",
-            "name": "Dishes",
+            "name": "DishesMeal",
+            "availableScene": [
+                {
+                    "numInstance": 5,
+                    "depth0": 0,
+                    "scene": "Living",
+                    "depth1": 3
+                }
+            ]
+        },
+        {
+            "numType": 2,
+            "baseDir": "Living",
+            "name": "DishesSnack",
             "availableScene": [
                 {
                     "numInstance": 5,

@@ -2251,7 +2251,6 @@ function mousedown_canvas(event) {
 
                 selectedAttrTabIdx = 0;
                 selectedAttrTab = attributes[selectedAttrTabIdx];
-                console.log(selectedAttrTab + " " + selectedAttrTabIdx);
                 redrawCanvas = true;
             }
         } else {
@@ -2323,7 +2322,6 @@ function mousedown_canvas(event) {
         if (attrSelectedIdx >= 0 && attrSelectedIdx < attributes.length) {
             selectedAttrTabIdx = attrSelectedIdx;
             selectedAttrTab = attributes[selectedAttrTabIdx];
-            console.log(selectedAttrTab + " " + selectedAttrTabIdx);
             redrawCanvas = true;
         }
     }
@@ -2338,15 +2336,14 @@ function mousedown_canvas(event) {
         var curObjType = curAvailableObj[selectedIdx].instance[selectedIns].type;
         var curAttrTypes = get_object_attr_types(curObjType);
         var curAttrType = curAttrTypes[selectedAttrTabIdx];
-
         var numAttr = curAvailableObj[selectedIdx].instance[0][curAttrType['num']];
-        
-        if (numAttr > MAX_NUM_ATTR_PER_ROW) {
-            numAttr = MAX_NUM_ATTR_PER_ROW;
-        }
         
         if ((curObjType == 'human' || curObjType == 'paperdoll') && curAttrType['id'] == 'expressionID') {
             numAttr -= 1; // Remove one due to (unselected) blank expression
+        }
+        
+        if (numAttr > MAX_NUM_ATTR_PER_ROW) {
+            numAttr = MAX_NUM_ATTR_PER_ROW;
         }
         
         if (attrX < CLIPART_SKIP * numAttr && attrX > 0 && 
@@ -2413,7 +2410,7 @@ function mousedown_canvas(event) {
                 }
             }
             
-            // Update attribute tab if the user selects a new clipart object
+            // Update attribute tab if the user selects an old clipart object
             // SA: TODO Maybe make it remember the 
             // previous clipart object type's attribute tab?
             if (selectedIdx != notUsed) {
@@ -2423,7 +2420,6 @@ function mousedown_canvas(event) {
 
                 selectedAttrTabIdx = 0;
                 selectedAttrTab = attributes[selectedAttrTabIdx];
-                console.log(selectedAttrTab + " " + selectedAttrTabIdx);
                 redrawCanvas = true;
             }
             
@@ -2787,12 +2783,13 @@ function mousemove_canvas(event) {
 
             var numAttr = curAvailableObj[selectedIdx].instance[0][curAttrType['num']];
         
-            if (numAttr > MAX_NUM_ATTR_PER_ROW) {
-                numAttr = MAX_NUM_ATTR_PER_ROW;
-            }
-            
             if ((curObjType == 'human' || curObjType == 'paperdoll') && curAttrType['id'] == 'expressionID') {
                 numAttr -= 1; // Remove one due to (unselected) blank expression
+            }
+            
+            // SA: TODO Update interface to support more than 9 attribute possibilites
+            if (numAttr > MAX_NUM_ATTR_PER_ROW) {
+                numAttr = MAX_NUM_ATTR_PER_ROW;
             }
 
             if (attrX < CLIPART_SKIP * numAttr && attrX > 0 && attrY < CLIPART_SKIP && attrY > 0) {
