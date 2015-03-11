@@ -1,5 +1,6 @@
 {
     "baseDirectory": "CharacterNew",
+    "attributeTypeList": ["Expression", "Pose"],
     "type": [
         {
             "name": "Anthony",

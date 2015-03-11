@@ -1,4 +1,5 @@
 {
+    "attributeTypeList": ["Type"],
     "type": [
         {
             "numPose": 4,

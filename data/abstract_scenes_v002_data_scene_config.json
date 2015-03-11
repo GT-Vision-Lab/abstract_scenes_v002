@@ -54,11 +54,11 @@
         "numFlip": 2,
         "numObjTypeShow": {
                             "paperdoll": 2,
-                            "animal": 8,
-                            "largeObject": 20,
-                            "smallObject": 20
+                            "animal": 2,
+                            "largeObject": 2,
+                            "smallObject": 2
                             },
-        "objectTypeOrder": [ "paperdoll", "animal", "largeObject", "smallObject"]
+        "objectTypeOrder": [ "largeObject", "paperdoll", "smallObject", "animal"]
     },
     "Park-XinleiSubset": {
         "baseDir": "Park",

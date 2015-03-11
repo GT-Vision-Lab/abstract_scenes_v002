@@ -1,5 +1,6 @@
 {
     "baseDirectory": "Animals",
+    "attributeTypeList": ["Pose"],
     "type": [
         {
             "numPose": 1,
