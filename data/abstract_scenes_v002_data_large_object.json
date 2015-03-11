@@ -2,7 +2,7 @@
     "attributeTypeList": ["Type"],
     "type": [
         {
-            "numPose": 2,
+            "numType": 2,
             "baseDir": "Park",
             "name": "bench",
             "availableScene": [
@@ -15,7 +15,7 @@
             ]
         },
         {
-            "numPose": 1,
+            "numType": 1,
             "baseDir": "Park",
             "name": "blanket",
             "availableScene": [
@@ -28,7 +28,7 @@
             ]
         },
         {
-            "numPose": 2,
+            "numType": 2,
             "baseDir": "Park",
             "name": "bike",
             "availableScene": [
@@ -41,7 +41,7 @@
             ]
         },
         {
-            "numPose": 2,
+            "numType": 2,
             "baseDir": "Living",
             "name": "Bookshelf",
             "availableScene": [
@@ -54,7 +54,7 @@
             ]
         },
         {
-            "numPose": 2,
+            "numType": 2,
             "baseDir": "Park",
             "name": "bush",
             "availableScene": [
@@ -67,7 +67,7 @@
             ]
         },
         {
-            "numPose": 2,
+            "numType": 2,
             "baseDir": "Living",
             "name": "Chair01",
             "availableScene": [
@@ -80,7 +80,7 @@
             ]
         },
         {
-            "numPose": 2,
+            "numType": 2,
             "baseDir": "Living",
             "name": "Chair02",
             "availableScene": [
@@ -93,7 +93,7 @@
             ]
         },
         {
-            "numPose": 3,
+            "numType": 3,
             "baseDir": "Park",
             "name": "cloud",
             "availableScene": [
@@ -106,7 +106,7 @@
             ]
         },
         {
-            "numPose": 1,
+            "numType": 1,
             "baseDir": "Living",
             "name": "CoatRack",
             "availableScene": [
@@ -119,7 +119,7 @@
             ]
         },
         {
-            "numPose": 2,
+            "numType": 2,
             "baseDir": "Living",
             "name": "CoffeeTable",
             "availableScene": [
@@ -132,7 +132,7 @@
             ]
         },
         {
-            "numPose": 2,
+            "numType": 2,
             "baseDir": "Living",
             "name": "Couch",
             "availableScene": [
@@ -145,7 +145,7 @@
             ]
         },
         {
-            "numPose": 2,
+            "numType": 2,
             "baseDir": "Living",
             "name": "Desk",
             "availableScene": [
@@ -158,7 +158,7 @@
             ]
         },
         {
-            "numPose": 2,
+            "numType": 2,
             "baseDir": "Living",
             "name": "DiningChair",
             "availableScene": [
@@ -171,7 +171,7 @@
             ]
         },
         {
-            "numPose": 2,
+            "numType": 2,
             "baseDir": "Living",
             "name": "DiningTable",
             "availableScene": [
@@ -184,7 +184,7 @@
             ]
         },
         {
-            "numPose": 3,
+            "numType": 3,
             "baseDir": "Living",
             "name": "Door",
             "availableScene": [
@@ -197,7 +197,7 @@
             ]
         },
         {
-            "numPose": 2,
+            "numType": 2,
             "baseDir": "Living",
             "name": "Endtable",
             "availableScene": [
@@ -210,7 +210,7 @@
             ]
         },
         {
-            "numPose": 1,
+            "numType": 1,
             "baseDir": "Living",
             "name": "Fireplace",
             "availableScene": [
@@ -223,7 +223,7 @@
             ]
         },
         {
-            "numPose": 2,
+            "numType": 2,
             "baseDir": "Living",
             "name": "Footstool",
             "availableScene": [
@@ -236,7 +236,7 @@
             ]
         },
         {
-            "numPose": 2,
+            "numType": 2,
             "baseDir": "Park",
             "name": "grill",
             "availableScene": [
@@ -249,7 +249,7 @@
             ]
         },
         {
-            "numPose": 1,
+            "numType": 1,
             "baseDir": "Park",
             "name": "log",
             "availableScene": [
@@ -262,7 +262,7 @@
             ]
         },
         {
-            "numPose": 1,
+            "numType": 1,
             "baseDir": "Park",
             "name": "monkeybars",
             "availableScene": [
@@ -275,7 +275,7 @@
             ]
         },
         {
-            "numPose": 2,
+            "numType": 2,
             "baseDir": "Park",
             "name": "moon",
             "availableScene": [
@@ -288,7 +288,7 @@
             ]
         },
         {
-            "numPose": 4,
+            "numType": 4,
             "baseDir": "Living",
             "name": "Picture",
             "availableScene": [
@@ -301,7 +301,7 @@
             ]
         },
         {
-            "numPose": 1,
+            "numType": 1,
             "baseDir": "Living",
             "name": "Plant",
             "availableScene": [
@@ -314,7 +314,7 @@
             ]
         },
         {
-            "numPose": 1,
+            "numType": 1,
             "baseDir": "Park",
             "name": "pond",
             "availableScene": [
@@ -327,7 +327,7 @@
             ]
         },
         {
-            "numPose": 1,
+            "numType": 1,
             "baseDir": "Living",
             "name": "Rug",
             "availableScene": [
@@ -340,7 +340,7 @@
             ]
         },
         {
-            "numPose": 2,
+            "numType": 2,
             "baseDir": "Park",
             "name": "sandbox",
             "availableScene": [
@@ -353,7 +353,7 @@
             ]
         },
         {
-            "numPose": 2,
+            "numType": 2,
             "baseDir": "Park",
             "name": "scooter",
             "availableScene": [
@@ -366,7 +366,7 @@
             ]
         },
         {
-            "numPose": 2,
+            "numType": 2,
             "baseDir": "Park",
             "name": "seesaw",
             "availableScene": [
@@ -379,7 +379,7 @@
             ]
         },
         {
-            "numPose": 1,
+            "numType": 1,
             "baseDir": "Park",
             "name": "sidewalk",
             "availableScene": [
@@ -392,7 +392,7 @@
             ]
         },
         {
-            "numPose": 2,
+            "numType": 2,
             "baseDir": "Park",
             "name": "slide",
             "availableScene": [
@@ -405,7 +405,7 @@
             ]
         },
         {
-            "numPose": 2,
+            "numType": 2,
             "baseDir": "Living",
             "name": "Sofa",
             "availableScene": [
@@ -418,7 +418,7 @@
             ]
         },
         {
-            "numPose": 2,
+            "numType": 2,
             "baseDir": "Living",
             "name": "Stool",
             "availableScene": [
@@ -431,7 +431,7 @@
             ]
         },
         {
-            "numPose": 1,
+            "numType": 1,
             "baseDir": "Park",
             "name": "sun",
             "availableScene": [
@@ -444,7 +444,7 @@
             ]
         },
         {
-            "numPose": 4,
+            "numType": 4,
             "baseDir": "Park",
             "name": "tree",
             "availableScene": [
@@ -457,7 +457,7 @@
             ]
         },
         {
-            "numPose": 4,
+            "numType": 4,
             "baseDir": "Living",
             "name": "TV",
             "availableScene": [
@@ -470,7 +470,7 @@
             ]
         },
         {
-            "numPose": 2,
+            "numType": 2,
             "baseDir": "Living",
             "name": "Table",
             "availableScene": [
@@ -483,7 +483,7 @@
             ]
         },
         {
-            "numPose": 3,
+            "numType": 3,
             "baseDir": "Living",
             "name": "Window02",
             "availableScene": [
@@ -496,7 +496,7 @@
             ]
         },
         {
-            "numPose": 3,
+            "numType": 3,
             "baseDir": "Living",
             "name": "Window03",
             "availableScene": [
@@ -509,7 +509,7 @@
             ]
         },
         {
-            "numPose": 3,
+            "numType": 3,
             "baseDir": "Living",
             "name": "Window05",
             "availableScene": [

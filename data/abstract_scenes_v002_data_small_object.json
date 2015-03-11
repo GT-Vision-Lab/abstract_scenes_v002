@@ -2,7 +2,7 @@
     "attributeTypeList": ["Type"],
     "type": [
         {
-            "numPose": 4,
+            "numType": 4,
             "baseDir": "Park",
             "name": "apple",
             "availableScene": [
@@ -21,7 +21,7 @@
             ]
         },
         {
-            "numPose": 1,
+            "numType": 1,
             "baseDir": "Park",
             "name": "baseball",
             "availableScene": [
@@ -34,7 +34,7 @@
             ]
         },
         {
-            "numPose": 2,
+            "numType": 2,
             "baseDir": "Park",
             "name": "basket",
             "availableScene": [
@@ -53,7 +53,7 @@
             ]
         },
         {
-            "numPose": 2,
+            "numType": 2,
             "baseDir": "Park",
             "name": "bat",
             "availableScene": [
@@ -66,7 +66,7 @@
             ]
         },
         {
-            "numPose": 1,
+            "numType": 1,
             "baseDir": "Park",
             "name": "beehive",
             "availableScene": [
@@ -79,7 +79,7 @@
             ]
         },
         {
-            "numPose": 3,
+            "numType": 3,
             "baseDir": "Living",
             "name": "Book",
             "availableScene": [
@@ -92,7 +92,7 @@
             ]
         },
         {
-            "numPose": 3,
+            "numType": 3,
             "baseDir": "Living",
             "name": "Bottle",
             "availableScene": [
@@ -105,7 +105,7 @@
             ]
         },
         {
-            "numPose": 2,
+            "numType": 2,
             "baseDir": "Park",
             "name": "bottle",
             "availableScene": [
@@ -124,7 +124,7 @@
             ]
         },
         {
-            "numPose": 2,
+            "numType": 2,
             "baseDir": "Park",
             "name": "bread",
             "availableScene": [
@@ -143,7 +143,7 @@
             ]
         },
         {
-            "numPose": 2,
+            "numType": 2,
             "baseDir": "Living",
             "name": "BuildingToy",
             "availableScene": [
@@ -156,7 +156,7 @@
             ]
         },
         {
-            "numPose": 1,
+            "numType": 1,
             "baseDir": "Living",
             "name": "Camera",
             "availableScene": [
@@ -169,7 +169,7 @@
             ]
         },
         {
-            "numPose": 1,
+            "numType": 1,
             "baseDir": "Park",
             "name": "campfire",
             "availableScene": [
@@ -182,7 +182,7 @@
             ]
         },
         {
-            "numPose": 1,
+            "numType": 1,
             "baseDir": "Living",
             "name": "CD",
             "availableScene": [
@@ -195,7 +195,7 @@
             ]
         },
         {
-            "numPose": 2,
+            "numType": 2,
             "baseDir": "Park",
             "name": "cheese",
             "availableScene": [
@@ -214,7 +214,7 @@
             ]
         },
         {
-            "numPose": 1,
+            "numType": 1,
             "baseDir": "Park",
             "name": "corn",
             "availableScene": [
@@ -233,7 +233,7 @@
             ]
         },
         {
-            "numPose": 1,
+            "numType": 1,
             "baseDir": "Park",
             "name": "cup",
             "availableScene": [
@@ -252,7 +252,7 @@
             ]
         },
         {
-            "numPose": 11,
+            "numType": 11,
             "baseDir": "Living",
             "name": "Dishes",
             "availableScene": [
@@ -265,7 +265,7 @@
             ]
         },
         {
-            "numPose": 2,
+            "numType": 2,
             "baseDir": "Living",
             "name": "DogBone",
             "availableScene": [
@@ -278,7 +278,7 @@
             ]
         },
         {
-            "numPose": 5,
+            "numType": 5,
             "baseDir": "Living",
             "name": "Doll",
             "availableScene": [
@@ -291,7 +291,7 @@
             ]
         },
         {
-            "numPose": 1,
+            "numType": 1,
             "baseDir": "Living",
             "name": "Dollhouse",
             "availableScene": [
@@ -304,7 +304,7 @@
             ]
         },
         {
-            "numPose": 4,
+            "numType": 4,
             "baseDir": "Park",
             "name": "flower",
             "availableScene": [
@@ -317,7 +317,7 @@
             ]
         },
         {
-            "numPose": 2,
+            "numType": 2,
             "baseDir": "Park",
             "name": "football",
             "availableScene": [
@@ -330,7 +330,7 @@
             ]
         },
         {
-            "numPose": 2,
+            "numType": 2,
             "baseDir": "Park",
             "name": "frisbee",
             "availableScene": [
@@ -343,7 +343,7 @@
             ]
         },
         {
-            "numPose": 1,
+            "numType": 1,
             "baseDir": "Living",
             "name": "Game",
             "availableScene": [
@@ -356,7 +356,7 @@
             ]
         },
         {
-            "numPose": 2,
+            "numType": 2,
             "baseDir": "Living",
             "name": "GameSystem",
             "availableScene": [
@@ -369,7 +369,7 @@
             ]
         },
         {
-            "numPose": 2,
+            "numType": 2,
             "baseDir": "Park",
             "name": "hamburger",
             "availableScene": [
@@ -382,7 +382,7 @@
             ]
         },
         {
-            "numPose": 2,
+            "numType": 2,
             "baseDir": "Park",
             "name": "hotdog",
             "availableScene": [
@@ -401,7 +401,7 @@
             ]
         },
         {
-            "numPose": 2,
+            "numType": 2,
             "baseDir": "Park",
             "name": "jumprope",
             "availableScene": [
@@ -414,7 +414,7 @@
             ]
         },
         {
-            "numPose": 2,
+            "numType": 2,
             "baseDir": "Park",
             "name": "lilypad",
             "availableScene": [
@@ -427,7 +427,7 @@
             ]
         },
         {
-            "numPose": 1,
+            "numType": 1,
             "baseDir": "Park",
             "name": "marshmallow",
             "availableScene": [
@@ -440,7 +440,7 @@
             ]
         },
         {
-            "numPose": 1,
+            "numType": 1,
             "baseDir": "Park",
             "name": "mushroom",
             "availableScene": [
@@ -453,7 +453,7 @@
             ]
         },
         {
-            "numPose": 1,
+            "numType": 1,
             "baseDir": "Park",
             "name": "nest",
             "availableScene": [
@@ -466,7 +466,7 @@
             ]
         },
         {
-            "numPose": 1,
+            "numType": 1,
             "baseDir": "Living",
             "name": "Notebook",
             "availableScene": [
@@ -479,7 +479,7 @@
             ]
         },
         {
-            "numPose": 2,
+            "numType": 2,
             "baseDir": "Park",
             "name": "pail",
             "availableScene": [
@@ -492,7 +492,7 @@
             ]
         },
         {
-            "numPose": 2,
+            "numType": 2,
             "baseDir": "Living",
             "name": "Paper",
             "availableScene": [
@@ -505,7 +505,7 @@
             ]
         },
         {
-            "numPose": 2,
+            "numType": 2,
             "baseDir": "Living",
             "name": "Pen",
             "availableScene": [
@@ -518,7 +518,7 @@
             ]
         },
         {
-            "numPose": 1,
+            "numType": 1,
             "baseDir": "Living",
             "name": "Pencil",
             "availableScene": [
@@ -531,7 +531,7 @@
             ]
         },
         {
-            "numPose": 1,
+            "numType": 1,
             "baseDir": "Living",
             "name": "PetBed",
             "availableScene": [
@@ -544,7 +544,7 @@
             ]
         },
         {
-            "numPose": 2,
+            "numType": 2,
             "baseDir": "Park",
             "name": "pie",
             "availableScene": [
@@ -563,7 +563,7 @@
             ]
         },
         {
-            "numPose": 8,
+            "numType": 8,
             "baseDir": "Living",
             "name": "Pillow",
             "availableScene": [
@@ -576,7 +576,7 @@
             ]
         },
         {
-            "numPose": 1,
+            "numType": 1,
             "baseDir": "Park",
             "name": "plate",
             "availableScene": [
@@ -595,7 +595,7 @@
             ]
         },
         {
-            "numPose": 4,
+            "numType": 4,
             "baseDir": "Living",
             "name": "PopCan",
             "availableScene": [
@@ -608,7 +608,7 @@
             ]
         },
         {
-            "numPose": 1,
+            "numType": 1,
             "baseDir": "Park",
             "name": "ribs",
             "availableScene": [
@@ -621,7 +621,7 @@
             ]
         },
         {
-            "numPose": 2,
+            "numType": 2,
             "baseDir": "Park",
             "name": "sandwich",
             "availableScene": [
@@ -640,7 +640,7 @@
             ]
         },
         {
-            "numPose": 2,
+            "numType": 2,
             "baseDir": "Living",
             "name": "Scissors",
             "availableScene": [
@@ -653,7 +653,7 @@
             ]
         },
         {
-            "numPose": 2,
+            "numType": 2,
             "baseDir": "Park",
             "name": "shovel",
             "availableScene": [
@@ -666,7 +666,7 @@
             ]
         },
         {
-            "numPose": 2,
+            "numType": 2,
             "baseDir": "Park",
             "name": "skateboard",
             "availableScene": [
@@ -679,7 +679,7 @@
             ]
         },
         {
-            "numPose": 1,
+            "numType": 1,
             "baseDir": "Park",
             "name": "soccer",
             "availableScene": [
@@ -692,7 +692,7 @@
             ]
         },
         {
-            "numPose": 1,
+            "numType": 1,
             "baseDir": "Living",
             "name": "Stapler",
             "availableScene": [
@@ -705,7 +705,7 @@
             ]
         },
         {
-            "numPose": 1,
+            "numType": 1,
             "baseDir": "Park",
             "name": "steak",
             "availableScene": [
@@ -724,7 +724,7 @@
             ]
         },
         {
-            "numPose": 1,
+            "numType": 1,
             "baseDir": "Living",
             "name": "Tape",
             "availableScene": [
@@ -737,7 +737,7 @@
             ]
         },
         {
-            "numPose": 1,
+            "numType": 1,
             "baseDir": "Living",
             "name": "teaset",
             "availableScene": [
@@ -750,7 +750,7 @@
             ]
         },
         {
-            "numPose": 1,
+            "numType": 1,
             "baseDir": "Park",
             "name": "tongs",
             "availableScene": [
@@ -763,7 +763,7 @@
             ]
         },
         {
-            "numPose": 5,
+            "numType": 5,
             "baseDir": "Living",
             "name": "Toy",
             "availableScene": [
@@ -776,7 +776,7 @@
             ]
         },
         {
-            "numPose": 3,
+            "numType": 3,
             "baseDir": "Park",
             "name": "utensil",
             "availableScene": [
@@ -795,7 +795,7 @@
             ]
         },
         {
-            "numPose": 2,
+            "numType": 2,
             "baseDir": "Park",
             "name": "watermelon",
             "availableScene": [
@@ -814,7 +814,7 @@
             ]
         },
         {
-            "numPose": 2,
+            "numType": 2,
             "baseDir": "Park",
             "name": "wine",
             "availableScene": [
@@ -833,7 +833,7 @@
             ]
         },
         {
-            "numPose": 1,
+            "numType": 1,
             "baseDir": "Living",
             "name": "Yarn",
             "availableScene": [

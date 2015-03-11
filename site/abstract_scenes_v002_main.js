@@ -14,7 +14,7 @@ var numObjTypeShow;
 var selectedTab;
 var selectedTabIdx;
 var selectedAttrTab;
-var selectedAttrTabIdx = 0;
+var selectedAttrTabIdx = 0; // Initialize to first attribute
 
 var curLoadAll;
 var numAvailableObjects = 0; // Gets updated in store_json_and_init
@@ -437,8 +437,7 @@ function rand_obj_init(histStr) {
                 var numTotalInstance = curObjectType.type[idxValidType].availableScene[idxScene].numInstance;
                 idxStyle = get_random_int(0, curObjectType.type[idxValidType].numStyle);
                 for ( var k = 0; k < numTotalInstance; k++ ) {
-                    
-                    idxPose = get_random_int(0, curObjectType.type[idxValidType].numPose);
+
                     var objInstance = {};
 
                     if (curObjectType.type[idxValidType].deformable == undefined) {
@@ -479,6 +478,8 @@ function rand_obj_init(histStr) {
                         objInstance.numExpression = curObjectType.type[idxValidType].numExpression;
                         objInstance.expressionID = 0; // No face
                         
+                        idxPose = get_random_int(0, curObjectType.type[idxValidType].numPose); // SA TODO Get rid of
+                        
                         if (objInstance.deformable == false) {
                             objInstance.numStyle = curObjectType.type[idxValidType].numStyle;
                             objInstance.styleID = idxStyle;
@@ -493,6 +494,7 @@ function rand_obj_init(histStr) {
                             objInstance.poseID = idxPose;
                         }
                     } else if (curObjectType.objectType == "animal") {
+                        idxPose = get_random_int(0, curObjectType.type[idxValidType].numPose);
                         if (objInstance.deformable == false) {
                             objInstance.numPose = curObjectType.type[idxValidType].numPose;
                             objInstance.poseID = idxPose;
@@ -500,12 +502,16 @@ function rand_obj_init(histStr) {
                             // TODO Update this when/if deformable animals need something specific
                         }
                     } else if (curObjectType.objectType == "largeObject" || curObjectType.objectType == "smallObject") {
+                        idxType = get_random_int(0, curObjectType.type[idxValidType].numType);
                         // SA: Do we want this at instance-level?
                         objInstance.baseDir = curObjectType.type[idxValidType].baseDir;
                         
                         // SA TODO Change to 'pose' to 'type'
-                        objInstance.numPose = curObjectType.type[idxValidType].numPose;
-                        objInstance.poseID = idxPose;
+//                         objInstance.numPose = curObjectType.type[idxValidType].numPose;
+//                         objInstance.poseID = idxPose;
+                        objInstance.numType = curObjectType.type[idxValidType].numType;
+                        objInstance.typeID = idxType;
+                        
                     }
                     
                     curDepth0Used[objInstance.depth0]++; // just the count
@@ -565,7 +571,7 @@ function json_obj_load_first_imgs() {
         for (j = 0; j < curAvailableObj[i].instance[curInst].numPose; j++) {
             curClipartImgs[i][j] = new Image();
             curClipartImgs[i][j].src =
-                obj_img_filename_pose(curAvailableObj[i].instance[curInst], j);
+                obj_img_filename_attr1(curAvailableObj[i].instance[curInst], j);
         }
     }
     
@@ -596,7 +602,7 @@ function json_obj_load_first_imgs() {
             
             curClipartImgs[i][s] = new Image();
             curClipartImgs[i][s].src = 
-                obj_img_filename_pose_expr(curAvailableObj[i].instance[curInst], j, k);
+                obj_img_filename_attr2(curAvailableObj[i].instance[curInst], j, k);
         }
 
         // also load the expression only images
@@ -635,6 +641,22 @@ function json_obj_load_first_imgs() {
             curPeopleExprImgs[i][j].onload = draw_canvas;
         }
     }
+}
+
+function get_object_attr_type(objType) {
+    
+    var curAttrType;
+    var curAttrName = objectData[objType].attributeTypeList[0];
+    
+    if (curAttrName == 'Type') {
+        curAttrType = {'num': 'numType', 'id': 'typeID'};
+    } else if (curAttrName == 'Pose') {
+        curAttrType = {'num': 'numPose', 'id': 'poseID'};
+    } else if (curAttrName == 'Expression') {
+        curAttrType = {'num': 'numExpression', 'id': 'expressionID'};
+    }
+
+    return curAttrType;
 }
 
 function rand_obj_load_first_imgs() {
@@ -696,14 +718,18 @@ function rand_obj_load_first_imgs() {
                 // SA TODO Add for non-deformable humans
             }
         } else {
-            curClipartImgs[i] = Array(curAvailableObj[i].instance[0].numPose);
-            for (j = 0; j < curAvailableObj[i].instance[0].numPose; j++) {
+            // SA TODO Make more robust for varying number of attributes
+            var curObjType = curAvailableObj[i].instance[0].type;
+            var curAttrType = get_object_attr_type(curObjType);
+            
+            curClipartImgs[i] = Array(curAvailableObj[i].instance[0][curAttrType['num']]);
+            for (j = 0; j < curAvailableObj[i].instance[0][curAttrType['num']]; j++) {
                 curClipartImgs[i][j] = new Image();
                 curClipartImgs[i][j].src =
-                    obj_img_filename_pose(curAvailableObj[i].instance[0], j);
+                    obj_img_filename_attr1(curAvailableObj[i].instance[0], j);
             }
 
-            curClipartImgs[i][curAvailableObj[i].instance[0].poseID].onload = draw_clipart;
+            curClipartImgs[i][curAvailableObj[i].instance[0][curAttrType['id']]].onload = draw_clipart;
         }
     }
     
@@ -733,7 +759,7 @@ function rand_obj_load_first_imgs() {
         for (j = 0; j < curAvailableObj[i].instance[0].numPose; j++) {
             curClipartImgs[i][j] = new Image();
             curClipartImgs[i][j].src = 
-                obj_img_filename_pose(curAvailableObj[i].instance[0], j);
+                obj_img_filename_attr1(curAvailableObj[i].instance[0], j);
         }
     }
 
@@ -759,7 +785,7 @@ function rand_obj_load_first_imgs() {
             
             curClipartImgs[i][s] = new Image(); 
             curClipartImgs[i][s].src = 
-                obj_img_filename_pose_expr(curAvailableObj[i].instance[0], j, k);
+                obj_img_filename_attr2(curAvailableObj[i].instance[0], j, k);
         }
 
         // also load the expression only images
@@ -877,50 +903,53 @@ function obj_img_filename(obj) {
     return obj_img_filename_general(obj, null, null, null);
 }
 
-function obj_img_filename_pose(obj, poseID) {
-    return obj_img_filename_general(obj, poseID, null, null);
+function obj_img_filename_attr1(obj, attr1) {
+    return obj_img_filename_general(obj, attr1, null, null);
 } 
 
-function obj_img_filename_pose_expr(obj, poseID, exprID) {
-    return obj_img_filename_general(obj, poseID, exprID, null);
+function obj_img_filename_attr2(obj, attr1, attr2) {
+    return obj_img_filename_general(obj, attr1, attr2, null);
 }
 
 // You can ask for a specific style, pose, or expression ID image
 // instead of the one that the object currently has.
-function obj_img_filename_general(obj, poseID, exprID, styleID) {
+function obj_img_filename_general(obj, attr1, attr2, attr3) {
+    var curObjType = obj.type;
+    var curAttrType = get_object_attr_type(curObjType);
     
-    if (poseID == null) {
-        poseID = obj['poseID'];
+    if (attr1 == null) {
+        attr1 = obj[curAttrType['id']];
     }
         
-    if (obj['type'] == 'human') {
-        if (exprID == null) {
-            exprID = obj['expressionID'];
-        }
-        if (styleID == null) {
-            styleID = obj['styleID'];
-        }
-        
-        humanFolder = objectData['human']['baseDirectory'];
-        styleFolder = obj['name'] + zero_pad((styleID+1), imgPadNum);
-        
-        name = zero_pad((poseID+1), imgPadNum) +
-               zero_pad((exprID+1), imgPadNum) +
-               '.' + CLIPART_IMG_FORMAT; 
-        filename = baseURLInterface + 
-                   humanFolder + '/' + styleFolder + '/' + name;
-    } else if (obj['type'] == 'animal') {
-        animalFolder = objectData['animal']['baseDirectory'];
-        name = obj['name'] + zero_pad((poseID+1), imgPadNum) +
-               '.' + CLIPART_IMG_FORMAT; 
-        filename = baseURLInterface + 
-                   animalFolder + '/' + name;
-    } else if (obj['type'] == 'largeObject' || obj['type'] == 'smallObject') {
+    if (curObjType == 'largeObject' || curObjType == 'smallObject') {
         sceneFolder = sceneConfigData['baseDirectory'][obj['baseDir']];
-        name = obj['name'] + zero_pad((poseID+1), imgPadNum) +
+        name = obj['name'] + zero_pad((attr1+1), imgPadNum) +
                '.' + CLIPART_IMG_FORMAT; 
         filename = baseURLInterface + 
                    sceneFolder + '/' + name;
+    } else if (curObjType == 'animal') {
+        animalFolder = objectData['animal']['baseDirectory'];
+        name = obj['name'] + zero_pad((attr1+1), imgPadNum) +
+               '.' + CLIPART_IMG_FORMAT; 
+        filename = baseURLInterface + 
+                   animalFolder + '/' + name;
+    } else if (curObjType == 'human') {
+        // SA: TODO Remove hardcodedness
+        if (attr2 == null) {
+            attr2 = obj['poseID'];
+        }
+        if (attr3 == null) {
+            attr3 = obj['styleID'];
+        }
+        
+        humanFolder = objectData['human']['baseDirectory'];
+        styleFolder = obj['name'] + zero_pad((attr3+1), imgPadNum);
+        
+        name = zero_pad((attr2+1), imgPadNum) +
+               zero_pad((attr1+1), imgPadNum) +
+               '.' + CLIPART_IMG_FORMAT; 
+        filename = baseURLInterface + 
+                   humanFolder + '/' + styleFolder + '/' + name;  
     } else {
         filename = null
     }
@@ -1321,12 +1350,10 @@ function load_obj_category_data() {
         
         for (var objectType in objectData) {
             if (objectData.hasOwnProperty(objectType)) {
-                sumPoses = 0;
                 curObjectType = objectData[objectType];
                 var validIdxs = [];
                 for ( var k = 0; k < curObjectType.type.length; k++ ) {
                     for ( var m = 0; m < curObjectType.type[k].availableScene.length; m++ ) {
-                        sumPoses += curObjectType.type[k].numPose;
                         if ( curObjectType.type[k].availableScene[m].scene == curSceneTypeBase ) {
                             validIdxs.push([k, m])
                         }
@@ -1407,10 +1434,13 @@ function draw_canvas() {
 
 function draw_nondeformable_obj(objIdx, instIdx) {
 
+    var curObjType = curAvailableObj[objIdx].instance[instIdx].type;
+    var curAttrType = get_object_attr_type(curObjType);
+    
     var scale = curZScale[curAvailableObj[objIdx].instance[instIdx].z];
 
-    var w = curClipartImgs[objIdx][curAvailableObj[objIdx].instance[instIdx].poseID].width;
-    var h = curClipartImgs[objIdx][curAvailableObj[objIdx].instance[instIdx].poseID].height;
+    var w = curClipartImgs[objIdx][curAvailableObj[objIdx].instance[instIdx][curAttrType['id']]].width;
+    var h = curClipartImgs[objIdx][curAvailableObj[objIdx].instance[instIdx][curAttrType['id']]].height;
 
     var rowOffset = -h / 2;
     var colOffset = -w / 2;
@@ -1418,14 +1448,14 @@ function draw_nondeformable_obj(objIdx, instIdx) {
     colOffset *= scale;
 
     if (curAvailableObj[objIdx].instance[instIdx].flip == 0) {
-        ctx.drawImage(curClipartImgs[objIdx][curAvailableObj[objIdx].instance[instIdx].poseID], 
+        ctx.drawImage(curClipartImgs[objIdx][curAvailableObj[objIdx].instance[instIdx][curAttrType['id']]], 
                         0, 0, w, h, 
                         curAvailableObj[objIdx].instance[instIdx].x + colOffset + CANVAS_COL, 
                         curAvailableObj[objIdx].instance[instIdx].y + rowOffset + CANVAS_ROW, 
                         w * scale, h * scale);
     } else if (curAvailableObj[objIdx].instance[instIdx].flip == 1) {
         ctx.setTransform(-1, 0, 0, 1, 0, 0);
-        ctx.drawImage(curClipartImgs[objIdx][curAvailableObj[objIdx].instance[instIdx].poseID], 
+        ctx.drawImage(curClipartImgs[objIdx][curAvailableObj[objIdx].instance[instIdx][curAttrType['id']]], 
                         0, 0, w, h, 
                         -curAvailableObj[objIdx].instance[instIdx].x + colOffset - CANVAS_COL, 
                         curAvailableObj[objIdx].instance[instIdx].y + rowOffset + CANVAS_ROW, 
@@ -1567,7 +1597,7 @@ function draw_scene() {
                                                 if (curClipartImgs[i][indexP] == undefined) {
                                                     curClipartImgs[i][indexP] = new Image();
                                                     curClipartImgs[i][indexP].src = 
-                                                        obj_img_filename_pose_expr(curAvailableObj[i].instance[m]);
+                                                        obj_img_filename_attr2(curAvailableObj[i].instance[m]);
                                                     curClipartImgs[i][indexP].onload = draw_canvas;
                                                     continue;
                                                 }
@@ -1801,7 +1831,8 @@ function draw_clipart() {
                         
                     } else {
                         if (curAvailableObj[idx].smallestUnusedInstanceIdx < curAvailableObj[idx].numInstance) {
-                            indexCR = curAvailableObj[idx].instance[curAvailableObj[idx].smallestUnusedInstanceIdx].poseID;
+                            var curAttrType = get_object_attr_type(curType);
+                            indexCR = curAvailableObj[idx].instance[curAvailableObj[idx].smallestUnusedInstanceIdx][curAttrType['id']];
                         } else {
                             ctx.drawImage(noLeftImg, 
                                           CLIPART_COL + c * CLIPART_SKIP +
@@ -1938,8 +1969,12 @@ function draw_clipart() {
 //                     }
                 }
             } else { // Not human
-                for (i = 0; i < curAvailableObj[selectedIdx].instance[0].numPose; i++) {
-                    if (i == curAvailableObj[selectedIdx].instance[selectedIns].poseID) {
+                
+                var curObjType = curAvailableObj[selectedIdx].instance[0].type;
+                var curAttrType = get_object_attr_type(curObjType);
+                
+                for (i = 0; i < curAvailableObj[selectedIdx].instance[0][curAttrType['num']]; i++) {
+                    if (i == curAvailableObj[selectedIdx].instance[selectedIns][curAttrType['id']]) {
                         ctx.drawImage(selectedImg, 
                                     ATTR_COL + i * CLIPART_SKIP + CLIPART_BUFFER / 2, 
                                     ATTR_ROW + CLIPART_BUFFER, 
@@ -2221,7 +2256,7 @@ function mousedown_canvas(event) {
                     }
                     curClipartImgs[selectedIdx][s] = new Image();
                     curClipartImgs[selectedIdx][s].src = 
-                        obj_img_filename_pose_expr(curAvailableObj[selectedIdx].instance[selectedIns], j, k);   
+                        obj_img_filename_attr2(curAvailableObj[selectedIdx].instance[selectedIns], j, k);   
                     curClipartImgs[selectedIdx][s].onload = draw_canvas;
                     s++;
                 }
@@ -2254,15 +2289,18 @@ function mousedown_canvas(event) {
 
     if (selectedIdx != notUsed &&
             loadedObjectsAndBG == true) {
-        if (selectedAttributeType == 0) {
-            var numAttr = curAvailableObj[selectedIdx].instance[0].numPose;
+        if (selectedAttributeType == 0) { // SA: TODO Deal with multiple attributes
+            var curObjType = curAvailableObj[selectedIdx].instance[0].type;
+            var curAttrType = get_object_attr_type(curObjType);
+            var numAttr = curAvailableObj[selectedIdx].instance[0][curAttrType['num']];
+            curAvailableObj[selectedIdx].instance[0]
             if (numAttr > MAX_NUM_ATTR) {
                 numAttr = MAX_NUM_ATTR;
             }
 
             if (attrX < CLIPART_SKIP * numAttr && attrX > 0 && attrY < CLIPART_SKIP && attrY > 0) {
-                curAvailableObj[selectedIdx].instance[selectedIns].poseID = Math.floor(attrX / CLIPART_SKIP);
-                log_user_data("pose");
+                curAvailableObj[selectedIdx].instance[selectedIns][curAttrType['id']] = Math.floor(attrX / CLIPART_SKIP);
+                log_user_data(curAttrType['id']);
                 redrawCanvas = true;
                 attrSelectorDown = true;
             }
@@ -2314,6 +2352,8 @@ function mousedown_canvas(event) {
                             if ( curAvailableObj[i].instance[0].depth0 == k && curAvailableObj[i].instance[0].depth1 == l) {
                                 for (m = 0; m < curAvailableObj[i].numInstance; m++) {
                                     if (curAvailableObj[i].instance[m].present == true && curAvailableObj[i].instance[m].z == j) {
+                                        var curObjType = curAvailableObj[i].instance[m].type;
+                                        var curAttrType = get_object_attr_type(curObjType);
                                         
 //                                         if (i < numObjTypeShow['paperdoll']) {
                                         if (curAvailableObj[i].instance[m].type == 'human' || 
@@ -2328,8 +2368,8 @@ function mousedown_canvas(event) {
                                             
                                         } else {
                                             var scale = curZScale[curAvailableObj[i].instance[m].z];
-                                            var w0 = curClipartImgs[i][curAvailableObj[i].instance[m].poseID].width;
-                                            var h0 = curClipartImgs[i][curAvailableObj[i].instance[m].poseID].height;
+                                            var w0 = curClipartImgs[i][curAvailableObj[i].instance[m][curAttrType['id']]].width;
+                                            var h0 = curClipartImgs[i][curAvailableObj[i].instance[m][curAttrType['id']]].height;
                                             var w = Math.floor(scale * w0);
                                             var h = Math.floor(scale * h0);
 
@@ -2347,8 +2387,8 @@ function mousedown_canvas(event) {
                                                 newCanvas.width = w;
                                                 newCanvas.height = h;
                                                 var c = newCanvas.getContext("2d");
-                                                c.drawImage(curClipartImgs[i][curAvailableObj[i].instance[m].poseID],
-                                                    0, 0, curClipartImgs[i][curAvailableObj[i].instance[m].poseID].width, curClipartImgs[i][curAvailableObj[i].instance[m].poseID].height,
+                                                c.drawImage(curClipartImgs[i][curAvailableObj[i].instance[m][curAttrType['id']]],
+                                                    0, 0, curClipartImgs[i][curAvailableObj[i].instance[m][curAttrType['id']]].width, curClipartImgs[i][curAvailableObj[i].instance[m][curAttrType['id']]].height,
                                                     0, 0, w, h);
 
                                                 // create a new pixel array
@@ -2620,14 +2660,17 @@ function mousemove_canvas(event) {
 
         if (selectedIdx != notUsed &&
                 loadedObjectsAndBG == true) {
-            if (selectedAttributeType == 0) {
-                var numAttr = curAvailableObj[selectedIdx].instance[0].numPose;
+            if (selectedAttributeType == 0) { // SA: TODO Deal with mulitple attributes
+                var curObjType = curAvailableObj[selectedIdx].instance[0].type;
+                var curAttrType = get_object_attr_type(curObjType);
+                var numAttr = curAvailableObj[selectedIdx].instance[0][curAttrType['num']];
+                
                 if (numAttr > MAX_NUM_ATTR)
                     numAttr = MAX_NUM_ATTR;
 
                 if (attrX < CLIPART_SKIP * numAttr && attrX > 0 && attrY < CLIPART_SKIP && attrY > 0) {
-                    curAvailableObj[selectedIdx].instance[selectedIns].poseID = Math.floor(attrX / CLIPART_SKIP);
-                    log_user_data("pose");
+                    curAvailableObj[selectedIdx].instance[selectedIns][curAttrType['id']] = Math.floor(attrX / CLIPART_SKIP);
+                    log_user_data(curAttrType['id']);
                     draw_canvas();
                 }
             }
