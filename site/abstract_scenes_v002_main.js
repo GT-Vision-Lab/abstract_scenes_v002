@@ -46,7 +46,7 @@ var loadedObjectsAndBG = false;
 // global variables for the page
 ////// MULTIPLE OBJECTS FOR THE CURRENT SCENE ///////
 // Various variables setting up the appearence of the interface
-var CANVAS_WIDTH = 800;
+var CANVAS_WIDTH = 840;
 var CANVAS_HEIGHT = 400;
 var CANVAS_ROW = 30;
 var CANVAS_COL = 20;
@@ -86,7 +86,7 @@ var CLIPART_SKIP = 80;
 var CLIPART_SIZE = CLIPART_SKIP - 2 * CLIPART_BUFFER;
 var CLIPART_OBJECT_OFFSET_COL = 0;
 var CLIPART_OBJECT_OFFSET_ROW = 70;
-var MAX_NUM_ATTR = 8;
+var MAX_NUM_ATTR_PER_ROW = 9;
 // Number of clip art to show of the other objects
 var CLIPART_OBJECT_COL = CLIPART_COL + CLIPART_SKIP * NUM_CLIPART_HORZ + 24;
 
@@ -1404,13 +1404,14 @@ function draw_canvas() {
         CANVAS_HEIGHT = bgImg.height;
     }
     
+    ATTR_PADDING = 30;
     SCALE_ROW = CANVAS_ROW + CANVAS_HEIGHT + 1.5*CLIPART_BUFFER;
     SCALE_COL = CANVAS_COL + 340 + CLIPART_BUFFER;
     FLIP_ROW = SCALE_ROW - 8;
     FLIP_COL = SCALE_COL + 200;
     ATTR_ROW = SCALE_ROW + 38 + CLIPART_BUFFER;
     ATTR_COL = CANVAS_COL;
-    ATTR_WIDTH = CANVAS_WIDTH;
+    ATTR_WIDTH = CANVAS_WIDTH + ATTR_PADDING;
     ATTR_HEIGHT = CLIPART_SKIP + 2 * CLIPART_BUFFER;
 
     ATTR_TYPE_WIDTH = 100;
@@ -1418,8 +1419,7 @@ function draw_canvas() {
     ATTR_TYPE_COL = ATTR_COL;
     ATTR_TYPE_ROW = ATTR_ROW - ATTR_TYPE_HEIGHT;
 
-
-    CLIPART_COL = CANVAS_COL + CANVAS_WIDTH + CLIPART_BUFFER;
+    CLIPART_COL = CANVAS_COL + CANVAS_WIDTH + ATTR_PADDING + CLIPART_BUFFER;
     CLIPART_ROW = CANVAS_ROW;
     CLIPART_WIDTH = CLIPART_SKIP * NUM_CLIPART_HORZ + 2 * CLIPART_BUFFER;
     TAB_WIDTH = CLIPART_WIDTH / NUM_TABS;
@@ -2066,8 +2066,7 @@ function draw_buttons() {
                     ctx.drawImage(buttonImg, w, (i + 3) * h, w, h, 
                                   i * w + FLIP_COL, 
                                   FLIP_ROW, w, h);
-                }
-                else {
+                } else {
                     ctx.drawImage(buttonImg, 0, (i + 3) * h, w, h, 
                                   i * w + FLIP_COL, 
                                   FLIP_ROW, w, h);
@@ -2180,33 +2179,11 @@ function mousedown_canvas(event) {
         selectedTab = objectTypeOrder[selectedTabIdx];
         tabPage = 0;
         if (selectedIdx == notUsed) {
+            selectedAttrTabIdx = 0;
             selectedAttrTab = objectData[selectedTab].attributeTypeList[selectedAttrTabIdx];
         }
         //log_user_data("tab"); // SA: TODO Add?
         redrawCanvas = true;
-    }
-
-    // Select attribute type
-    var attrTypeX = cx - ATTR_TYPE_COL - canvas_fix.offsetLeft;
-    var attrTypeY = cy - ATTR_TYPE_ROW - canvas_fix.offsetTop;
-
-    if (attrTypeY > 0 && attrTypeY < ATTR_TYPE_HEIGHT && loadedObjectsAndBG == true) {
-        var attrSelectedIdx = Math.floor(attrTypeX / ATTR_TYPE_WIDTH);
-        
-        var curSelectedObjType;
-        if (selectedIdx != notUsed) {
-            curSelectedObjType = curAvailableObj[selectedIdx].instance[0].type;
-        } else {
-            curSelectedObjType = selectedTab;
-        }
-        attributes = objectData[curSelectedObjType].attributeTypeList;
-        
-        if (attrSelectedIdx >= 0 && attrSelectedIdx < attributes.length) {
-            selectedAttrTabIdx = attrSelectedIdx;
-            selectedAttrTab = attributes[selectedAttrTabIdx];
-            console.log(selectedAttrTab + " " + selectedAttrTabIdx);
-            redrawCanvas = true;
-        }
     }
     
     // Select clipart objects to add to canvas
@@ -2263,6 +2240,20 @@ function mousedown_canvas(event) {
                 // log_user_data("Transition to scene?"); // SA: TODO Add?
                 redrawCanvas = true;
             }
+            
+            // Update attribute tab if the user selects a new clipart object
+            // SA: TODO Maybe make it remember the 
+            // previous clipart object type's attribute tab?
+            if (selectedIdx != prevSelectedIdx && selectedIdx != notUsed) {
+                var curSelectedObjType = curAvailableObj[selectedIdx].instance[0].type;
+
+                attributes = objectData[curSelectedObjType].attributeTypeList;
+
+                selectedAttrTabIdx = 0;
+                selectedAttrTab = attributes[selectedAttrTabIdx];
+                console.log(selectedAttrTab + " " + selectedAttrTabIdx);
+                redrawCanvas = true;
+            }
         } else {
             // If the user clicks in the select object part of menu
             // but it's not a valid object, then leave selectedIdx
@@ -2314,6 +2305,29 @@ function mousedown_canvas(event) {
         draw_canvas();
     }
 
+    // Select attribute type
+    var attrTypeX = cx - ATTR_TYPE_COL - canvas_fix.offsetLeft;
+    var attrTypeY = cy - ATTR_TYPE_ROW - canvas_fix.offsetTop;
+
+    if (attrTypeY > 0 && attrTypeY < ATTR_TYPE_HEIGHT && loadedObjectsAndBG == true) {
+        var attrSelectedIdx = Math.floor(attrTypeX / ATTR_TYPE_WIDTH);
+        
+        var curSelectedObjType;
+        if (selectedIdx != notUsed) {
+            curSelectedObjType = curAvailableObj[selectedIdx].instance[0].type;
+        } else {
+            curSelectedObjType = selectedTab;
+        }
+        attributes = objectData[curSelectedObjType].attributeTypeList;
+        
+        if (attrSelectedIdx >= 0 && attrSelectedIdx < attributes.length) {
+            selectedAttrTabIdx = attrSelectedIdx;
+            selectedAttrTab = attributes[selectedAttrTabIdx];
+            console.log(selectedAttrTab + " " + selectedAttrTabIdx);
+            redrawCanvas = true;
+        }
+    }
+    
     // Select clipart attributes
     var attrX = cx - ATTR_COL - canvas_fix.offsetLeft;
     var attrY = cy - ATTR_ROW - canvas_fix.offsetTop;
@@ -2326,9 +2340,13 @@ function mousedown_canvas(event) {
         var curAttrType = curAttrTypes[selectedAttrTabIdx];
 
         var numAttr = curAvailableObj[selectedIdx].instance[0][curAttrType['num']];
-
-        if (numAttr > MAX_NUM_ATTR) {
-            numAttr = MAX_NUM_ATTR;
+        
+        if (numAttr > MAX_NUM_ATTR_PER_ROW) {
+            numAttr = MAX_NUM_ATTR_PER_ROW;
+        }
+        
+        if ((curObjType == 'human' || curObjType == 'paperdoll') && curAttrType['id'] == 'expressionID') {
+            numAttr -= 1; // Remove one due to (unselected) blank expression
         }
         
         if (attrX < CLIPART_SKIP * numAttr && attrX > 0 && 
@@ -2393,6 +2411,20 @@ function mousedown_canvas(event) {
                         }
                     }
                 }
+            }
+            
+            // Update attribute tab if the user selects a new clipart object
+            // SA: TODO Maybe make it remember the 
+            // previous clipart object type's attribute tab?
+            if (selectedIdx != notUsed) {
+                var curSelectedObjType = curAvailableObj[selectedIdx].instance[0].type;
+
+                attributes = objectData[curSelectedObjType].attributeTypeList;
+
+                selectedAttrTabIdx = 0;
+                selectedAttrTab = attributes[selectedAttrTabIdx];
+                console.log(selectedAttrTab + " " + selectedAttrTabIdx);
+                redrawCanvas = true;
             }
             
             if (selectedIdx >= 0) {
@@ -2754,9 +2786,13 @@ function mousemove_canvas(event) {
             var curAttrType = curAttrTypes[selectedAttrTabIdx];
 
             var numAttr = curAvailableObj[selectedIdx].instance[0][curAttrType['num']];
+        
+            if (numAttr > MAX_NUM_ATTR_PER_ROW) {
+                numAttr = MAX_NUM_ATTR_PER_ROW;
+            }
             
-            if (numAttr > MAX_NUM_ATTR) {
-                numAttr = MAX_NUM_ATTR;
+            if ((curObjType == 'human' || curObjType == 'paperdoll') && curAttrType['id'] == 'expressionID') {
+                numAttr -= 1; // Remove one due to (unselected) blank expression
             }
 
             if (attrX < CLIPART_SKIP * numAttr && attrX > 0 && attrY < CLIPART_SKIP && attrY > 0) {
