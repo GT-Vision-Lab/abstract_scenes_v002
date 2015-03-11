@@ -46,7 +46,7 @@ var loadedObjectsAndBG = false;
 // global variables for the page
 ////// MULTIPLE OBJECTS FOR THE CURRENT SCENE ///////
 // Various variables setting up the appearence of the interface
-var CANVAS_WIDTH = 840;
+var CANVAS_WIDTH = 800;
 var CANVAS_HEIGHT = 400;
 var CANVAS_ROW = 30;
 var CANVAS_COL = 20;
@@ -132,8 +132,12 @@ var lastIns = -9999;
 var selectPaperdollPose = false;
 var lastX = 0;
 var lastY = 0;
-var lastZ = 0; 
+var lastZ = 0;
+var lastGlobalRot = 0;
+var lastLocalRots = [];
+
 var moveClipart = false;
+var userChange = false;
 
 // get response from keyboard
 var CTRL_DOWN = false;
@@ -226,6 +230,8 @@ function reset_scene() {
         lastX = 0;
         lastY = 0;
         lastZ = defZSize; 
+        lastGlobalRot = notUsed;
+        lastLocalRots = [];
         
         // In the html file
         update_instructions();
@@ -265,6 +271,7 @@ function reset_scene() {
             curAvailableObj = curSceneData.availableObject;
             curClipartImgs = curSceneData.clipartImgs;
             curPeopleExprImgs = curSceneData.peopleExprImgs;
+            curPaperdollPartImgs = curSceneData.paperdollPartImgs;
             curUserSequence = curSceneData.userSequence;
             curLoadAll = curSceneData.loadAll;
             curDepth0Used = curSceneData.depth0Used;
@@ -308,6 +315,7 @@ function reset_scene() {
             curSceneData.availableObject = curAvailableObj;
             curSceneData.clipartImgs = curClipartImgs;
             curSceneData.peopleExprImgs = curPeopleExprImgs;
+            curSceneData.paperdollPartImgs = curPaperdollPartImgs;
             curSceneData.loadAll = curLoadAll;
             curSceneData.userSequence = curUserSequence;
             curSceneData.depth0Used = curDepth0Used;
@@ -340,12 +348,15 @@ function json_obj_init() {
                         selectedIns: [],
                         present: [],
                         poseID: [],
+                        typeID: [],
                         expressionID: [],
                         x: [],
                         y: [],
                         z: [],
                         flip: [],
-                        depth1: []
+                        depth1: [],
+                        globalRot: [],
+                        localRots: []
                       };
 
     curDepth0Used = Array(numDepth0);
@@ -379,12 +390,15 @@ function rand_obj_init(histStr) {
                         selectedIns: [],
                         present: [],
                         poseID: [],
+                        typeID: [],
                         expressionID: [],
                         x: [],
                         y: [],
                         z: [],
                         flip: [],
-                        depth1: []
+                        depth1: [],
+                        globalRot: [],
+                        localRots: []
                       };
 
     curDepth0Used = Array(numDepth0);
@@ -658,12 +672,10 @@ function get_object_attr_types(objType) {
 function rand_obj_load_first_imgs() {
     
     for (i = 0; i < numAvailableObjects; i++) {
-    
-        // SA: TODO Update for human
         if (curAvailableObj[i].instance[0].type == 'human') {
-
             if (curAvailableObj[i].instance[0].deformable == true) {
                 
+//                 curPaperdollPartImgs = Array(numObjTypeShow['human']);
                 // Load paperdoll heads/expression
                 curClipartImgs[i] = Array(curAvailableObj[i].instance[0].numExpression);
                 curPeopleExprImgs[i] = Array(curAvailableObj[i].instance[0].numExpression);
@@ -693,16 +705,13 @@ function rand_obj_load_first_imgs() {
                         curAvailableObj[i].instance[k].deformableX[j] = 0;
                         curAvailableObj[i].instance[k].deformableY[j] = 0;
                         
-                        if (curAvailableObj[i].instance[k].body[j].part == 'Head') {
-                            // Don't rotate the head
-                            curAvailableObj[i].instance[k].deformableGlobalRot[j] = 0;
-                            curAvailableObj[i].instance[k].deformableLocalRot[j] = 0;
-                        } else if (curAvailableObj[i].instance[k].body[j].part == 'Hair') {
-                            // Don't rotate the hair
-                            curAvailableObj[i].instance[k].deformableGlobalRot[j] = 0;
-                            curAvailableObj[i].instance[k].deformableLocalRot[j] = 0;
-                        } else if (curAvailableObj[i].instance[k].body[j].part == 'Torso') {
-                            // Don't rotate the torso
+                        if (curAvailableObj[i].instance[k].body[j].part == 'Head' || 
+                            curAvailableObj[i].instance[k].body[j].part == 'Hair' || 
+                            curAvailableObj[i].instance[k].body[j].part == 'Torso' ||
+                            curAvailableObj[i].instance[k].body[j].part == 'LeftHand' || 
+                            curAvailableObj[i].instance[k].body[j].part == 'RightHand' || 
+                            curAvailableObj[i].instance[k].body[j].part == 'LeftFoot' || 
+                            curAvailableObj[i].instance[k].body[j].part == 'RightFoot') {
                             curAvailableObj[i].instance[k].deformableGlobalRot[j] = 0;
                             curAvailableObj[i].instance[k].deformableLocalRot[j] = 0;
                         }
@@ -1031,6 +1040,11 @@ function num_differences_instance(originalInst, currentInst) {
         console.log("poseID changed");
         isDiff += 1;
     }
+    
+    if (originalInst.typeID != currentInst.typeID) {
+        console.log("typeID changed");
+        isDiff += 1;
+    }
 
 //     // depth0 currently can't change
 //     if (originalInst.depth0 != currentInst.depth0) {
@@ -1122,7 +1136,7 @@ function validate_scene() {
 //     for (i = 0; i < objectTypeOrder.length; i++) {
 //         numAvailableObjectsUsed = 0;
 //         for (j = 0; j < numObjTypeShow[objectTypeOrder[i]]; j++) {
-//                 curObjIdx = clipartIdxStart[i] + j;
+//                 curObjIdx = clipartIdxStart[objectTypeOrder[i]] + j;
 //             for (m = 0; m < curAvailableObj[curObjIdx].numInstance; m++) {
 //                 if (curAvailableObj[curObjIdx].instance[m].present == true) {
 //                     numAvailableObjectsUsed++;
@@ -1144,11 +1158,9 @@ function validate_scene() {
     
     for (i = 0; i < numAvailableObjects; i++) {
         for (m = 0; m < curAvailableObj[i].numInstance; m++) {
-            
             if (curAvailableObj[i].instance[m].present) {
                 
                 numAvailableObjectsUsed++;
-                
                 if (curAvailableObj[i].instance[m].type == 'human') {
                     
                     if (curAvailableObj[i].instance[m].expressionID == 0) {
@@ -1185,6 +1197,7 @@ function log_user_data(msg) {
         // SA: TODO Verify that this is correct/reasonable
         if ( selectedIdx != notUsed && selectedIns != notUsed) {
             curUserSequence.poseID.push(curAvailableObj[selectedIdx].instance[selectedIns].poseID);
+            curUserSequence.typeID.push(curAvailableObj[selectedIdx].instance[selectedIns].typeID); // Fix?
             curUserSequence.expressionID.push(curAvailableObj[selectedIdx].instance[selectedIns].expressionID);
             curUserSequence.present.push(curAvailableObj[selectedIdx].instance[selectedIns].present);
             curUserSequence.x.push(curAvailableObj[selectedIdx].instance[selectedIns].x);
@@ -1192,8 +1205,11 @@ function log_user_data(msg) {
             curUserSequence.z.push(curAvailableObj[selectedIdx].instance[selectedIns].z);
             curUserSequence.flip.push(curAvailableObj[selectedIdx].instance[selectedIns].flip);
             curUserSequence.depth1.push(curAvailableObj[selectedIdx].instance[selectedIns].depth1);
+            curUserSequence.globalRot.push(lastGlobalRot);
+            curUserSequence.localRots.push(lastLocalRots);
         } else {
             curUserSequence.poseID.push(notUsed);
+            curUserSequence.typeID.push(notUsed);
             curUserSequence.expressionID.push(notUsed);
             curUserSequence.present.push(notUsed);
             curUserSequence.x.push(notUsed);
@@ -1201,10 +1217,12 @@ function log_user_data(msg) {
             curUserSequence.z.push(notUsed);
             curUserSequence.flip.push(notUsed);
             curUserSequence.depth1.push(notUsed);
+            curUserSequence.globalRot.push(notUsed);
+            curUserSequence.localRots.push([]);
         }
-        if (msg != undefined) {
-            console.log(msg + ": " + curUserSequence.flip.length);
-        }
+//         if (msg != undefined) {
+//             console.log(msg);
+//         }
     }
 }
 
@@ -2103,44 +2121,54 @@ function draw_buttons() {
 // select object size, flip, pose, expression (for humans).
 // ===========================================================
 function mouseup_canvas(event) {
-    
-    moveClipart = false;
 
     if (selectedIdx != notUsed &&
         loadedObjectsAndBG == true) {
         // record the movement data
-        if (selectedIdx != lastIdx || selectedIns != lastIns || 
+        if (selectedIdx != lastIdx || selectedIns != lastIns || userChange || 
                 curAvailableObj[selectedIdx].instance[selectedIns].x != lastX || 
                 curAvailableObj[selectedIdx].instance[selectedIns].y != lastY || 
                 curAvailableObj[selectedIdx].instance[selectedIns].z != lastZ) {
-
-            log_user_data("mouseup1");
-
+            
             lastIdx = selectedIdx;
             lastIns = selectedIns;
             lastX = curAvailableObj[selectedIdx].instance[selectedIns].x;
             lastY = curAvailableObj[selectedIdx].instance[selectedIns].y;
             lastZ = curAvailableObj[selectedIdx].instance[selectedIns].z;
+            
+            if (curAvailableObj[selectedIdx].instance[selectedIns].deformable == true) {
+                // SA: TODO Fix if deformable object not human
+                var mainBodyIdx = curAvailableObj[selectedIdx].instance[selectedIns].partIdxList['Torso'];
+                lastGlobalRot = curAvailableObj[selectedIdx].instance[selectedIns].deformableGlobalRot[mainBodyIdx];
+                lastLocalRots = curAvailableObj[selectedIdx].instance[selectedIns].deformableLocalRot;
+            }
+            
+            log_user_data("mouseup1");
         }
 
         if (curAvailableObj[selectedIdx].instance[selectedIns].present == false) {
             // should find a smart way to deal with the pointer
             if (selectedIns < curAvailableObj[selectedIdx].smallestUnusedInstanceIdx) {
-                curAvailableObj[selectedIdx].smallestUnusedInstanceIdx = selectedIns;
+                if (curAvailableObj[selectedIdx].instance[selectedIns].type == 'human') {
+                    curAvailableObj[selectedIdx].instance[selectedIns].expressionID = 0;
+                }
                 curAvailableObj[selectedIdx].smallestUnusedInstanceIdx = selectedIns;
             }
 
             selectedIdx = notUsed;
             selectedIns = notUsed;
-            log_user_data("mouseup2"); // SA: TODO Add? Doesn't seem to get triggered
+            log_user_data("mouseup2");
 
             draw_canvas();
         }
     }
     
+    wasOnCanvas = false;
     attrSelectorDown = false;
     flipDown = false;
     scaleSliderDown = false;
+    userChange = false;
+    moveClipart = false;
 }
 
 function mousedown_canvas(event) {
@@ -2370,7 +2398,8 @@ function mousedown_canvas(event) {
             if (curObjType == 'human' && curAttrType['id'] == 'expressionID') {
                 curAvailableObj[selectedIdx].instance[selectedIns][curAttrType['id']] += 1;
             }
-            log_user_data(curAttrType['id']);
+            //log_user_data(curAttrType['id']);
+            userChange = true;
             redrawCanvas = true;
             attrSelectorDown = true;
         }
@@ -2478,8 +2507,18 @@ function mousedown_canvas(event) {
 
         if (flipButtonX >= 0 && flipButtonX < buttonW * 2 && flipButtonY >= 0 && flipButtonY < buttonH) {
             if (selectedIdx != notUsed) {
-                curAvailableObj[selectedIdx].instance[selectedIns].flip = Math.floor(flipButtonX / buttonW);
-                log_user_data("flip");
+                var newFlip = Math.floor(flipButtonX / buttonW);
+                var oldFlip = curAvailableObj[selectedIdx].instance[selectedIns].flip;
+                
+                // Toggles flip - Assumes binary 0/1 values
+                if (oldFlip == newFlip) {
+                    curAvailableObj[selectedIdx].instance[selectedIns].flip = newFlip ? newFlip-1 :newFlip + 1;
+                } else {
+                    curAvailableObj[selectedIdx].instance[selectedIns].flip = newFlip;
+                }
+
+//                 log_user_data("flip");
+                userChange = true;
                 redrawCanvas = true;
                 flipDown = true;
             }
@@ -2718,8 +2757,9 @@ function mousemove_canvas(event) {
         moveClipart == true && 
         wasOnCanvas === true &&
         loadedObjectsAndBG == true) {
+
         curAvailableObj[selectedIdx].instance[selectedIns].present = false;
-//         log_user_data("mousemove_unselect"); // Changes too frequently with mouse movement
+        //log_user_data("mousemove_unselect"); // Changes too frequently with mouse movement
         draw_canvas();
     }
 
@@ -2741,6 +2781,7 @@ function mousemove_canvas(event) {
                 curAvailableObj[selectedIdx].instance[selectedIns].present = true;
                 var paperdollInst = curAvailableObj[selectedIdx].instance[selectedIns];
                 
+                userChange = true;
                 if (selectedPart == 'Torso') {
                     paperdollInst.x = canvasX + mouse_offset_X;
                     paperdollInst.y = canvasY + mouse_offset_Y;
@@ -2800,7 +2841,6 @@ function mousemove_canvas(event) {
         
             if (curObjType == 'human' && curAttrType['id'] == 'expressionID') {
                 numAttr -= 1; // Remove one due to (unselected) blank expression
-                console.log('hi')
             }
             
             // SA: TODO Update interface to support more than 9 attribute possibilites
@@ -2813,7 +2853,7 @@ function mousemove_canvas(event) {
                 if (curObjType == 'human' && curAttrType['id'] == 'expressionID') {
                     curAvailableObj[selectedIdx].instance[selectedIns][curAttrType['id']] += 1;
                 }
-                log_user_data(curAttrType['id']);
+//                 log_user_data(curAttrType['id']);
                 draw_canvas();
             }
             
@@ -2843,8 +2883,11 @@ function mousemove_canvas(event) {
             flipButtonY >= 0 && flipButtonY < buttonH) {
             
             if (selectedIdx != notUsed) {
-                curAvailableObj[selectedIdx].instance[selectedIns].flip = Math.floor(flipButtonX / buttonW);
-                log_user_data("flip");
+                var newFlip = Math.floor(flipButtonX / buttonW);
+//                 var oldFlip = curAvailableObj[selectedIdx].instance[selectedIns].flip;
+                curAvailableObj[selectedIdx].instance[selectedIns].flip = newFlip;
+//                 log_user_data("flip");
+                userChange = true;
                 draw_canvas();
             }
         }
