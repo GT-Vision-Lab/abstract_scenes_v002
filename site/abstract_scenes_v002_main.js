@@ -328,9 +328,10 @@ function json_obj_init() {
     curSceneData = JSON.parse(JSON.stringify(sceneJSONData[sceneFilename].scene));
     curAvailableObj = curSceneData.availableObject;
     curClipartImgs = Array(numAvailableObjects);
-    curPeopleExprImgs = Array(numObjTypeShow['human']); // SA: TODO FIX
-    curPeopleExprImgs = Array(numObjTypeShow['paperdoll']);
-    curPaperdollPartImgs = Array(numObjTypeShow['paperdoll']);
+    curPeopleExprImgs = Array(numObjTypeShow['human']);
+    
+    // TODO FIX
+//    curPaperdollPartImgs = Array(numObjTypeShow['paperdoll']);
     
 //     // Don't overwrite user tracking history
 //     curUserSequence = curSceneData.userSequence;
@@ -472,9 +473,8 @@ function rand_obj_init(histStr) {
                     }
                     
                     // Object type-specific fields
-                    if (curObjectType.objectType == "human" || curObjectType.objectType == "paperdoll") {
+                    if (curObjectType.objectType == "human") {
                         objInstance.numExpression = curObjectType.type[idxValidType].numExpression;
-
                         objInstance.expressionID = 0; // No face
                         
                         if (objInstance.deformable == false) {
@@ -660,8 +660,7 @@ function rand_obj_load_first_imgs() {
     for (i = 0; i < numAvailableObjects; i++) {
     
         // SA: TODO Update for human
-        if (curAvailableObj[i].instance[0].type == 'human' || 
-            curAvailableObj[i].instance[0].type == 'paperdoll') {
+        if (curAvailableObj[i].instance[0].type == 'human') {
 
             if (curAvailableObj[i].instance[0].deformable == true) {
                 
@@ -860,8 +859,8 @@ function paperdoll_expr_img_filename_expr(obj, exprID) {
     }
 
     // SA TODO Update to be more flexible
-    if (obj['type'] == 'paperdoll') {
-        humanFolder = objectData['paperdoll']['baseDirectory'];
+    if (obj['type'] == 'human') {
+        humanFolder = objectData['human']['baseDirectory'];
         name = obj['name'] +
                zero_pad((exprID + 1), imgPadNum) +
                '.' + CLIPART_IMG_FORMAT;
@@ -879,8 +878,8 @@ function paperdoll_part_img_filename_expr(obj, partName) {
 
     var filename;
 
-    if (obj['type'] == 'paperdoll') {
-        humanFolder = objectData['paperdoll']['baseDirectory'];
+    if (obj['type'] == 'human') {
+        humanFolder = objectData['human']['baseDirectory'];
         name = obj['name'] + '/' + 
                partName +
                '.' + CLIPART_IMG_FORMAT;
@@ -1150,8 +1149,7 @@ function validate_scene() {
                 
                 numAvailableObjectsUsed++;
                 
-                if (curAvailableObj[i].instance[m].type == 'human' || 
-                    curAvailableObj[i].instance[m].type == 'paperdoll') {
+                if (curAvailableObj[i].instance[m].type == 'human') {
                     
                     if (curAvailableObj[i].instance[m].expressionID == 0) {
                         render_dialog("expression");
@@ -1274,13 +1272,13 @@ var jsonIdx = -1; // Start with -1 because of config
 
 function load_config_json() {
     $.getJSON(dataURL+sceneConfigFile).done( function(data) { 
-        load_object_config(data); 
+        load_object_config(data, null); 
     }).fail( function() { 
         console.log("Loading JSON " + sceneConfigFile + " failed.");  
     });
 }
 
-function load_object_config(data) {
+function load_object_config(data, deformType) {
     
     var curFile;
     
@@ -1289,18 +1287,33 @@ function load_object_config(data) {
         objectData = {};
         jsonIdx += 1;
     } else {
-        objectData[data.objectType] = data;
+        var deformTypeUse;
+        
+        if ( deformTypesUse[data.objectType] == undefined ) {
+            deformTypeUse = deformTypeDefault;
+        } else {
+            deformTypeUse = deformTypesUse[data.objectType];
+        }
+        
+        if (deformType == deformTypeUse) {
+            objectData[data.objectType] = data;
+        }
         jsonIdx += 1;
     }
     
+    // SA: Loads all JSON files, even if they don't end up being used.
+    // Maybe a bit wasteful.
     if (jsonIdx < sceneConfigData.clipartObjJSONFile.length) {
-        curFile = sceneConfigData.clipartObjJSONFile[jsonIdx].file;
-        
-        $.getJSON(dataURL+curFile).done( function(data) { 
-            load_object_config(data); 
-        }).fail( function() { 
-            console.log("Loading JSON " + curFile + " failed.");  
-        });
+        var curObjFiles = sceneConfigData.clipartObjJSONFile[jsonIdx].file;
+        for (var deformType in curObjFiles) {
+            curFile = sceneConfigData.clipartObjJSONFile[jsonIdx].file[deformType];
+            
+            $.getJSON(dataURL+curFile).done( function(data) { 
+                load_object_config(data, deformType); 
+            }).fail( function() { 
+                console.log("Loading JSON " + curFile + " failed.");  
+            });
+        }
     } else {
         load_obj_category_data();
         reset_scene();
@@ -1338,9 +1351,16 @@ function load_obj_category_data() {
         
         curSceneType = sceneTypeList[curScene];
         curSceneTypeBase = extract_scene_type_base(curSceneType)
-        objectTypeOrder = sceneConfigData[curSceneType].objectTypeOrder;
-        numObjTypeShow = sceneConfigData[curSceneType].numObjTypeShow;
         
+        var objectTypeData = sceneConfigData[curSceneType].objectTypeData;
+        objectTypeOrder = [];
+        numObjTypeShow = {};
+        for (var idxObjT in objectTypeData) {
+            var curName = objectTypeData[idxObjT].nameType;
+            objectTypeOrder.push(curName);
+            numObjTypeShow[curName] = objectTypeData[idxObjT].numShow;
+        }
+
         // In case scene config is bad, we overwrite values
         // that suggest putting more objects than available for
         // that category and prevents an infinite loop
@@ -1404,7 +1424,7 @@ function draw_canvas() {
         CANVAS_HEIGHT = bgImg.height;
     }
     
-    ATTR_PADDING = 30;
+    ATTR_PADDING = 30; // SA: Hack to get 9 attribute items
     SCALE_ROW = CANVAS_ROW + CANVAS_HEIGHT + 1.5*CLIPART_BUFFER;
     SCALE_COL = CANVAS_COL + 340 + CLIPART_BUFFER;
     FLIP_ROW = SCALE_ROW - 8;
@@ -1511,7 +1531,7 @@ function draw_nondeformable_person(objIdx, instIdx) {
 }
 
 function draw_deformable_person(objIdx, instIdx) {
-    paperdoll = curAvailableObj[objIdx].instance[instIdx];
+    var paperdoll = curAvailableObj[objIdx].instance[instIdx];
     var numBodyParts = paperdoll.body.length;
     var scale = paperdoll.globalScale * curZScale[paperdoll.z];
 
@@ -1626,8 +1646,7 @@ function draw_scene() {
                                     curAvailableObj[i].instance[m].z == j && 
                                     curAvailableObj[i].instance[m].depth1 == l) {
                                     
-                                    if (curAvailableObj[i].instance[m].type == 'human' || 
-                                        curAvailableObj[i].instance[m].type == 'paperdoll') {
+                                    if (curAvailableObj[i].instance[m].type == 'human') {
                                     
                                             if (curAvailableObj[i].instance[m].deformable == true) {
                                                 draw_deformable_person(i, m);
@@ -1704,8 +1723,7 @@ function draw_clipart() {
     var tabCounter = 1;
     for (var idxOT in objectTypeOrder) {
         var curTabObjType = objectData[objectTypeOrder[idxOT]].objectType;
-        if (curTabObjType == 'human' ||
-            curTabObjType == 'paperdoll') {
+        if (curTabObjType == 'human') {
             ctx.fillText("People",  CLIPART_COL + tabCounter * TAB_WIDTH / 2, CLIPART_ROW + TAB_HEIGHT / 2 + 8);
         } else if (curTabObjType == 'animal') {
             ctx.fillText("Animals", CLIPART_COL + tabCounter * TAB_WIDTH / 2, CLIPART_ROW + TAB_HEIGHT / 2 + 8);
@@ -1929,9 +1947,7 @@ function draw_clipart() {
         if (selectedIdx != notUsed) {
             var curSelectedObjType = curAvailableObj[selectedIdx].instance[selectedIns].type;
             
-            if (curSelectedObjType == 'human' &&
-                curAvailableObj[selectedIdx].instance[selectedIns].deformable == false) {
-
+            if (curSelectedObjType == 'human' ) {
                 if (selectedAttrTab == 'Expression') {
                     for (i = 1; i < curAvailableObj[selectedIdx].instance[0].numExpression; i++) {
                         // just to show it is selected
@@ -1959,7 +1975,8 @@ function draw_clipart() {
                                       0, 0, w, h, 
                                       Math.floor(xo), Math.floor(yo), newW, newH);
                     }
-                } else if (selectedAttrTab == 'Pose') {
+                } else if (selectedAttrTab == 'Pose' &&
+                           curAvailableObj[selectedIdx].instance[selectedIns].deformable == false) {
                     for (i = 0; i < curAvailableObj[selectedIdx].instance[0].numPose; i++) {
                         // just to show it is selected
                         if (i == curAvailableObj[selectedIdx].instance[selectedIns].poseID) {
@@ -2209,7 +2226,7 @@ function mousedown_canvas(event) {
             // SA: Should instance be 0?
             var curSelectedObjType = curAvailableObj[selectedIdx].instance[0].type;
             
-            if (curSelectedObjType == 'paperdoll' && 
+            if (curSelectedObjType == 'human' && 
                 curAvailableObj[selectedIdx].instance[0].deformable == true) {
                 
                 selectPaperdollPose = true;
@@ -2338,7 +2355,7 @@ function mousedown_canvas(event) {
         var curAttrType = curAttrTypes[selectedAttrTabIdx];
         var numAttr = curAvailableObj[selectedIdx].instance[0][curAttrType['num']];
         
-        if ((curObjType == 'human' || curObjType == 'paperdoll') && curAttrType['id'] == 'expressionID') {
+        if (curObjType == 'human' && curAttrType['id'] == 'expressionID') {
             numAttr -= 1; // Remove one due to (unselected) blank expression
         }
         
@@ -2389,8 +2406,7 @@ function mousedown_canvas(event) {
                             if ( curAvailableObj[i].instance[0].depth0 == k && curAvailableObj[i].instance[0].depth1 == l) {
                                 for (m = 0; m < curAvailableObj[i].numInstance; m++) {
                                     if (curAvailableObj[i].instance[m].present == true && curAvailableObj[i].instance[m].z == j) {
-                                        if ((curAvailableObj[i].instance[m].type == 'human' || 
-                                            curAvailableObj[i].instance[m].type == 'paperdoll') ) {
+                                        if (curAvailableObj[i].instance[m].type == 'human') {
                                             
                                             if (curAvailableObj[i].instance[m].deformable == true) {
                                                 // Handle the deformable people in a separate function
@@ -2719,8 +2735,7 @@ function mousemove_canvas(event) {
         wasOnCanvas = true;
 
         if (selectedIdx != notUsed && moveClipart === true) {   
-            if ((curAvailableObj[selectedIdx].instance[selectedIns].type == 'human' || 
-                curAvailableObj[selectedIdx].instance[selectedIns].type == 'paperdoll') &&
+            if (curAvailableObj[selectedIdx].instance[selectedIns].type == 'human' &&
                 curAvailableObj[selectedIdx].instance[selectedIns].deformable == true) {
                     
                 curAvailableObj[selectedIdx].instance[selectedIns].present = true;
@@ -2783,8 +2798,9 @@ function mousemove_canvas(event) {
 
             var numAttr = curAvailableObj[selectedIdx].instance[0][curAttrType['num']];
         
-            if ((curObjType == 'human' || curObjType == 'paperdoll') && curAttrType['id'] == 'expressionID') {
+            if (curObjType == 'human' && curAttrType['id'] == 'expressionID') {
                 numAttr -= 1; // Remove one due to (unselected) blank expression
+                console.log('hi')
             }
             
             // SA: TODO Update interface to support more than 9 attribute possibilites

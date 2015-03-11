@@ -27,6 +27,13 @@ var sceneJSONURL = baseURL + "../scenes/json/";
 var AVAIL_SCENE_TYPES = ["Living-All", "Park-All"];
 var AVAIL_SCENE_TYPES = ["Living", "Park"]; // SA: For Larry integration
 
+// In case forget to update deformTypesUse
+var deformTypeDefault = 'nondeformable'; 
+var deformTypesUse = { "human": "deformable",
+                       "animal": "nondeformable",
+                       "largeObject": "nondeformable"
+                     };
+
 // Xinlei instruction example related
 // Keep for Xinlei's examples
 var exampleBaseURL = "http://ladoga.graphics.cs.cmu.edu/xinleic/genSents/Interface/";
@@ -72,6 +79,15 @@ if (restrictInputStr == "") {
         restrictInput = true;
     } else {
         restrictInput = false;
+    }
+}
+
+var deformHumanStr = decode(gup("deformHuman"));
+if (deformHumanStr != "") {
+    if (deformHumanStr == "0") {
+        deformTypesUse['human'] = 'nondeformable';
+    } else {
+        deformTypesUse['human'] = 'deformable';
     }
 }
 
