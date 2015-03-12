@@ -32,6 +32,7 @@ var objectData = {};
 // Data for the current (rendered) scene
 var curSceneData;
 var curAvailableObj;
+var curAvailableObjInit;
 var curUserSequence;
 var curClipartImgs;
 var curPeopleExprImgs;
@@ -217,6 +218,8 @@ function reset_scene() {
         maxNumObj = sceneConfigData[curSceneType].maxNumObj;
         minPerCatType = sceneConfigData[curSceneType].minPerCatType;
         minPosChange = sceneConfigData[curSceneType].minPosChange;
+        minAngleThresh = sceneConfigData[curSceneType].minAngleThresh;
+        minAnglesChange = sceneConfigData[curSceneType].minAnglesChange;
         minSceneChange = sceneConfigData[curSceneType].minSceneChange;
         numZSize = sceneConfigData[curSceneType].numZSize;
         numDepth0 = sceneConfigData[curSceneType].numDepth0;
@@ -269,6 +272,7 @@ function reset_scene() {
         if (curSceneData != undefined) { // Scene exists from current session
             
             curAvailableObj = curSceneData.availableObject;
+            curAvailableObjInit = curSceneData.availableObjectInit;
             curClipartImgs = curSceneData.clipartImgs;
             curPeopleExprImgs = curSceneData.peopleExprImgs;
             curPaperdollPartImgs = curSceneData.paperdollPartImgs;
@@ -313,6 +317,7 @@ function reset_scene() {
             
             // SA: TODO Should probably wrap this in a nice class initialization or something
             curSceneData.availableObject = curAvailableObj;
+            curSceneData.availableObjectInit = curAvailableObjInit;
             curSceneData.clipartImgs = curClipartImgs;
             curSceneData.peopleExprImgs = curPeopleExprImgs;
             curSceneData.paperdollPartImgs = curPaperdollPartImgs;
@@ -501,6 +506,25 @@ function rand_obj_init(histStr) {
                             // SA: For original paperdolls, only 1 clothing style
                             objInstance.numStyle = 1;
                             objInstance.styleID = 0;
+                            
+                            // Randomly init part rotations
+                            for (var idxParts = 0; idxParts < objInstance.body.length; idxParts++) {
+                                objInstance.deformableGlobalRot[idxParts] = (2.0 * Math.random() - 1.0) * 0.5;
+                                objInstance.deformableLocalRot[idxParts] = (2.0 * Math.random() - 1.0) * 0.5;
+                                objInstance.deformableX[idxParts] = 0;
+                                objInstance.deformableY[idxParts] = 0;
+                                
+                                if (objInstance.body[idxParts].part == 'Head' || 
+                                    objInstance.body[idxParts].part == 'Hair' || 
+                                    objInstance.body[idxParts].part == 'Torso' ||
+                                    objInstance.body[idxParts].part == 'LeftHand' || 
+                                    objInstance.body[idxParts].part == 'RightHand' || 
+                                    objInstance.body[idxParts].part == 'LeftFoot' || 
+                                    objInstance.body[idxParts].part == 'RightFoot') {
+                                    objInstance.deformableGlobalRot[idxParts] = 0;
+                                    objInstance.deformableLocalRot[idxParts] = 0;
+                                }
+                            }
                         }
                     } else if (curObjectType.objectType == "animal") {
                         idxPose = get_random_int(0, curObjectType.type[idxValidType].numPose);
@@ -536,6 +560,9 @@ function rand_obj_init(histStr) {
             }
         }
     }
+    
+    // SA: Hack but it works...
+    curAvailableObjInit = JSON.parse(JSON.stringify(curAvailableObj));
 }
 
 function json_obj_load_first_imgs() {
@@ -671,11 +698,11 @@ function get_object_attr_types(objType) {
 
 function rand_obj_load_first_imgs() {
     
+    curPaperdollPartImgs = Array(numObjTypeShow['human']);
+    
     for (i = 0; i < numAvailableObjects; i++) {
         if (curAvailableObj[i].instance[0].type == 'human') {
-            if (curAvailableObj[i].instance[0].deformable == true) {
-                
-//                 curPaperdollPartImgs = Array(numObjTypeShow['human']);
+            if (curAvailableObj[i].instance[0].deformable == true) {            
                 // Load paperdoll heads/expression
                 curClipartImgs[i] = Array(curAvailableObj[i].instance[0].numExpression);
                 curPeopleExprImgs[i] = Array(curAvailableObj[i].instance[0].numExpression);
@@ -695,27 +722,6 @@ function rand_obj_load_first_imgs() {
                     curPaperdollPartImgs[i][j] = new Image();
                     curPaperdollPartImgs[i][j].src =
                         paperdoll_part_img_filename_expr(curAvailableObj[i].instance[0], curAvailableObj[i].instance[0].body[j].part);
-                }
-
-                // Randomly init part rotations
-                for (k = 0; k < curAvailableObj[i].numInstance;k++) {
-                    for (j = 0; j < curAvailableObj[i].instance[0].body.length; j++) {
-                        curAvailableObj[i].instance[k].deformableGlobalRot[j] = (2.0 * Math.random() - 1.0) * 0.5;
-                        curAvailableObj[i].instance[k].deformableLocalRot[j] = (2.0 * Math.random() - 1.0) * 0.5;
-                        curAvailableObj[i].instance[k].deformableX[j] = 0;
-                        curAvailableObj[i].instance[k].deformableY[j] = 0;
-                        
-                        if (curAvailableObj[i].instance[k].body[j].part == 'Head' || 
-                            curAvailableObj[i].instance[k].body[j].part == 'Hair' || 
-                            curAvailableObj[i].instance[k].body[j].part == 'Torso' ||
-                            curAvailableObj[i].instance[k].body[j].part == 'LeftHand' || 
-                            curAvailableObj[i].instance[k].body[j].part == 'RightHand' || 
-                            curAvailableObj[i].instance[k].body[j].part == 'LeftFoot' || 
-                            curAvailableObj[i].instance[k].body[j].part == 'RightFoot') {
-                            curAvailableObj[i].instance[k].deformableGlobalRot[j] = 0;
-                            curAvailableObj[i].instance[k].deformableLocalRot[j] = 0;
-                        }
-                    }
                 }
             } else {
                 curLoadAll[i] = 0; // set the variable to be zero
@@ -1115,6 +1121,47 @@ function is_different_from_init_scene() {
     return isDiff;
 }
 
+function check_deformable_person_change() {
+
+    for (var i = 0; i < curAvailableObj.length; i++) {
+        if (curAvailableObj[i].instance[0].type == "human") {
+            for (var j = 0; j < curAvailableObj[i].numInstance; j++) {
+                if (curAvailableObj[i].instance[j].present == true) {
+                    var paperdoll = curAvailableObj[i].instance[j];
+                    var paperdollInit = curAvailableObjInit[i].instance[j];
+                    
+                    var numBodyParts = paperdoll.body.length;
+                    var anglesChange = 0;
+                    var change;
+                    
+                    var mainBodyIdx = paperdoll.partIdxList['Torso'];
+                    var globalRot = paperdoll.deformableGlobalRot[mainBodyIdx];
+                    var globalRotInit = paperdollInit.deformableGlobalRot[mainBodyIdx];
+                    change = Math.abs(globalRotInit - globalRot);
+                    
+                    if (change >= minAngleThresh) {
+                        anglesChange += 1;
+                    }
+                    
+                    for (var k = 0; k < numBodyParts; k++) {
+                        change = Math.abs(paperdollInit.deformableLocalRot[k] -
+                                          paperdoll.deformableLocalRot[k]);
+                        if (change >= minAngleThresh) {
+                            anglesChange += 1;
+                        }
+                    }
+                    
+                    if (anglesChange < minAnglesChange) {
+                        return -1;
+                    }
+                }
+            }
+        }
+    }
+    
+    return 0;
+}
+
 function validate_scene() {
     
     var numAvailableObjectsUsed;
@@ -1173,6 +1220,14 @@ function validate_scene() {
         }
     }
     
+    if (deformTypesUse["human"] == "deformable") {
+        if (check_deformable_person_change() < 0) {
+            render_dialog("deformHuman");
+            validScene = false;
+            return validScene;
+        }
+    }
+    
     if (numAvailableObjectsUsed < minNumObj) {
         render_dialog("minClipart");
         validScene = false;
@@ -1183,7 +1238,7 @@ function validate_scene() {
         render_dialog("maxClipart");
         validScene = false;
         return validScene;
-    }        
+    }
     
     return validScene;
 }

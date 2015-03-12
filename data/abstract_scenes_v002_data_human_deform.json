@@ -20,7 +20,7 @@
             ],
             "deformable": true,
             "numExpression": 9,
-            "numPose": 8,
+            "numPose": 0,
             "globalScale": 0.5,
             "body": [
             {
@@ -210,7 +210,7 @@
             ],
             "deformable": true,
             "numExpression": 9,
-            "numPose": 8,
+            "numPose": 0,
             "globalScale": 0.5,
             "body": [
             {

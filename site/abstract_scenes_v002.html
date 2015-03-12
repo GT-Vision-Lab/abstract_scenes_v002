@@ -315,7 +315,10 @@
                     var text = "Please make at least " + 
                                 minSceneChange + " change" + ((minSceneChange==1) ? "" : "s") + 
                                 " to the original scene. Thanks!";
+                } else if (errorMsg == "deformHuman") {
+                    var text = "Please change the limb positions of the people some more. Thanks!";
                 }
+                
                 
                 $("#dialog-modal").text(text);
                 $("#dialog-modal").dialog('open');
