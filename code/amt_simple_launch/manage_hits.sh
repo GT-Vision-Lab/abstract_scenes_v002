@@ -22,7 +22,7 @@ apprFileHITs=0
 apprAllHITs=0
 delAndApproveHITs=0
 
-expType="amt_simple_launch"
+expType="amt_simple_launch_demo"
 expName="pilot_01"
 
 # Current directory of script
