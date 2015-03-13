@@ -11,6 +11,7 @@ If you are running the interface local (e.g., not on a web server), you can use 
 If you have Python installed properly installed, in a command prompt, you can run 'python -m SimpleHTTPServer 8000' in the abstract_scenes_v002/ folder.
 If you haven't configured it well (e.g., it's slightly more complicated on Windows), you can run the code/start_python_web_server.py script.
 You'll need to update the directory accordingly.
+Once the Python HTTP server starts up, you can open a web browser and go to localhost:8000 (or whatever port number you specified) and navigate to the site/abstract_scenes_v002.html file.
 
 ### Python Information
 Note: This currently is known to work with Python 2.7. 
