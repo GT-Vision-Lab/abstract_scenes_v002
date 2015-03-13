@@ -1,8 +1,7 @@
 # Local folders to ignore
-interface/*
+data/*
+site_pngs/*
 scenes/*
-data/input/*
-data/output/*
 
 # Images and other files
 ###################

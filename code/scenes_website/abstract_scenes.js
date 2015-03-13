@@ -57,12 +57,12 @@ else {
 }
 
 var jsonData; // a global
-var exp_names = ['Funny Scenes'];
+var exp_names = ['Abstract Scenes'];
 var dataset_names = ['pilot_01'];
-IMG_PATHS = ["http://vision.ece.vt.edu/funny_scenes/data/output/amt_scene_collection/pilot_01/ills/",
+IMG_PATHS = ["https://vision.ece.vt.edu/abstract_scenes_v002/data/output/amt_simple_launch/pilot_01/ills/",
             ];
 //DATA_PATH must be local (i.e., not a different URL)
-DATA_PATH = "../../data/output/amt_scene_collection/pilot_01/json/"
+DATA_PATH = "../../data/output/amt_simple_launch/pilot_01/json/"
 data_filenames = ["pilot_01_noSceneData.min.json",
                  ];
                   

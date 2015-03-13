@@ -15,9 +15,9 @@ from os.path import join as dir_join
 # this script.
 # I also vertically flip pencil by hand
 
-imgDir = '../../interface/Living/'
-imgDir = '../../interface/Park/'
-imgDir = '../../interface/Animals/'
+imgDir = '../../site_pngs/Living/'
+imgDir = '../../site_pngs/Park/'
+imgDir = '../../site_pngs/Animals/'
 
 os.chdir(imgDir);
 

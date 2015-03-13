@@ -857,7 +857,7 @@ function expr_img_filename_expr(obj, exprID) {
                '.' + CLIPART_IMG_FORMAT; 
             
         filename = baseURLInterface + 
-                    humanFolder + '/' + name;
+                    humanFolder + '/Expressions/' + name;
     } else {
         filename = null;
     }
@@ -881,7 +881,7 @@ function paperdoll_expr_img_filename_expr(obj, exprID) {
                '.' + CLIPART_IMG_FORMAT;
 
         filename = baseURLInterface +
-                    humanFolder + '/' + name;
+                    humanFolder + '/Expressions/'  + name;
     } else {
         filename = null;
     }

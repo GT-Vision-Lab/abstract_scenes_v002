@@ -30,9 +30,11 @@ currentDir=`eval "cd \"$SCRIPT_PATH\" && pwd"`
 
 # Find the main directory for the data files
 relDataDir=../../data
+relSiteBaseDir=../../
 #relDataDir=/srv/share/funny_scenes/data
 mkdir -p ${relDataDir}
 dataDir=$(readlink -f $relDataDir)
+siteBaseDir=$(readlink -f $relSiteBaseDir)
 
 inputDataDir=$dataDir/input/$expType/$expName
 outputDataDir=$dataDir/output/$expType/$expName
@@ -88,9 +90,11 @@ fi
 if [ $renderScenes -gt 0 ]
 then
 cd $currentDir/../render_scenes
+# --<name> are optional fields with default values; see render_scenes_json.py
 python render_scenes_json.py render $sceneJSONFile $outputDataIllDir \
-        --interface_dir=$dataDir/../interface/ \
-        --config_dir=$dataDir \
+        --site_pngs_dir=$siteBaseDir/site_pngs/ \
+        --config_dir=$siteBaseDir/site_data/ \
+        --config_dir=abstract_scenes_v002_data_scene_config.json \
         --overwrite
 fi
 

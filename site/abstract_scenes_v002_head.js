@@ -16,22 +16,28 @@
 // sceneConfigFile = "abstract_scenes_v002_data_scene_config.json" by default
 // but you can pass the filename via the sceneConfig QS parameter
 
-// Current interface location
-// var baseURL = "./"
-var baseURL = "http://vision.ece.vt.edu/abstract_scenes_v002/site/";
+// Location of the interface on server--not sure why you'd want this over relative
+var baseURL = "https://vision.ece.vt.edu/abstract_scenes_v002/site/";
+// Location of the interface -- Easiest to just make it current directory
 var baseURL = './'
-var baseURLInterface = baseURL + "../interface/";
-var dataURL = baseURL + "../data/";
+// Relative location of the image files for the interface
+var baseURLInterface = baseURL + "../site_pngs/";
+// Use web data location of image files if you don't want to download them locally
+// baseURLInterface = baseURL + "https://vision.ece.vt.edu/abstract_scenes_v002/site_pngs/";
+// Location of interface configuration files
+var dataURL = baseURL + "../site_data/";
+// Location of some demo scenes to load
 var sceneJSONURL = baseURL + "../scenes/json/";
 
 var AVAIL_SCENE_TYPES = ["Living-All", "Park-All"];
-var AVAIL_SCENE_TYPES = ["Living", "Park"]; // SA: For Larry integration
+// var AVAIL_SCENE_TYPES = ["Living", "Park"]; // SA: For Larry integration
 
 // In case forget to update deformTypesUse
 var deformTypeDefault = 'nondeformable'; 
 var deformTypesUse = { "human": "deformable",
                        "animal": "nondeformable",
-                       "largeObject": "nondeformable"
+                       "largeObject": "nondeformable",
+                       "smallObject": "nondeformable"
                      };
 
 // Xinlei instruction example related

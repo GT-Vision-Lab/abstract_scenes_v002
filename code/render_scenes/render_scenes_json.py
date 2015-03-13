@@ -41,15 +41,15 @@ class RenderScenes(object):
         clipart_img_format = self.opts['--format']
         self.overwrite = self.opts['--overwrite']
 
-        if (self.opts['--interface_dir'] == 'USE_DEF'):
+        if (self.opts['--site_pngs_dir'] == 'USE_DEF'):
             #base_url_interface = os.path.join('..', '..', 'interface')
-            base_url_interface = '/srv/share/abstract_scenes_v002/interface/'
+            base_url_interface = '/srv/share/abstract_scenes_v002/site_pngs/'
         else:
-            base_url_interface = self.opts['--interface_dir']
+            base_url_interface = self.opts['--site_pngs_dir']
             
         if (self.opts['--config_dir'] == 'USE_DEF'):
             #config_folder = dir_path(os.path.join('..', '..', 'data'))
-            config_folder = '/srv/share/abstract_scenes_v002/data/'
+            config_folder = '/srv/share/abstract_scenes_v002/site_data/'
         else:
             config_folder = self.opts['--config_dir']
 
@@ -376,20 +376,20 @@ class RenderScenes(object):
 def main():
     '''
     Usage:
-        render_scenes_json.py render <jsonfile> <outdir> [--overwrite --interface_dir=ID --config_dir=CD --config_file=CF --format=FMT]
+        render_scenes_json.py render <jsonfile> <outdir> [--overwrite --site_pngs_dir=ID --config_dir=CD --config_file=CF --format=FMT]
                 
     Options:
         <jsonfile>          Filepath to JSON file (from other code and extracted from results file)
         <outdir>            Directory to put the processed result files, i.e., JSON
         --format=FMT        Image file format [default: png]
-        --interface_dir=ID  Path to the interface dir (contains all object images) [default: USE_DEF]
+        --site_pngs_dir=ID  Path to the site_pngs dir (contains all object images) [default: USE_DEF]
         --config_dir=CD     Path to the config data files (contains all object data) [default: USE_DEF]
         --config_file=CF    Name of the config data file (contains all object images) [default: USE_DEF]
         --overwrite         Overwrite files even if they exist
     '''
     
-    #USE_DEF for --interface_dir is /srv/share/abstract_scenes_v002/interface/
-    #USE_DEF for --config_dir is /srv/share/abstract_scenes_v002/data/
+    #USE_DEF for --site_pngs_dir is /srv/share/abstract_scenes_v002/site_pngs/
+    #USE_DEF for --config_dir is /srv/share/abstract_scenes_v002/site_data/
     #USE_DEF for --config_file is abstract_scenes_v002_data_scene_config.json
     
     # 1. set up command line interface

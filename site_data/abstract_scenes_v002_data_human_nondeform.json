@@ -1,5 +1,5 @@
 {
-    "baseDirectory": "CharacterNew",
+    "baseDirectory": "HumanNondeformable",
     "attributeTypeList": ["Expression", "Pose"],
     "type": [
         {
