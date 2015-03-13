@@ -273,7 +273,7 @@ class RenderScenes(object):
     def overlay_nondeformable_person(self, bg_img, img_pad_num, cur_obj, z_scale):
         # In our case, we're just computing the filename and loading it, so 
         # a nondeformable person is the same as nondeformable objects.
-        overlay_nondeformable_obj(bg_img, img_pad_num, cur_obj, z_scale)
+        self.overlay_nondeformable_obj(bg_img, img_pad_num, cur_obj, z_scale)
         
     def overlay_nondeformable_obj(self, bg_img, img_pad_num, cur_obj, z_scale):
         
