@@ -1,6 +1,8 @@
 # Local folders to ignore
 interface/*
 scenes/*
+data/input/*
+data/output/*
 
 # Images and other files
 ###################

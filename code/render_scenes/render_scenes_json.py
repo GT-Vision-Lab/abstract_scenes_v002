@@ -6,8 +6,12 @@ from PIL import Image, ImageFilter
 from os import path
 import os
 import glob
+
+import math
 from numpy import matrix
 from numpy import linalg
+
+import pdb
 
 def dir_path(dname):
     '''
@@ -64,10 +68,13 @@ class RenderScenes(object):
         obj_filenames = self.scene_config_data['clipartObjJSONFile']
         object_data = {}
         for obj_file in obj_filenames:
-            with open(os.path.join(config_folder, obj_file['file'])) as f:
-                obj = json.load(f)
-                object_data[obj['objectType']] = obj
-        
+            obj_file_vers = obj_file['file']
+            temp_obj = {}
+            for obj_type, obj_type_file in obj_file_vers.items():
+                with open(os.path.join(config_folder, obj_type_file)) as f:
+                    obj = json.load(f)
+                    temp_obj[obj_type] = obj
+            object_data[obj['objectType']] = temp_obj
         self.object_data = object_data
         
         with open(json_file) as json_fileid:
@@ -75,40 +82,73 @@ class RenderScenes(object):
 
         for cur_scene in all_scenes:
             self.render_one_scene(cur_scene)
+            
+    def get_object_attr_types(self, obj_type, deform_type):
+        
+        cur_attr_types = []
 
-    def obj_img_filename(self, img_pad_num, obj, poseID=None, exprID=None):
+        for cur_attr_name in self.object_data[obj_type][deform_type]['attributeTypeList']:
+            cur_attr_type = {}
+
+            if (cur_attr_name == 'Type'):
+                cur_attr_type = {'num': 'numType', 'id': 'typeID'}
+            elif (cur_attr_name == 'Pose'):
+                cur_attr_type = {'num': 'numPose', 'id': 'poseID'}
+            elif (cur_attr_name == 'Expression'):
+                cur_attr_type = {'num': 'numExpression', 'id': 'expressionID'}
+            
+            cur_attr_types.append(cur_attr_type)
+        
+        return cur_attr_types
+
+    def obj_img_filename(self, img_pad_num, obj, attr1=None, attr2=None, attr3=None):
         
         object_data = self.object_data
         # TODO Don't hardcode this?
-        clipart_img_format = 'png';
+        clipart_img_format = 'png'
         
-        if (obj['type'] == 'human'):
-            humanFolder = object_data['human']['baseDirectory']
-            styleFolder = '{0}{1}'.format(obj['name'], 
-                                        str(obj['styleID']+1).zfill(img_pad_num))
-            if (poseID == None and exprID == None):
-                poseID = obj['poseID']
-                exprID = obj['expressionID']
-            name = '{0}{1}.{2}'.format(str(poseID+1).zfill(img_pad_num), 
-                                    str(exprID+1).zfill(img_pad_num), 
-                                    clipart_img_format)
-            filename = os.path.join(self.base_url_interface, humanFolder, styleFolder, name)
-        elif (obj['type'] == 'animal'):
-            animalFolder = object_data['animal']['baseDirectory']
-            if ( poseID == None):
-                poseID = obj['poseID']
-            name = '{0}{1}.{2}'.format(obj['name'],
-                                    str(poseID+1).zfill(img_pad_num), 
-                                    clipart_img_format)
-            filename = os.path.join(self.base_url_interface, animalFolder, name)
-        elif (obj['type'] == 'largeObject' or obj['type'] == 'smallObject'):
+        cur_obj_type = obj['type']
+        cur_obj_name = obj['name']
+        if (obj['deformable'] == True):
+            cur_obj_deform = 'deformable'
+        else:
+            cur_obj_deform = 'nondeformable'
+            
+        cur_attr_types = self.get_object_attr_types(cur_obj_type, cur_obj_deform)
+        
+        if (attr1 == None):
+            attr1 = obj[cur_attr_types[0]['id']]
+            
+        if (cur_obj_type == 'largeObject' or cur_obj_type == 'smallObject'):
             sceneFolder = self.scene_config_data['baseDirectory'][obj['baseDir']]
-            if ( poseID == None):
-                poseID = obj['poseID']
-            name = '{0}{1}.{2}'.format(obj['name'],
-                                    str(poseID+1).zfill(img_pad_num), 
+
+            name = '{0}{1}.{2}'.format(cur_obj_name,
+                                    str(attr1+1).zfill(img_pad_num), 
                                     clipart_img_format)
             filename = os.path.join(self.base_url_interface, sceneFolder, name)
+        elif (cur_obj_type == 'animal'):
+            animalFolder = object_data['animal'][cur_obj_deform]['baseDirectory']
+
+            name = '{0}{1}.{2}'.format(cur_obj_name,
+                                    str(attr1+1).zfill(img_pad_num), 
+                                    clipart_img_format)
+            filename = os.path.join(self.base_url_interface, animalFolder, name)       
+        elif (cur_obj_type == 'human'):
+
+            if (attr2 == None):
+                attr2 = obj[cur_attr_types[1]['id']]
+
+            if (attr3 == None):
+                attr3 = obj['styleID']
+
+            humanFolder = object_data['human'][cur_obj_deform]['baseDirectory']
+            styleFolder = '{0}{1}'.format(cur_obj_name, 
+                                        str(attr3+1).zfill(img_pad_num))
+            
+            name = '{0}{1}.{2}'.format(str(attr2+1).zfill(img_pad_num), 
+                                    str(attr1+1).zfill(img_pad_num), 
+                                    clipart_img_format)
+            filename = os.path.join(self.base_url_interface, humanFolder, styleFolder, name)
         else:
             filename = None
 
@@ -116,51 +156,154 @@ class RenderScenes(object):
 
     ## Needed for the interface but not here (loads just the heads w/ expr)
     ## TODO Update to support this class
-    #def obj_expr_filenames(self, obj):
-        #filenames = []
-        #if (obj['type'] == 'human'):
-            #for i in range(0, obj['numExpression']):
-                #humanFolder = object_data['human']['baseDirectory']
-                #name = '{0}{1}.{2}'.format(obj['name'], 
-                                    #str(i+1).zfill(img_pad_num),
-                                    #clipart_img_format)
-                #filename = os.path.join(base_url_interface, humanFolder, name)
-                #filenames.append(filename)
-        #else:
-            #filenames = None
+    def obj_expr_filename(self, img_pad_num, obj):
+        filename = None
+        clipart_img_format = 'png'
         
-        #return filenames
-
-    ## TODO Something that might need to be done for paperdoll/deformable support
-    #def get_render_transform(self, X, flip, scale):
-
-        #if ( flip == 0 ):
-            #S  = matrix([[scale, 0, 0], 
-                        #[0, scale, 0], 
-                        #[0, 0, 1]])
-            #T1 = matrix([[1, 0, X[0]],
-                        #[0, 1, X[1]],
-                        #[0, 0, 1]])
-            #T = S*T1
-        #else: # (flip == 1)
-            #S  = matrix([[scale, 0, 0], 
-                        #[0, scale, 0], 
-                        #[0, 0, 1]])
-            #T1 = matrix([[1, 0, -X[0]], 
-                        #[0, 1, X[1]], 
-                        #[0, 0, 1]])
-            #F = matrix([[-1, 0, 0], 
-                        #[0, 1, 0], 
-                        #[0, 0, 1]])
-            #T = F*S*T1
+        cur_obj_type = obj['type']
+        cur_obj_name = obj['name']
+        if (obj['deformable'] == True):
+            obj_deform = 'deformable'
+        else:
+            obj_deform = 'nondeformable'
         
-        #Tinv = linalg.inv(T)
-        ##Tinv = T
-        #Tinvtuple = (Tinv[0,0], Tinv[0,1], Tinv[0,2], 
-                    #Tinv[1,0], Tinv[1,1], Tinv[1,2])
+        if (cur_obj_type == 'human'):
+            humanFolder = self.object_data['human'][obj_deform]['baseDirectory']
+            name = '{0}{1}.{2}'.format(cur_obj_name, 
+                                       str(obj['expressionID']+1).zfill(img_pad_num),
+                                        clipart_img_format)
+            filename = os.path.join(self.base_url_interface, humanFolder, name)
+        
+        return filename
+    
+    def paperdoll_part_img_filename_expr(self, obj, part_name):
 
-        #return Tinvtuple
+        filename = None
+        cur_obj_type = obj['type']
+        cur_obj_name = obj['name']
+        
+        if (obj['deformable'] == True):
+            obj_deform = 'deformable'
+        else:
+            obj_deform = 'nondeformable'
+        
+        clipart_img_format = 'png'
+        
+        if (cur_obj_type == 'human'):
+            humanFolder = self.object_data['human'][obj_deform]['baseDirectory']
+            name = '{0}.{1}'.format(part_name, clipart_img_format)
+            filename = os.path.join(self.base_url_interface, humanFolder, cur_obj_name, name)
+        
+        return filename
 
+    def get_render_transform(self, X1, X, rad, flip, scale):
+
+        if (flip == 0):
+            S  = matrix([[scale, 0, 0], 
+                        [0, scale, 0], 
+                        [0, 0, 1]])
+            T1 = matrix([[1, 0, X1[0]],
+                        [0, 1, X1[1]],
+                        [0, 0, 1]])
+            T2 = matrix([[1, 0, X[0]], 
+                        [0, 1, X[1]], 
+                        [0, 0, 1]])
+            R  = matrix([[math.cos(rad), -math.sin(rad), 0], 
+                        [math.sin(rad), math.cos(rad), 0], 
+                        [0, 0, 1]])
+            T = S*T2*R*T1
+        else: # (flip == 1)
+            rad *= -1
+            S  = matrix([[scale, 0, 0], 
+                        [0, scale, 0], 
+                        [0, 0, 1]])
+            T1 = matrix([[1, 0, X1[0]],
+                        [0, 1, X1[1]],
+                        [0, 0, 1]])
+            T2 = matrix([[1, 0, -X[0]], 
+                        [0, 1, X[1]], 
+                        [0, 0, 1]])
+            R  = matrix([[math.cos(rad), -math.sin(rad), 0], 
+                        [math.sin(rad), math.cos(rad), 0], 
+                        [0, 0, 1]])
+            F = matrix([[-1, 0, 0], 
+                        [0, 1, 0], 
+                        [0, 0, 1]])
+            T = F*S*T2*R*T1
+        
+        Tinv = linalg.inv(T);
+        Tinvtuple = (Tinv[0,0], Tinv[0,1], Tinv[0,2], 
+                    Tinv[1,0], Tinv[1,1], Tinv[1,2])
+
+        return Tinvtuple
+
+    def overlay_deformable_person(self, bg_img, img_pad_num, cur_obj, z_scale):
+        
+        num_parts = len(cur_obj['body'])
+        scale = cur_obj['globalScale'] * z_scale[cur_obj['z']]
+        
+        bg_size= bg_img.size
+        flip = cur_obj['flip']
+        
+        for partIdx in range(0, num_parts):
+            part = cur_obj['body'][partIdx]
+            part_name = part['part']
+            
+            X1 = [-part['childX'], 
+                  -part['childY']]
+            X = [cur_obj['deformableX'][partIdx], 
+                 cur_obj['deformableY'][partIdx]]
+            rotation = cur_obj['deformableGlobalRot'][partIdx]
+            
+            Tinvtuple = self.get_render_transform(X1, X, 
+                                                  rotation, flip, scale)
+            if (part_name == 'Head'):
+                part_fn = self.obj_expr_filename(img_pad_num, cur_obj)
+            else:
+                part_fn = self.paperdoll_part_img_filename_expr(cur_obj, part_name)
+            
+            # TODO Update so don't keep opening files for efficiency
+            part_img = Image.open(part_fn)
+            part_tf = part_img.transform(bg_size, Image.AFFINE,
+                                         Tinvtuple, resample=Image.BICUBIC)
+            
+            bg_img.paste(part_tf, (0, 0), part_tf)
+        
+    def overlay_nondeformable_person(self, bg_img, img_pad_num, cur_obj, z_scale):
+        # In our case, we're just computing the filename and loading it, so 
+        # a nondeformable person is the same as nondeformable objects.
+        overlay_nondeformable_obj(bg_img, img_pad_num, cur_obj, z_scale)
+        
+    def overlay_nondeformable_obj(self, bg_img, img_pad_num, cur_obj, z_scale):
+        
+        scale = z_scale[cur_obj['z']]
+
+        # TODO We should just load all possible
+        # clipart images once and then index into them 
+        # with filename for efficiency
+        cur_filename = self.obj_img_filename(img_pad_num, cur_obj)
+        cur_clipart_img = Image.open(cur_filename)
+        
+        (w, h) = cur_clipart_img.size
+        X = [cur_obj['x'], cur_obj['y']]
+
+        colOffset = -w / 2.0
+        rowOffset = -h / 2.0
+        colOffset *= scale
+        rowOffset *= scale
+        
+        X[0] += colOffset
+        X[1] += rowOffset
+        
+        offset = (int(X[0]), int(X[1]))
+        resized = cur_clipart_img.resize((int(w*scale), int(h*scale)), Image.ANTIALIAS)
+
+        if (cur_obj['flip'] == 0):
+            bg_img.paste(resized, offset, resized)
+        else: 
+            flipped = resized.transpose(Image.FLIP_LEFT_RIGHT)
+            bg_img.paste(flipped, offset, flipped)
+        
     def render_one_scene(self, data):
         
         img_file = os.path.join(self.render_dir, data['imgName'])
@@ -177,9 +320,17 @@ class RenderScenes(object):
             num_z_size = cur_scene_config['numZSize']
             num_depth0 = cur_scene_config['numDepth0']
             num_depth1 = cur_scene_config['numDepth1']
-            numFlip = cur_scene_config['numFlip']
+            num_flip = cur_scene_config['numFlip']
             
-            num_obj_type_show = cur_scene_config['numObjTypeShow']
+            object_type_data = cur_scene_config['objectTypeData']
+            object_type_order = []
+            num_obj_type_show = {}
+            for obj_el in object_type_data:
+
+                cur_name = obj_el['nameType']
+                object_type_order.append(cur_name)
+                num_obj_type_show[cur_name] = obj_el['numShow']
+            
             cur_avail_obj = cur_scene['availableObject']
             cur_z_scale = [1.0]
             for i in range(1, num_z_size):
@@ -204,42 +355,21 @@ class RenderScenes(object):
                         for i in range(0, len(cur_avail_obj)):
                             if (cur_avail_obj[i]['instance'][0]['depth0'] == k):
                                 for m in range(0, cur_avail_obj[i]['numInstance']):
-                                    if (cur_avail_obj[i]['instance'][m]['present'] == True and
-                                        cur_avail_obj[i]['instance'][m]['z'] == j and
-                                        cur_avail_obj[i]['instance'][m]['depth1'] == L):
+                                    cur_obj = cur_avail_obj[i]['instance'][m]
+                                    if (cur_obj['present'] == True and
+                                        cur_obj['z'] == j and
+                                        cur_obj['depth1'] == L):
                                         
-                                        scale = cur_z_scale[cur_avail_obj[i]['instance'][m]['z']]
-                                        
-                                        #if (cur_avail_obj[i]['instance'][m]['type'] == 'human'):
-                                            #indexP = cur_avail_obj[i]['instance'][m]['poseID']*cur_avail_obj[i]['instance'][m]['numExpression'] + cur_avail_obj[i]['instance'][m]['expressionID'];
-                                        #else:
-                                            #indexP = cur_avail_obj[i]['instance'][m]['poseID']
-
-                                        # TODO We should just load all possible
-                                        # clipart images once and then index into them 
-                                        # with filename for efficiency
-                                        cur_filename = self.obj_img_filename(img_pad_num, cur_avail_obj[i]['instance'][m])
-                                        cur_clipart_img = Image.open(cur_filename)
-                                        
-                                        (w, h) = cur_clipart_img.size
-                                        X = [cur_avail_obj[i]['instance'][m]['x'], cur_avail_obj[i]['instance'][m]['y']]
-
-                                        colOffset = -w / 2
-                                        rowOffset = -h / 2
-                                        colOffset *= scale
-                                        rowOffset *= scale
-                                        
-                                        X[0] += colOffset
-                                        X[1] += rowOffset
-                                        
-                                        offset = (int(X[0]), int(X[1]))
-                                        resized = cur_clipart_img.resize((int(w*scale), int(h*scale)))
-
-                                        if (cur_avail_obj[i]['instance'][m]['flip']== 0):
-                                            bg_img.paste(resized, offset, resized)
-                                        else: 
-                                            flipped = resized.transpose(Image.FLIP_LEFT_RIGHT)
-                                            bg_img.paste(flipped, offset, flipped)
+                                        if (cur_obj['type'] == 'human'):
+                                            if (cur_obj['deformable'] == True):
+                                                self.overlay_deformable_person(bg_img, img_pad_num,
+                                                                               cur_obj, cur_z_scale)
+                                            else:
+                                                self.overlay_nondeformable_person(bg_img, img_pad_num,
+                                                                                  cur_obj, cur_z_scale)
+                                        else:
+                                            self.overlay_nondeformable_obj(bg_img, img_pad_num,
+                                                                           cur_obj, cur_z_scale)
 
             bg_img.save(img_file, self.clipart_img_format, compress_level=0, optimize=1)
 
