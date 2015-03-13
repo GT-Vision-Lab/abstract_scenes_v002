@@ -56,7 +56,7 @@ class RenderScenes(object):
         if (self.opts['--config_file'] == 'USE_DEF'):
             scene_config_file = os.path.join(config_folder, 'abstract_scenes_v002_data_scene_config.json')
         else:
-            scene_config_file = self.opts['--config_file']
+            scene_config_file = os.path.join(config_folder, self.opts['--config_file'])
 
         self.render_dir = render_dir
         self.clipart_img_format = clipart_img_format
@@ -69,12 +69,12 @@ class RenderScenes(object):
         object_data = {}
         for obj_file in obj_filenames:
             obj_file_vers = obj_file['file']
-            temp_obj = {}
-            for obj_type, obj_type_file in obj_file_vers.items():
+            for obj_dtype, obj_type_file in obj_file_vers.items():
                 with open(os.path.join(config_folder, obj_type_file)) as f:
                     obj = json.load(f)
-                    temp_obj[obj_type] = obj
-            object_data[obj['objectType']] = temp_obj
+                    if obj['objectType'] not in object_data:
+                        object_data[obj['objectType']] = {}
+                    object_data[obj['objectType']][obj_dtype] = obj
         self.object_data = object_data
         
         with open(json_file) as json_fileid:
@@ -172,7 +172,8 @@ class RenderScenes(object):
             name = '{0}{1}.{2}'.format(cur_obj_name, 
                                        str(obj['expressionID']+1).zfill(img_pad_num),
                                         clipart_img_format)
-            filename = os.path.join(self.base_url_interface, humanFolder, name)
+            filename = os.path.join(self.base_url_interface, humanFolder, 
+                                    'Expressions', name)
         
         return filename
     

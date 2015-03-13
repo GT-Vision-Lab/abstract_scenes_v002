@@ -14,8 +14,8 @@ else
 fi
 
 createHITs=0
-dlHITs=0
-processResults=0
+dlHITs=1
+processResults=1
 renderScenes=1
 updateHITs=0
 apprFileHITs=0
@@ -29,12 +29,15 @@ expName="pilot_01"
 currentDir=`eval "cd \"$SCRIPT_PATH\" && pwd"`
 
 # Find the main directory for the data files
+# If running locally
 relDataDir=../../data
-relSiteBaseDir=../../
-#relDataDir=/srv/share/funny_scenes/data
+relCodeBaseDir=../../
+# If running on server
+relDataDir=/srv/share/abstract_scenes_v002/data
+relCodeBaseDir=/srv/share/abstract_scenes_v002/
 mkdir -p ${relDataDir}
 dataDir=$(readlink -f $relDataDir)
-siteBaseDir=$(readlink -f $relSiteBaseDir)
+codeBaseDir=$(readlink -f $relCodeBaseDir)
 
 inputDataDir=$dataDir/input/$expType/$expName
 outputDataDir=$dataDir/output/$expType/$expName
@@ -92,9 +95,9 @@ then
 cd $currentDir/../render_scenes
 # --<name> are optional fields with default values; see render_scenes_json.py
 python render_scenes_json.py render $sceneJSONFile $outputDataIllDir \
-        --site_pngs_dir=$siteBaseDir/site_pngs/ \
-        --config_dir=$siteBaseDir/site_data/ \
-        --config_dir=abstract_scenes_v002_data_scene_config.json \
+        --site_pngs_dir=$codeBaseDir/site_pngs/ \
+        --config_dir=$codeBaseDir/site_data/ \
+        --config_file=abstract_scenes_v002_data_scene_config.json \
         --overwrite
 fi
 
