@@ -5,9 +5,6 @@ from PIL import Image
 from os import path
 import os
 import glob
-from os.path import basename
-from os.path import splitext
-from os.path import join as dir_join
 
 # Quick script to horizontally flip images
 # I manually looked through them all (except people)
@@ -15,15 +12,19 @@ from os.path import join as dir_join
 # this script.
 # I also vertically flip pencil by hand
 
-imgDir = '../../site_pngs/Living/'
-imgDir = '../../site_pngs/Park/'
-imgDir = '../../site_pngs/Animals/'
+code_folder = os.path.dirname(os.path.realpath(__file__))
 
-os.chdir(imgDir);
+img_dirs = ['../../site_pngs/Living/',
+            '../../site_pngs/Park/',
+            '../../site_pngs/Animals/']
 
-files_to_flip = glob.glob('*_orig.png')
-for filename in files_to_flip:
-    new_filename = filename[:-9] + '.png'
-    img = Image.open(filename).transpose(Image.FLIP_LEFT_RIGHT)
-    img.save(new_filename, 'png', compress_level=0, optimize=1)
-    
+for img_dir in img_dirs:
+    os.chdir(img_dir);
+
+    files_to_flip = glob.glob('*_orig.png')
+    for filename in files_to_flip:
+        new_filename = filename[:-9] + '.png'
+        img = Image.open(filename).transpose(Image.FLIP_LEFT_RIGHT)
+        img.save(new_filename, 'png', compress_level=0, optimize=1)
+
+    os.chdir(code_folder)
