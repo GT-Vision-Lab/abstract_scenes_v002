@@ -56,12 +56,19 @@ var ex_total = NUM_GOOD_EXAMPLES+1;
 // Will be overwritten in reset_scene()
 var minNumObj = 1; // How many clipart objects they need to use.
 var maxNumObj = 20; // How many clipart objects they should at most use.
-var minPosChange = 10; // How many pixels does object need to move to count as change.
-var minSceneChange = 3; // How many things need to change if initializing from JSON.
+var minJSONPosChange = 10; // How many pixels does object need to move to count as change.
+var minJSONSceneChange = 3; // How many things need to change if initializing from JSON.
 var minPerCatType = 1; // How many clipart of each type is required (unused).
 var minPosChange = 20; // The minimum distance (pixels) to count as change
-var minAngleThresh = 0.05; // The minimum angle (radians) to count as change
-var minAnglesChange = 3; // How many deformable parts need to change
+var minAngleThreshRandInit = 0.05; // The minimum angle (radians) to count as change
+var minAnglesChangeRandInit = 3; // How many deformable parts need to change
+var minAngleThreshJSONInit = 0.05; // The minimum angle (radians) to count as change
+// How many deformable parts need to change.
+// In JSON mode, if minAnglesChangeJSONInit == 0, then every angle change of a person
+// counts towards minJSONSceneChange. If minAnglesChangeJSONInit > 0, then
+// only if the total number of angle changes of a person is greater than minAnglesChangeJSONInit 
+// does it count towards one minJSONSceneChange.
+var minAnglesChangeJSONInit = 0;
 var imgPadNum; // How many zeros to pad image-related names
 var defZSize;
 var notUsed;
@@ -166,7 +173,7 @@ var sceneConfigStr = decode(gup("sceneConfig"));
 if (sceneConfigStr == "") {
     sceneConfigFile = "abstract_scenes_v002_data_scene_config.json"
 } else {
-    sceneConfigFile = sceneConfig;
+    sceneConfigFile = sceneConfigStr;
 }
 
 // ===========================================================
@@ -237,7 +244,6 @@ function load_scene_json(loaded_data, filename) {
         curSceneFile = sceneJSONFile[sceneJSONIdx];
         sceneJSONIdx += 1;
         if (loaded_data != null) {
-            console.log(loaded_data);
             sceneJSONData[filename] = loaded_data;
         }
         
@@ -252,19 +258,20 @@ function load_scene_json(loaded_data, filename) {
                             randSceneType = get_random_int(0, AVAIL_SCENE_TYPES.length);
                             load_scene_json({"scene": {"sceneType": AVAIL_SCENE_TYPES[randSceneType]},
                                              "failed": true}, curSceneFile);
-//                             sceneJSONData[curSceneFile] = null;
                         } );    
     } else {
+        
         sceneJSONData[filename] = loaded_data;
+
         for (var i = 0; i < sceneJSONFile.length; i++) {
             sceneTypeList.push(
                 sceneJSONData[sceneJSONFile[i]].scene.sceneType
             );
         }
         
-        sceneData = Array(numScene);
+        
         curSceneType = sceneTypeList[0];
-//         load_obj_category_data();
+        sceneData = Array(sceneJSONFile.length);
         update_instructions();
     }
 }
