@@ -5,6 +5,7 @@ The second version of the interface for the [Abstract Scenes research project](h
 To use the web interface (or render scenes in general), you will need to download the images.
 You can find the majority of the images [here](https://vision.ece.vt.edu/abstract_scenes_v002/site_pngs/site_pngs_without_HumanNondeformable.zip).
 If you need the nondeformable human images (1.5GB), you can find them [here](https://vision.ece.vt.edu/abstract_scenes_v002/site_pngs/site_pngs_just_HumanNondeformable.zip).
+These images should be placed in a folder called site_pngs.
 
 ### Running the Interface Locally
 If you are running the interface local (e.g., not on a web server), you can use Python to run a local web server.
