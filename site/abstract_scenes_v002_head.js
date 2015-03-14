@@ -116,7 +116,28 @@ var numScene = 3;
 var loadSceneJSON = false;
 var loadedSceneJSON = {};
 
-sceneJSONFile = collect_ordered_QS('sceneJSON', NUM_QS_ZEROPAD);
+
+var jsonDemoStr = decode(gup("jsonDemo"));
+if (jsonDemoStr == "") {
+    jsonDemo = false;
+} else {
+    if (jsonDemoStr != "0") {
+        jsonDemo = true;
+    } else {
+        jsonDemo = false;
+    }
+}
+
+if (jsonDemo) {
+    sceneJSONFile = ['35H6S234SA0H5UPSZN4KBGWKULZ65Q_00.min.json',
+                     '35H6S234SA0H5UPSZN4KBGWKULZ65Q_01.min.json',
+                     '3YOH7BII097523PW7IGYPXV184KVKQ_00.min.json',
+                     '3YOH7BII097523PW7IGYPXV184KVKQ_01.min.json'
+                    ];
+
+} else {
+    sceneJSONFile = collect_ordered_QS('sceneJSON', NUM_QS_ZEROPAD);
+}
 
 if (sceneJSONFile.length > 0) {
     sceneTypeList = [];
@@ -264,7 +285,11 @@ function load_scene_json(loaded_data, filename) {
     } else {
         
         sceneJSONData[filename] = loaded_data;
-        loadedSceneJSON[filename] = true;
+        if (sceneJSONData[filename].hasOwnProperty('failed')) {
+            loadedSceneJSON[filename] = false;
+        } else {
+            loadedSceneJSON[filename] = true;
+        }
         for (var i = 0; i < sceneJSONFile.length; i++) {
             sceneTypeList.push(
                 sceneJSONData[sceneJSONFile[i]].scene.sceneType
