@@ -114,6 +114,7 @@ var curSceneType = '';
 var numScene = 3;
 
 var loadSceneJSON = false;
+var loadedSceneJSON = {};
 
 sceneJSONFile = collect_ordered_QS('sceneJSON', NUM_QS_ZEROPAD);
 
@@ -203,7 +204,7 @@ function zero_pad(num, numZeros) {
     var n = Math.abs(num);
     var zeros = Math.max(0, numZeros - Math.floor(n).toString().length );
     var zeroString = Math.pow(10,zeros).toString().substr(1);
-    if( num < 0 ) {
+    if (num < 0) {
         zeroString = '-' + zeroString;
     }
 
@@ -222,7 +223,7 @@ function collect_ordered_QS(param_name, pad) {
         name = param_name + zero_pad(i, pad);
         val = decode(gup(name));
 
-        if ( val == "") {
+        if (val == "") {
             done = true;
         } else {
             array.push(val);
@@ -242,6 +243,7 @@ function load_scene_json(loaded_data, filename) {
 
     if (sceneJSONIdx < sceneJSONFile.length) {
         curSceneFile = sceneJSONFile[sceneJSONIdx];
+        loadedSceneJSON[curSceneFile] = true;
         sceneJSONIdx += 1;
         if (loaded_data != null) {
             sceneJSONData[filename] = loaded_data;
@@ -251,8 +253,8 @@ function load_scene_json(loaded_data, filename) {
             function(data) {  console.log("Loading scene JSON " + 
                             curSceneFile +" succeeded.");
                 load_scene_json(data, curSceneFile); } )
-                        .fail( function(d) { 
-                            console.log(curSceneFile);
+                        .fail( function(d) {
+                            loadedSceneJSON[curSceneFile] = false;
                             console.log("Loading scene JSON " + 
                             curSceneFile +" failed.");
                             randSceneType = get_random_int(0, AVAIL_SCENE_TYPES.length);
@@ -262,13 +264,12 @@ function load_scene_json(loaded_data, filename) {
     } else {
         
         sceneJSONData[filename] = loaded_data;
-
+        loadedSceneJSON[filename] = true;
         for (var i = 0; i < sceneJSONFile.length; i++) {
             sceneTypeList.push(
                 sceneJSONData[sceneJSONFile[i]].scene.sceneType
             );
         }
-        
         
         curSceneType = sceneTypeList[0];
         sceneData = Array(sceneJSONFile.length);
