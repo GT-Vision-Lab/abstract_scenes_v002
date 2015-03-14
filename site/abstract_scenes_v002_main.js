@@ -2322,7 +2322,7 @@ function mousedown_canvas(event) {
         }
 
         if (selectedIdx != notUsed && curLoadAll[selectedIdx] == 1 &&
-            (selectedTab == 'human' && curDeformTypesUse['human'] == false)) {
+            (selectedTab == 'human' && curDeformTypesUse['human'] == 'nondeformable')) {
             // should do some loading
             var s = 0;
             for (j = 0; j < curAvailableObj[selectedIdx].instance[0].numPose; j++) {
