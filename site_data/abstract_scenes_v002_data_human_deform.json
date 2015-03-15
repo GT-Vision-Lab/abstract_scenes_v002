@@ -160,7 +160,7 @@
                     "handleRadius": 15,
                     "parentX": 16,
                     "parentY": 128,
-                    "childX": 14,
+                    "childX": 64,
                     "childY": 9
                 },
                 {
@@ -3441,13 +3441,13 @@
             "deformable": true,
             "numExpression": 9,
             "numPose": 0,
-            "globalScale": 0.5,
+            "globalScale": 0.95,
             "body": [
                 {
                     "part": "Torso",
                     "parent": "null",
                     "clickTransfer": "null",
-                    "handleRadius": 30,
+                    "handleRadius": 10,
                     "parentX": -1,
                     "parentY": -1,
                     "childX": 28,
@@ -3457,7 +3457,7 @@
                     "part": "Head",
                     "parent": "Torso",
                     "clickTransfer": "null",
-                    "handleRadius": 20,
+                    "handleRadius": 7,
                     "parentX": 22,
                     "parentY": 6,
                     "childX": 27,
@@ -3467,30 +3467,30 @@
                     "part": "RightLeg",
                     "parent": "Torso",
                     "clickTransfer": "null",
-                    "handleRadius": 15,
+                    "handleRadius": 5,
                     "parentX": 6,
                     "parentY": 63,
-                    "childX": 37,
-                    "childY": 12
+                    "childX": 13,
+                    "childY": 10
                 },
                 {
                     "part": "LeftLeg",
                     "parent": "Torso",
                     "clickTransfer": "null",
-                    "handleRadius": 15,
+                    "handleRadius": 5,
                     "parentX": 30,
                     "parentY": 70,
-                    "childX": 40,
-                    "childY": 12
+                    "childX": 13,
+                    "childY": 10
                 },
                 {
                     "part": "RightArm",
                     "parent": "Torso",
                     "clickTransfer": "null",
-                    "handleRadius": 15,
+                    "handleRadius": 5,
                     "parentX": 17,
                     "parentY": 18,
-                    "childX": 31,
+                    "childX": 10,
                     "childY": 10
                 },
                 {
@@ -3498,19 +3498,19 @@
                     "parent": "RightArm",
                     "clickTransfer": "RightArm",
                     "handleRadius": 0,
-                    "parentX": 5,
-                    "parentY": 26,
-                    "childX": 12,
-                    "childY": 7
+                    "parentX": 26,
+                    "parentY": 36,
+                    "childX": 8,
+                    "childY": 3
                 },
                 {
                     "part": "LeftArm",
                     "parent": "Torso",
                     "clickTransfer": "null",
-                    "handleRadius": 15,
+                    "handleRadius": 5,
                     "parentX": 38,
                     "parentY": 18,
-                    "childX": 31,
+                    "childX": 10,
                     "childY": 10
                 },
                 {
@@ -3518,10 +3518,10 @@
                     "parent": "LeftArm",
                     "clickTransfer": "LeftArm",
                     "handleRadius": 0,
-                    "parentX": 5,
-                    "parentY": 26,
-                    "childX": 12,
-                    "childY": 7
+                    "parentX": 26,
+                    "parentY": 36,
+                    "childX": 8,
+                    "childY": 3
                 }
             ],
             "partIdxList": {
@@ -3554,13 +3554,13 @@
             "deformable": true,
             "numExpression": 9,
             "numPose": 0,
-            "globalScale": 0.5,
+            "globalScale": 0.75,
             "body": [
                 {
                     "part": "Torso",
                     "parent": "null",
                     "clickTransfer": "null",
-                    "handleRadius": 30,
+                    "handleRadius": 10,
                     "parentX": -1,
                     "parentY": -1,
                     "childX": 28,
@@ -3570,7 +3570,7 @@
                     "part": "Head",
                     "parent": "Torso",
                     "clickTransfer": "null",
-                    "handleRadius": 20,
+                    "handleRadius": 7,
                     "parentX": 22,
                     "parentY": 6,
                     "childX": 27,
@@ -3580,30 +3580,30 @@
                     "part": "RightLeg",
                     "parent": "Torso",
                     "clickTransfer": "null",
-                    "handleRadius": 15,
+                    "handleRadius": 5,
                     "parentX": 6,
                     "parentY": 63,
-                    "childX": 37,
-                    "childY": 12
+                    "childX": 13,
+                    "childY": 10
                 },
                 {
                     "part": "LeftLeg",
                     "parent": "Torso",
                     "clickTransfer": "null",
-                    "handleRadius": 15,
+                    "handleRadius": 5,
                     "parentX": 30,
                     "parentY": 70,
-                    "childX": 40,
-                    "childY": 12
+                    "childX": 13,
+                    "childY": 10
                 },
                 {
                     "part": "RightArm",
                     "parent": "Torso",
                     "clickTransfer": "null",
-                    "handleRadius": 15,
+                    "handleRadius": 5,
                     "parentX": 17,
                     "parentY": 18,
-                    "childX": 31,
+                    "childX": 10,
                     "childY": 10
                 },
                 {
@@ -3611,19 +3611,19 @@
                     "parent": "RightArm",
                     "clickTransfer": "RightArm",
                     "handleRadius": 0,
-                    "parentX": 5,
-                    "parentY": 26,
-                    "childX": 12,
-                    "childY": 7
+                    "parentX": 26,
+                    "parentY": 36,
+                    "childX": 8,
+                    "childY": 3
                 },
                 {
                     "part": "LeftArm",
                     "parent": "Torso",
                     "clickTransfer": "null",
-                    "handleRadius": 15,
+                    "handleRadius": 5,
                     "parentX": 38,
                     "parentY": 18,
-                    "childX": 31,
+                    "childX": 10,
                     "childY": 10
                 },
                 {
@@ -3631,10 +3631,10 @@
                     "parent": "LeftArm",
                     "clickTransfer": "LeftArm",
                     "handleRadius": 0,
-                    "parentX": 5,
-                    "parentY": 26,
-                    "childX": 12,
-                    "childY": 7
+                    "parentX": 26,
+                    "parentY": 36,
+                    "childX": 8,
+                    "childY": 3
                 }
             ],
             "partIdxList": {

@@ -1843,15 +1843,18 @@ function draw_clipart() {
                                       CLIPART_SKIP, CLIPART_SKIP);
                     }
                     
-                    var indexCR;
+                    var idxAttr;
                     var left = 1;
                     var Size = 13;
                     var locationOffset = 11;
+                    var idxInst = curAvailableObj[idx].smallestUnusedInstanceIdx;
+                    var objInst = curAvailableObj[idx].instance[idxInst];
 
                     if (curType == "human") {
 
-                        if (curAvailableObj[idx].smallestUnusedInstanceIdx < curAvailableObj[idx].numInstance) {
-                            indexCR = curAvailableObj[idx].instance[curAvailableObj[idx].smallestUnusedInstanceIdx].expressionID;
+                        if (idxInst < curAvailableObj[idx].numInstance) {
+//                             idxAttr = objInst.expressionID;
+                            idxAttr = 1; // Neutral instead of blank for menu
                         } else {
                             ctx.drawImage(noLeftImg, 
                                           CLIPART_COL + c * CLIPART_SKIP +
@@ -1861,6 +1864,8 @@ function draw_clipart() {
                                           CLIPART_SKIP, CLIPART_SKIP);
                             continue;
                         }
+                        
+                        var exprImg = curPeopleExprImgs[idx][idxAttr];
 
                         if (typeof curPeopleExprImgs[idx] == "undefined") { // just sometimes it is not even loaded yet...
                             continue;
@@ -1871,22 +1876,90 @@ function draw_clipart() {
                                 left++;
                             }
                         }
-                        
-                        var w = curPeopleExprImgs[idx][indexCR].width;
-                        var h = curPeopleExprImgs[idx][indexCR].height;
-                        
-                        var newW = Math.min(w, CLIPART_SIZE * w / Math.max(w, h));
-                        var newH = Math.min(h, CLIPART_SIZE * h / Math.max(w, h));
 
-                        var rowOffset = (CLIPART_SIZE - newH) / 2 + CLIPART_BUFFER / 2;
-                        var colOffset = (CLIPART_SIZE - newW) / 2 + CLIPART_BUFFER / 2;
-                        var xo = CLIPART_COL + c * CLIPART_SKIP + CLIPART_BUFFER + colOffset;
-                        var yo = CLIPART_ROW + TAB_HEIGHT + r * CLIPART_SKIP + CLIPART_BUFFER + rowOffset;
+                        var w = exprImg.width;
+                        var h = exprImg.height;
+                        
+                        var ratioHead = CLIPART_SIZE/Math.max(w, h);
 
-                        ctx.drawImage(curPeopleExprImgs[idx][indexCR], 0, 0, w, h, 
-                                      Math.floor(xo) + CLIPART_OBJECT_OFFSET_COL, 
-                                      Math.floor(yo) + CLIPART_OBJECT_OFFSET_ROW, 
-                                      newW, newH);
+                        var newW = Math.min(w, ratioHead * w);
+                        var newH = Math.min(h, ratioHead * h);
+
+                        // Deformable and not hairless baby and hair loaded if there
+                        if (objInst.deformable == true) {
+                            
+                            var hairIdx = objInst.partIdxList['Hair'];  
+                            var hairOffset = objInst.body[hairIdx];
+                            var hairImg = curPaperdollPartImgs[idx][hairIdx];
+                        
+                            if (hairIdx != undefined && 
+                                hairImg != undefined) {
+                                
+                                var wHair = hairImg.width;
+                                var hHair = hairImg.height;
+                                
+                                var curName = objInst.name;
+                                var dollNo = Number(curName.slice(-2));
+                                var scaleFactor;
+                                
+                                // SA: Hack to make women larger
+                                if (dollNo % 2 == 0) {
+                                    scaleFactor = 1.15;
+                                } else {
+                                    scaleFactor = 1.0;
+                                }
+                                var ratioHair = scaleFactor * CLIPART_SIZE / Math.max(wHair, hHair);
+                                
+                                newW = Math.min(w, ratioHair * w);
+                                newH = Math.min(h, ratioHair * h);
+                        
+                                var newWHair = Math.min(wHair, ratioHair*wHair);
+                                var newHHair = Math.min(hHair, ratioHair*hHair);
+                                
+                                var rowOffsetHair = (CLIPART_SIZE - newHHair) / 2 + CLIPART_BUFFER / 2;
+                                var colOffsetHair = (CLIPART_SIZE - newWHair) / 2 + CLIPART_BUFFER / 2;
+                                var xoHair = CLIPART_COL + c * CLIPART_SKIP + CLIPART_BUFFER + colOffsetHair;
+                                var yoHair = CLIPART_ROW + TAB_HEIGHT + r * CLIPART_SKIP + CLIPART_BUFFER + rowOffsetHair;
+
+                                var xx = ratioHair * (hairOffset.parentX - hairOffset.childX);
+                                var yy = ratioHair * (hairOffset.parentY - hairOffset.childY);
+                                
+                                // SA: Hacky to get positioning decent...
+                                ctx.drawImage(exprImg, 0, 0, w, h, 
+                                              Math.floor(xoHair - xx) + CLIPART_OBJECT_OFFSET_COL, 
+                                              Math.floor(yoHair - 0.25*yy) + CLIPART_OBJECT_OFFSET_ROW, 
+                                              newW, newH);    
+                                                 
+                                ctx.drawImage(hairImg, 0, 0, wHair, hHair, 
+                                              Math.floor(xoHair) + CLIPART_OBJECT_OFFSET_COL,
+                                              Math.floor(yoHair + 0.75*yy) + CLIPART_OBJECT_OFFSET_ROW,
+                                              newWHair, newHHair);
+                            } else { // Baby Head / Hair not loaded
+                                
+                                var rowOffset = (CLIPART_SIZE -newH) / 2 + CLIPART_BUFFER / 2;
+                                var colOffset = (CLIPART_SIZE - newW) / 2 + CLIPART_BUFFER / 2;
+                                var xo = CLIPART_COL + c * CLIPART_SKIP + CLIPART_BUFFER + colOffset;
+                                var yo = CLIPART_ROW + TAB_HEIGHT + r * CLIPART_SKIP + CLIPART_BUFFER + rowOffset;
+                                
+                                ctx.drawImage(exprImg, 0, 0, w, h, 
+                                                Math.floor(xo) + CLIPART_OBJECT_OFFSET_COL, 
+                                                Math.floor(yo) + CLIPART_OBJECT_OFFSET_ROW, 
+                                                newW, newH);
+                                
+                            }
+
+                        } else { // Nondeformable
+
+                            var rowOffset = (CLIPART_SIZE -newH) / 2 + CLIPART_BUFFER / 2;
+                            var colOffset = (CLIPART_SIZE - newW) / 2 + CLIPART_BUFFER / 2;
+                            var xo = CLIPART_COL + c * CLIPART_SKIP + CLIPART_BUFFER + colOffset;
+                            var yo = CLIPART_ROW + TAB_HEIGHT + r * CLIPART_SKIP + CLIPART_BUFFER + rowOffset;
+                            
+                            ctx.drawImage(exprImg, 0, 0, w, h, 
+                                          Math.floor(xo) + CLIPART_OBJECT_OFFSET_COL, 
+                                          Math.floor(yo) + CLIPART_OBJECT_OFFSET_ROW, 
+                                          newW, newH);
+                        }
                         
                         xo = CLIPART_COL + (c + 1) * CLIPART_SKIP - 1;
                         yo = CLIPART_ROW + TAB_HEIGHT + (r + 1) * CLIPART_SKIP - locationOffset;
@@ -1912,7 +1985,7 @@ function draw_clipart() {
                         if (curAvailableObj[idx].smallestUnusedInstanceIdx < curAvailableObj[idx].numInstance) {
                             var curAttrTypes = get_object_attr_types(curType);
                             if (curAttrTypes.length == 1) {
-                                indexCR = curAvailableObj[idx].instance[curAvailableObj[idx].smallestUnusedInstanceIdx][curAttrTypes[0]['id']];
+                                idxAttr = curAvailableObj[idx].instance[curAvailableObj[idx].smallestUnusedInstanceIdx][curAttrTypes[0]['id']];
                             } else {
                                 // TODO Figure out what do do if this happens
                             }
@@ -1936,8 +2009,8 @@ function draw_clipart() {
                             }
                         }
 
-                        var w = curClipartImgs[idx][indexCR].width;
-                        var h = curClipartImgs[idx][indexCR].height;
+                        var w = curClipartImgs[idx][idxAttr].width;
+                        var h = curClipartImgs[idx][idxAttr].height;
                         
                         var newW = Math.min(w, CLIPART_SIZE * w / Math.max(w, h));
                         var newH = Math.min(h, CLIPART_SIZE * h / Math.max(w, h));
@@ -1947,7 +2020,7 @@ function draw_clipart() {
                         var xo = CLIPART_COL + c * CLIPART_SKIP + CLIPART_BUFFER + colOffset;
                         var yo = CLIPART_ROW + TAB_HEIGHT + r * CLIPART_SKIP + CLIPART_BUFFER + rowOffset;
 
-                        ctx.drawImage(curClipartImgs[idx][indexCR], 0, 0, w, h, 
+                        ctx.drawImage(curClipartImgs[idx][idxAttr], 0, 0, w, h, 
                                       Math.floor(xo) + CLIPART_OBJECT_OFFSET_COL, 
                                       Math.floor(yo) + CLIPART_OBJECT_OFFSET_ROW, 
                                       newW, newH);
@@ -2615,10 +2688,6 @@ function check_nondeformable_object_selection(canvasX, canvasY, objIdx, instIdx)
                 selectedIns = m;
             }
             // log_user_data("mousedown_selected"); // Doesn't seem necessary
-        
-            // SA: TODO Should this be here?
-            mouse_offset_X = (x + w / 2) - canvasX;
-            mouse_offset_Y = (y + h / 2) - canvasY;
 
             // SA: TODO Should clicking on a selected object (on canvas) change tab?
             // Uncommenting below will enable that feature.
@@ -2631,8 +2700,31 @@ function check_nondeformable_object_selection(canvasX, canvasY, objIdx, instIdx)
     }
 }
 
+function flip_image_data(canvas, context, input) {
+
+   // Create output image data temporary buffer
+   var output = context.createImageData(canvas.width, canvas.height);
+   // Get imagedata size
+   var w = input.width, h = input.height;
+   var inputData = input.data;
+   var outputData = output.data
+   // loop
+   for (var y = 1; y < h-1; y += 1) {
+       for (var x = 1; x < w-1; x += 1) {
+           // RGBA
+           var i = (y*w + x)*4;
+           var flip = (y*w + (w - x))*4;
+           for (var c = 0; c < 4; c += 1) {
+                outputData[i+c] = inputData[flip+c];
+           }
+       }
+   }
+   
+   return output;
+}
+
 function check_deformable_person_selection(canvasX, canvasY, objIdx, instIdx) {
-    
+    console.log("click: " + canvasX + ', ' + canvasY);
     var paperdoll = curAvailableObj[objIdx].instance[instIdx];
     var numBodyParts = paperdoll.body.length;
     var scale = paperdoll.globalScale * curZScale[paperdoll.z];
@@ -2643,10 +2735,18 @@ function check_deformable_person_selection(canvasX, canvasY, objIdx, instIdx) {
         var ws = Math.floor(scale * curPaperdollPartImgs[objIdx][partIdx].width);
         var hs = Math.floor(scale * curPaperdollPartImgs[objIdx][partIdx].height);
 
-        var x0 = canvasX / scale - paperdoll.deformableX[partIdx];
+        var x0;    
+        var x00;
+        x00 = paperdoll.deformableX[partIdx]*scale
+        if (paperdoll.flip == 1) {
+            x0 = canvasX / scale - paperdoll.deformableX[partIdx];
+        } else {
+            x0 = canvasX / scale - paperdoll.deformableX[partIdx];
+        }
         var y0 = canvasY / scale - paperdoll.deformableY[partIdx];
 
         var rotMatrix = [];
+        
         rotMatrix.push(Math.cos(-paperdoll.deformableGlobalRot[partIdx]));
         rotMatrix.push(-Math.sin(-paperdoll.deformableGlobalRot[partIdx]));
         rotMatrix.push(Math.sin(-paperdoll.deformableGlobalRot[partIdx]));
@@ -2657,29 +2757,42 @@ function check_deformable_person_selection(canvasX, canvasY, objIdx, instIdx) {
 
         x1 *= scale;
         y1 *= scale;
+        
+//         if (paperdoll.flip == 1 && paperdoll.body[partIdx].part == 'LeftArmBottom') {
+//             console.log('x1: ' + x1);
+//             console.log('ws-x1: ' + (x1-ws));
+//             //debugger;
+//             x1 = x1-ws;
+//         }
 
         if (x1 >= 0 && x1 < ws && y1 >= 0 && y1 < hs) {
-
+            console.log("think selected: " + paperdoll.body[partIdx].part + " " + Math.floor(x1) + ', ' + Math.floor(y1));
+            console.log('x00: ' + x00);
             // Make sure the piece of clipart is actually visible below the mouse click
             var newCanvas = document.createElement('canvas');
             newCanvas.width = ws;
             newCanvas.height = hs;
             var c = newCanvas.getContext("2d");
+
             c.drawImage(curPaperdollPartImgs[objIdx][partIdx],
                         0, 0, w, h,
                         0, 0, ws, hs);
 
             // create a new pixel array
             imageData = c.getImageData(0, 0, ws, hs);
+            
             var imgX = Math.floor(x1);
             if (paperdoll.flip == 1) {
+//                 imageData = flip_image_data(newCanvas, c, imageData);
                 imgX = ws - 1 - imgX;
             }
+            
             var imgY = Math.floor(y1);
             var alpha = imageData.data[(imgX + imgY * ws) * 4 + 3];
 
             // If the piece of clipart visible?
-            if (alpha > 0) {
+            if (alpha >     0) {
+                
                 selectedIdx = objIdx;
                 selectedIns = instIdx;
                 if (paperdoll.body[partIdx].clickTransfer == 'null') {
@@ -2743,10 +2856,6 @@ function check_nondeformable_person_selection(canvasX, canvasY, objIdx, instIdx)
             selectedIns = m;
         }
         // log_user_data("mousedown_selected"); // Doesn't seem necessary
-    
-        // SA: TODO Should this be here?
-        mouse_offset_X = (x + w / 2) - canvasX;
-        mouse_offset_Y = (y + h / 2) - canvasY;
 
         // SA: TODO Should clicking on a selected object (on canvas) change tab?
         // Uncommenting below will enable that feature.
