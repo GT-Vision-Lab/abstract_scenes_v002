@@ -40,6 +40,8 @@ var deformTypesUse = { "human": "deformable",
                        "smallObject": "nondeformable"
                      };
 
+var deformHumanPoseInit; // Whether to init deformable people from set of poses
+
 // Xinlei instruction example related
 // Keep for Xinlei's examples
 var exampleBaseURL = "http://ladoga.graphics.cs.cmu.edu/xinleic/genSents/Interface/";
@@ -105,6 +107,17 @@ if (deformHumanStr != "") {
     } else {
         deformTypesUse['human'] = 'deformable';
     }
+}
+
+var deformHumanPoseStr = decode(gup("deformHumanPoseInit"));
+if (deformHumanPoseStr != "") {
+    if (deformHumanPoseStr == "0") {
+        deformHumanPoseInit = false;
+    } else {
+        deformHumanPoseInit = true;
+    }
+} else {
+    deformHumanPoseInit = true;
 }
 
 // Maybe want to parse list of scene types in the future
