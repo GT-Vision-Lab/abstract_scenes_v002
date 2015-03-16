@@ -387,7 +387,7 @@ function json_obj_init() {
     }
 }
 
-function rand_obj_init(histStr) {
+function rand_obj_init() {
     
     curDeformTypesUse = {};
     var deformType;
@@ -521,22 +521,63 @@ function rand_obj_init(histStr) {
                             objInstance.numStyle = 1;
                             objInstance.styleID = 0;
                             
-                            // Randomly init part rotations
-                            for (var idxParts = 0; idxParts < objInstance.body.length; idxParts++) {
-                                objInstance.deformableGlobalRot[idxParts] = (2.0 * Math.random() - 1.0) * 0.5;
-                                objInstance.deformableLocalRot[idxParts] = (2.0 * Math.random() - 1.0) * 0.5;
-                                objInstance.deformableX[idxParts] = 0;
-                                objInstance.deformableY[idxParts] = 0;
+                            if (deformHumanPoseInit == true) {
+                                // Randomly init part rotations, based on init set of poses
+                                var numRandInitPoses;
+                                var randInitPoseIdx;
+                                if (objInstance.body[0].initPose != undefined) {
+                                    numRandInitPoses = objInstance.body[0].initPose.length;
+                                    randInitPoseIdx = get_random_int(0, numRandInitPoses);
+                                }
                                 
-                                if (objInstance.body[idxParts].part == 'Head' || 
-                                    objInstance.body[idxParts].part == 'Hair' || 
-                                    objInstance.body[idxParts].part == 'Torso' ||
-                                    objInstance.body[idxParts].part == 'LeftHand' || 
-                                    objInstance.body[idxParts].part == 'RightHand' || 
-                                    objInstance.body[idxParts].part == 'LeftFoot' || 
-                                    objInstance.body[idxParts].part == 'RightFoot') {
-                                    objInstance.deformableGlobalRot[idxParts] = 0;
-                                    objInstance.deformableLocalRot[idxParts] = 0;
+                                for (var idxParts = 0; idxParts < objInstance.body.length; idxParts++) {
+                                    randInitPoses = objInstance.body[idxParts].initPose;
+                                    
+                                    if (objInstance.body[idxParts].initPose != undefined) {
+                                        var noise = (Math.random() - 1.0) * 0.15;
+                                        objInstance.deformableLocalRot[idxParts] = randInitPoses[randInitPoseIdx] + noise;
+                                        objInstance.deformableGlobalRot[idxParts] = randInitPoses[randInitPoseIdx] + noise;
+                                        objInstance.randInitPoseIdx = randInitPoseIdx;
+                                    } else {
+                                        // Data format missing poses
+                                        objInstance.deformableLocalRot[idxParts] = (2.0 * Math.random() - 1.0) * 0.5;
+                                        objInstance.deformableGlobalRot[idxParts] = objInstance.deformableLocalRot[idxParts];
+                                        objInstance.randInitPoseIdx = notUsed;
+                                        
+                                        if (objInstance.body[idxParts].part == 'Head' || 
+                                            objInstance.body[idxParts].part == 'Hair' || 
+                                            objInstance.body[idxParts].part == 'Torso' ||
+                                            objInstance.body[idxParts].part == 'LeftHand' || 
+                                            objInstance.body[idxParts].part == 'RightHand' || 
+                                            objInstance.body[idxParts].part == 'LeftFoot' || 
+                                            objInstance.body[idxParts].part == 'RightFoot') {
+                                            objInstance.deformableGlobalRot[idxParts] = 0;
+                                            objInstance.deformableLocalRot[idxParts] = 0;
+                                        }
+                                    }
+
+                                    objInstance.deformableX[idxParts] = 0;
+                                    objInstance.deformableY[idxParts] = 0;
+                                }
+                            } else {
+                                // Randomly init part rotations
+                                for (var idxParts = 0; idxParts < objInstance.body.length; idxParts++) {
+                                    objInstance.deformableGlobalRot[idxParts] = (2.0 * Math.random() - 1.0) * 0.5;
+                                    objInstance.deformableLocalRot[idxParts] = (2.0 * Math.random() - 1.0) * 0.5;
+                                    objInstance.deformableX[idxParts] = 0;
+                                    objInstance.deformableY[idxParts] = 0;
+                                    objInstance.randInitPoseIdx = notUsed;
+                                    
+                                    if (objInstance.body[idxParts].part == 'Head' || 
+                                        objInstance.body[idxParts].part == 'Hair' || 
+                                        objInstance.body[idxParts].part == 'Torso' ||
+                                        objInstance.body[idxParts].part == 'LeftHand' || 
+                                        objInstance.body[idxParts].part == 'RightHand' || 
+                                        objInstance.body[idxParts].part == 'LeftFoot' || 
+                                        objInstance.body[idxParts].part == 'RightFoot') {
+                                        objInstance.deformableGlobalRot[idxParts] = 0;
+                                        objInstance.deformableLocalRot[idxParts] = 0;
+                                    }
                                 }
                             }
                         }
@@ -2567,7 +2608,10 @@ function mousedown_canvas(event) {
 
                 attributes = objectData[curSelectedObjType][curDeformTypesUse[curSelectedObjType]].attributeTypeList;
 
-                selectedAttrTabIdx = 0;
+                if (selectedIdx != lastIdx) {
+                    console.log(0);
+                    selectedAttrTabIdx = 0;
+                }
                 selectedAttrTab = attributes[selectedAttrTabIdx];
                 redrawCanvas = true;
             }
