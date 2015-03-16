@@ -547,6 +547,17 @@ function rand_obj_init() {
                                     
                                     if (objInstance.body[idxParts].initPose != undefined) {
                                         var noise = (Math.random() - 1.0) * 0.15;
+                                        
+                                        // Don't add noise to certain elements
+                                        if (objInstance.body[idxParts].part == 'Head' || 
+                                            objInstance.body[idxParts].part == 'Hair' || 
+                                            objInstance.body[idxParts].part == 'LeftHand' || 
+                                            objInstance.body[idxParts].part == 'RightHand' || 
+                                            objInstance.body[idxParts].part == 'LeftFoot' || 
+                                            objInstance.body[idxParts].part == 'RightFoot') {
+                                            noise = 0;
+                                        }
+                                        
                                         objInstance.deformableLocalRot[idxParts] = randInitPoses[randInitPoseIdx] + noise;
                                         objInstance.deformableGlobalRot[idxParts] = randInitPoses[randInitPoseIdx] + noise;
                                         objInstance.randInitPoseIdx = randInitPoseIdx;

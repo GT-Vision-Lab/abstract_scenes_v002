@@ -173,7 +173,7 @@
                     "handleRadius": 15,
                     "parentX": 16,
                     "parentY": 128,
-                    "childX": 64,
+                    "childX": 14,
                     "childY": 9,
                     "initPose": [1.79, 0.37, -0.34, -2.7, 0.29, 1.55, 0.4, 0.054, 0.47]
                 },
