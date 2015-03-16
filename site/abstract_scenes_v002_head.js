@@ -87,6 +87,7 @@ var curScene = 0;
 // Contain all scene objects, which each will contain all info (and more) 
 // needed to render an image or load it back into the interface later
 var sceneData;
+var jsonScenesLoaded = false;
 
 // By default, require restrictions on input
 var restrictInputStr = decode(gup("restrictInput"));
@@ -312,6 +313,7 @@ function load_scene_json(loaded_data, filename) {
         curSceneType = sceneTypeList[0];
         sceneData = Array(sceneJSONFile.length);
         update_instructions();
+        jsonScenesLoaded = true;
     }
 }
 

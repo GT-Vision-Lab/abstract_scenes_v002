@@ -43,7 +43,9 @@ var curDepth1Used;
 var curInitHistory;
 var curDeformTypesUse;
 
+// SA: TODO Clean-up these hacks to make viewing work okay
 var loadedObjectsAndBG = false;
+var firstInit = false;
 
 // global variables for the page
 ////// MULTIPLE OBJECTS FOR THE CURRENT SCENE ///////
@@ -150,11 +152,18 @@ var CTRL_DOWN = false;
 // rendering objects.
 load_config_json(); 
 
+// SA: TODO Remove this quick hack that makes 
+// sure the interface is being displayed,
+// even if JSON/image loading is slow.
+window.setInterval(function(){
+  draw_canvas();
+}, 5000);
+
 // ===========================================================
 // Top-level initialization of the website and canvas
 // ===========================================================
 function init() {
-    
+
     init_time = $.now();
     curScene = 0;
     
@@ -196,7 +205,8 @@ function init() {
     tabPageDownImg.src = baseURLInterface + 'next_button.png';
     tabPageDownImg.onload = draw_canvas;
 
-    reset_scene();
+    // SA: Removed because of JSON file loading
+//     reset_scene();
     draw_canvas();
 }
 
@@ -334,6 +344,8 @@ function reset_scene() {
             curSceneData.sceneConfigFile = sceneConfigFile;
         }
         loadedObjectsAndBG = true;
+    } else {
+        console.log('reset_skipped');
     }
     draw_scene();
 }
@@ -667,11 +679,11 @@ function obj_load_first_imgs() {
                 for (j = 0; j < curAvailableObj[i].instance[0].numExpression; j++) {
                     curClipartImgs[i][j] = new Image();
                     curClipartImgs[i][j].src =
-                        paperdoll_expr_img_filename_expr(curAvailableObj[i].instance[0], j);
+                        deformable_humanl_expr_img_filename_expr(curAvailableObj[i].instance[0], j);
 
                     curPeopleExprImgs[i][j] = new Image();
                     curPeopleExprImgs[i][j].src =
-                        paperdoll_expr_img_filename_expr(curAvailableObj[i].instance[0], j);
+                        deformable_humanl_expr_img_filename_expr(curAvailableObj[i].instance[0], j);
                 }
             
                 // Load paperdoll part images
@@ -679,7 +691,7 @@ function obj_load_first_imgs() {
                 for (j = 0; j < curAvailableObj[i].instance[0].body.length; j++) {
                     curPaperdollPartImgs[i][j] = new Image();
                     curPaperdollPartImgs[i][j].src =
-                        paperdoll_part_img_filename_expr(curAvailableObj[i].instance[0], curAvailableObj[i].instance[0].body[j].part);
+                        deformable_human_part_img_filename_expr(curAvailableObj[i].instance[0], curAvailableObj[i].instance[0].body[j].part);
                 }
             } else {
                 curLoadAll[i] = 0; // set the variable to be zero
@@ -824,7 +836,7 @@ function expr_img_filename_expr(obj, exprID) {
     return filename;
 }
 
-function paperdoll_expr_img_filename_expr(obj, exprID) {
+function deformable_humanl_expr_img_filename_expr(obj, exprID) {
 
     var filename;
     var curDeformType = curDeformTypesUse[obj['type']];
@@ -849,7 +861,7 @@ function paperdoll_expr_img_filename_expr(obj, exprID) {
     return filename;
 }
 
-function paperdoll_part_img_filename_expr(obj, partName) {
+function deformable_human_part_img_filename_expr(obj, partName) {
 
     var filename;
     var curDeformType = curDeformTypesUse[obj['type']];
@@ -1392,114 +1404,124 @@ function load_object_config(data, deformType) {
         }
     } else {
         load_obj_category_data();
-        reset_scene();
     }
 }
 
 function load_obj_category_data() {
 
-    // Make sure the sceneTypeList is all valid scene types
-    if (sceneTypeList.length > 0 && sceneConfigData != undefined) {
-        
-        var validSceneTypeList = [];
-        sceneTypeList.forEach( function(d) {
-            if (sceneConfigData.hasOwnProperty(d)) {
-                validSceneTypeList.push(d);
-            }
-        })
-        sceneTypeList = validSceneTypeList;
-        numScene = sceneTypeList.length;
-        
-        if (numScene == 0) {
-            var sceneTypeListIdx = get_random_int(0, AVAIL_SCENE_TYPES.length);
-            sceneTypeList = [AVAIL_SCENE_TYPES[sceneTypeListIdx]]
+    if ((loadSceneJSON == true && jsonScenesLoaded == true) ||
+        (loadSceneJSON == false)) {
+        // Make sure the sceneTypeList is all valid scene types
+        if (sceneTypeList.length > 0 && sceneConfigData != undefined) {
+            
+            var validSceneTypeList = [];
+            sceneTypeList.forEach( function(d) {
+                if (sceneConfigData.hasOwnProperty(d)) {
+                    validSceneTypeList.push(d);
+                }
+            })
+            sceneTypeList = validSceneTypeList;
             numScene = sceneTypeList.length;
-            console.log('Invalid scene type entered. ' +
-                        'Defaulting to one scene of ' +
-                        sceneTypeList[0] + '.');
+            
+            if (numScene == 0) {
+                var sceneTypeListIdx = get_random_int(0, AVAIL_SCENE_TYPES.length);
+                sceneTypeList = [AVAIL_SCENE_TYPES[sceneTypeListIdx]]
+                numScene = sceneTypeList.length;
+                console.log('Invalid scene type entered. ' +
+                            'Defaulting to one scene of ' +
+                            sceneTypeList[0] + '.');
+            }
+            
+            update_instructions();
         }
         
-        update_instructions();
-    }
-    
-    if (sceneTypeList.length > 0 && sceneConfigData != undefined) {
-        var numSelObj;
-        
-        if (loadSceneJSON == true) {
-            curSceneDataFile = sceneJSONFile[curScene];
-            var curLoaded = loadedSceneJSON[curSceneDataFile];
-            if (curLoaded == true) {
-                var curSceneData = sceneJSONData[curSceneDataFile];
-                curDeformTypesUse = curSceneData.scene.deformTypesUse;
+        if (sceneTypeList.length > 0 && sceneConfigData != undefined) {
+            var numSelObj;
+            
+            if (loadSceneJSON == true) {
+                curSceneDataFile = sceneJSONFile[curScene];
+                var curLoaded = loadedSceneJSON[curSceneDataFile];
+                if (curLoaded == true) {
+                    var curSceneData = sceneJSONData[curSceneDataFile];
+                    curDeformTypesUse = curSceneData.scene.deformTypesUse;
+                } else {
+                    curDeformTypesUse = deformTypesUse;
+                }
             } else {
                 curDeformTypesUse = deformTypesUse;
             }
-        } else {
-            curDeformTypesUse = deformTypesUse;
-        }
-        
-        curSceneType = sceneTypeList[curScene];
-        curSceneTypeBase = extract_scene_type_base(curSceneType)
-        
-        var objectTypeData = sceneConfigData[curSceneType].objectTypeData;
-        objectTypeOrder = [];
-        numObjTypeShow = {};
-        for (var idxObjT in objectTypeData) {
-            var curName = objectTypeData[idxObjT].nameType;
-            objectTypeOrder.push(curName);
-            numObjTypeShow[curName] = objectTypeData[idxObjT].numShow;
-        }
+            
+            curSceneType = sceneTypeList[curScene];
+            curSceneTypeBase = extract_scene_type_base(curSceneType)
+            
+            var objectTypeData = sceneConfigData[curSceneType].objectTypeData;
+            objectTypeOrder = [];
+            numObjTypeShow = {};
+            for (var idxObjT in objectTypeData) {
+                var curName = objectTypeData[idxObjT].nameType;
+                objectTypeOrder.push(curName);
+                numObjTypeShow[curName] = objectTypeData[idxObjT].numShow;
+            }
 
-        // In case scene config is bad, we overwrite values
-        // that suggest putting more objects than available for
-        // that category and prevents an infinite loop
-        
-        for (var objectType in objectData) {
-            if (objectData.hasOwnProperty(objectType)) {
-                curObjectType = objectData[objectType][curDeformTypesUse[objectType]];
-                var validIdxs = [];
-                for (var k = 0; k < curObjectType.type.length; k++) {
-                    for (var m = 0; m < curObjectType.type[k].availableScene.length; m++) {
-                        if (curObjectType.type[k].availableScene[m].scene == curSceneTypeBase) {
-                            validIdxs.push([k, m])
+            // In case scene config is bad, we overwrite values
+            // that suggest putting more objects than available for
+            // that category and prevents an infinite loop
+            
+            for (var objectType in objectData) {
+                if (objectData.hasOwnProperty(objectType)) {
+                    curObjectType = objectData[objectType][curDeformTypesUse[objectType]];
+                    var validIdxs = [];
+                    for (var k = 0; k < curObjectType.type.length; k++) {
+                        for (var m = 0; m < curObjectType.type[k].availableScene.length; m++) {
+                            if (curObjectType.type[k].availableScene[m].scene == curSceneTypeBase) {
+                                validIdxs.push([k, m])
+                            }
                         }
                     }
+                    var numValidTypes = validIdxs.length;
+                    numSelObj = numObjTypeShow[curObjectType.objectType];
+                    if (numSelObj > numValidTypes) {
+                        console.log(curSceneType + " asked for too many " + 
+                                    curObjectType.objectType + 
+                                    " objects. Overwriting with the max.")
+                    }
+                    numSelObj = Math.min(numSelObj, numValidTypes);
+                    numObjTypeShow[curObjectType.objectType] = numSelObj;
                 }
-                var numValidTypes = validIdxs.length;
-                numSelObj = numObjTypeShow[curObjectType.objectType];
-                if (numSelObj > numValidTypes) {
-                    console.log(curSceneType + " asked for too many " + 
-                                curObjectType.objectType + 
-                                " objects. Overwriting with the max.")
-                }
-                numSelObj = Math.min(numSelObj, numValidTypes);
-                numObjTypeShow[curObjectType.objectType] = numSelObj;
             }
+            
+            // Need to initialize this otherwise interface won't load properly
+            numAvailableObjects = 0;
+            objectTypeToIdx = {};
+            for (var i = 0; i < objectTypeOrder.length; i++) {
+                numAvailableObjects += numObjTypeShow[objectTypeOrder[i]];
+                objectTypeToIdx[objectTypeOrder[i]] = i;
+            }
+            
+            selectedTab = sceneConfigData[curSceneType].startTab;
+            selectedTabIdx = objectTypeToIdx[selectedTab];
+            selectedAttrTabIdx = 0;
+            selectedAttrTab = objectData[selectedTab][curDeformTypesUse[selectedTab]].attributeTypeList[selectedAttrTabIdx];
+            tabPage = 0;
+            NUM_TABS = objectTypeOrder.length;
+            if (firstInit == false) {
+                firstInit = true;
+                reset_scene();
+            }
+        } else {
+            numAvailableObjects = 0;
+            selectedTab = 'animals';
+            selectedTabIdx = 0; // SA: Maybe not right if sceneConfigFile broken...
+            selectedAttrTabIdx = 0;
+            selectedAttrTab = 'Type';
+            tabPage = 0;
+            NUM_TABS = 4;
         }
-        
-        // Need to initialize this otherwise interface won't load properly
-        numAvailableObjects = 0;
-        objectTypeToIdx = {};
-        for (var i = 0; i < objectTypeOrder.length; i++) {
-            numAvailableObjects += numObjTypeShow[objectTypeOrder[i]];
-            objectTypeToIdx[objectTypeOrder[i]] = i;
-        }
-        
-        selectedTab = sceneConfigData[curSceneType].startTab;
-        selectedTabIdx = objectTypeToIdx[selectedTab];
-        selectedAttrTabIdx = 0;
-        selectedAttrTab = objectData[selectedTab][curDeformTypesUse[selectedTab]].attributeTypeList[selectedAttrTabIdx];
-        tabPage = 0;
-        NUM_TABS = objectTypeOrder.length;
-    } else {
-        numAvailableObjects = 0;
-        selectedTab = 'animals';
-        selectedTabIdx = 0; // SA: Maybe not right if sceneConfigFile broken...
-        selectedAttrTabIdx = 0;
-        selectedAttrTab = 'Type';
-        tabPage = 0;
-        NUM_TABS = 4;
+    } else if (loadSceneJSON == true && jsonScenesLoaded == false) {
+        // Keep trying until data is loaded
+        setTimeout(function(){ load_obj_category_data();}, 300);
     }
+
 }
 
 // ===========================================================
@@ -2608,10 +2630,11 @@ function mousedown_canvas(event) {
 
                 attributes = objectData[curSelectedObjType][curDeformTypesUse[curSelectedObjType]].attributeTypeList;
 
+                // Don't switch to default if same object selected
                 if (selectedIdx != lastIdx) {
-                    console.log(0);
                     selectedAttrTabIdx = 0;
                 }
+                
                 selectedAttrTab = attributes[selectedAttrTabIdx];
                 redrawCanvas = true;
             }
@@ -2768,7 +2791,7 @@ function flip_image_data(canvas, context, input) {
 }
 
 function check_deformable_person_selection(canvasX, canvasY, objIdx, instIdx) {
-    console.log("click: " + canvasX + ', ' + canvasY);
+
     var paperdoll = curAvailableObj[objIdx].instance[instIdx];
     var numBodyParts = paperdoll.body.length;
     var scale = paperdoll.globalScale * curZScale[paperdoll.z];
@@ -2779,39 +2802,36 @@ function check_deformable_person_selection(canvasX, canvasY, objIdx, instIdx) {
         var ws = Math.floor(scale * curPaperdollPartImgs[objIdx][partIdx].width);
         var hs = Math.floor(scale * curPaperdollPartImgs[objIdx][partIdx].height);
 
-        var x0;    
-        var x00;
-        x00 = paperdoll.deformableX[partIdx]*scale
-        if (paperdoll.flip == 1) {
-            x0 = canvasX / scale - paperdoll.deformableX[partIdx];
-        } else {
-            x0 = canvasX / scale - paperdoll.deformableX[partIdx];
-        }
+        var x1 = 0;
+        var y1 = 0;
+        var x00 = 0;
+        x00 = paperdoll.deformableX[partIdx] * scale
+
+        var x0 = canvasX / scale - paperdoll.deformableX[partIdx];
         var y0 = canvasY / scale - paperdoll.deformableY[partIdx];
 
         var rotMatrix = [];
-        
+
         rotMatrix.push(Math.cos(-paperdoll.deformableGlobalRot[partIdx]));
         rotMatrix.push(-Math.sin(-paperdoll.deformableGlobalRot[partIdx]));
         rotMatrix.push(Math.sin(-paperdoll.deformableGlobalRot[partIdx]));
         rotMatrix.push(Math.cos(-paperdoll.deformableGlobalRot[partIdx]));
 
-        var x1 = rotMatrix[0] * x0 + rotMatrix[1] * y0 + paperdoll.body[partIdx].childX;
-        var y1 = rotMatrix[2] * x0 + rotMatrix[3] * y0 + paperdoll.body[partIdx].childY;
+        var x1 = rotMatrix[0] * x0 + rotMatrix[1] * y0;
+        var y1 = rotMatrix[2] * x0 + rotMatrix[3] * y0;
+
+        if (paperdoll.flip == 1) {
+            x1 += w - 1 - paperdoll.body[partIdx].childX;
+        } else {
+            x1 += paperdoll.body[partIdx].childX;
+        }
+
+        y1 += paperdoll.body[partIdx].childY;
 
         x1 *= scale;
         y1 *= scale;
-        
-//         if (paperdoll.flip == 1 && paperdoll.body[partIdx].part == 'LeftArmBottom') {
-//             console.log('x1: ' + x1);
-//             console.log('ws-x1: ' + (x1-ws));
-//             //debugger;
-//             x1 = x1-ws;
-//         }
-
+       
         if (x1 >= 0 && x1 < ws && y1 >= 0 && y1 < hs) {
-            console.log("think selected: " + paperdoll.body[partIdx].part + " " + Math.floor(x1) + ', ' + Math.floor(y1));
-            console.log('x00: ' + x00);
             // Make sure the piece of clipart is actually visible below the mouse click
             var newCanvas = document.createElement('canvas');
             newCanvas.width = ws;
@@ -2827,7 +2847,6 @@ function check_deformable_person_selection(canvasX, canvasY, objIdx, instIdx) {
             
             var imgX = Math.floor(x1);
             if (paperdoll.flip == 1) {
-//                 imageData = flip_image_data(newCanvas, c, imageData);
                 imgX = ws - 1 - imgX;
             }
             
@@ -2835,7 +2854,7 @@ function check_deformable_person_selection(canvasX, canvasY, objIdx, instIdx) {
             var alpha = imageData.data[(imgX + imgY * ws) * 4 + 3];
 
             // If the piece of clipart visible?
-            if (alpha >     0) {
+            if (alpha > 0) {
                 
                 selectedIdx = objIdx;
                 selectedIns = instIdx;
@@ -2980,8 +2999,8 @@ function mousemove_canvas(event) {
                         selectedParentIdx = paperdollInst.partIdxList[paperdollInst.body[selectedPartIdx].parent];
 
                         var scale = paperdollInst.globalScale * curZScale[paperdollInst.z];
-                        var x0 = canvasX/scale - paperdollInst.deformableX[selectedPartIdx];
-                        var y0 = canvasY/scale - paperdollInst.deformableY[selectedPartIdx];
+                        var x0 = canvasX / scale - paperdollInst.deformableX[selectedPartIdx];
+                        var y0 = canvasY / scale - paperdollInst.deformableY[selectedPartIdx];
 
                         if (paperdollInst.flip == 1) {
                             paperdollInst.deformableLocalRot[selectedPartIdx] = -Math.atan2(-x0, y0);
