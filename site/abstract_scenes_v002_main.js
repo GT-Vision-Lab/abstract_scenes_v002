@@ -2608,7 +2608,10 @@ function mousedown_canvas(event) {
 
                 attributes = objectData[curSelectedObjType][curDeformTypesUse[curSelectedObjType]].attributeTypeList;
 
-                selectedAttrTabIdx = 0;
+                if (selectedIdx != lastIdx) {
+                    console.log(0);
+                    selectedAttrTabIdx = 0;
+                }
                 selectedAttrTab = attributes[selectedAttrTabIdx];
                 redrawCanvas = true;
             }
