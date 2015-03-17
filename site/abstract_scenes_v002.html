@@ -71,7 +71,7 @@
                         </p>
                         <p>
                         <!-- TODO Make number of scenes this dynamically update -->
-                        You will be asked to complete 3 <b>different/independent</b> scenes.
+                        You will be asked to complete <span id="numTotalScenes">3</span> <b>different/independent</b> scenes.
                         You can go back and forth between all of your scenes by pressing "Prev" and "Next" 
                         When you finish your last one, a pop-up will ask you to submit.
                         </p>
@@ -195,7 +195,7 @@
             
             function update_instructions() {
                 if (curSceneTypeBase == "Living") {
-                    titleStr = "(<b style='color:red;'>" + "Living/Diving Room" + "</b>)";
+                    titleStr = "(<b style='color:red;'>" + "Living/Dining Room" + "</b>)";
                 } else {
                     if (curSceneTypeBase != undefined) {
                         titleStr = "(<b style='color:red;'>" + curSceneTypeBase + "</b>)";
@@ -204,6 +204,7 @@
                     }
                 }
                 
+                document.getElementById('numTotalScenes').innerHTML = numScene;
                 document.getElementById('titleScene').innerHTML = titleStr;
                 document.getElementById('counter').innerHTML = 
                         "Scene " + (curScene+1) + "/" + numScene;

@@ -240,7 +240,7 @@ var curSceneTypeBase = extract_scene_type_base(curSceneType)
 // Affects what's in the instructions
 var titleStr;
 if (curSceneTypeBase == "Living") {
-    titleStr = "Living/Diving Room";
+    titleStr = "Living/Dining Room";
 } else {
     titleStr = curSceneTypeBase;
 }
