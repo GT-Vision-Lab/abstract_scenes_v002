@@ -1,5 +1,6 @@
-Xinlei Chen
 Stanislaw Antol
+Xinlei Chen
+Tanmay Batra
 Xiao Lin
 Larry Zitnick
 Devi Parikh
