@@ -1,5 +1,6 @@
 # abstract_scenes_v002
 The second version of the interface for the [Abstract Scenes research project](http://research.microsoft.com/en-us/um/people/larryz/clipart/abstract_scenes.html).
+The master branch of the interface can be found [here](https://vision.ece.vt.edu/abstract_scenes_v002/site/abstract_scenes_v002.html).
 
 ## Interface Images
 To use the web interface (or render scenes in general), you will need to download the images.
