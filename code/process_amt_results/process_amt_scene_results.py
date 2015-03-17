@@ -132,7 +132,9 @@ def extract_scene_data(hit_data):
             parsed_datum['imgName'] = '{0}_{1:02d}.png'.format(parsed_datum['assignmentId'], cur_idx)
             parsed_datum['scene'] = scene
             if 'sceneType' not in parsed_datum['scene']:
-                parsed_datum['scene']['sceneType'] = "Living"
+                parsed_datum['scene']['sceneType'] = 'Living'
+            if 'sceneConfigFile' not in parsed_datum['scene']:
+                parsed_datum['scene']['sceneConfigFile'] = 'abstract_scenes_v002_data_scene_config.json'
             hit_result.append(copy.copy(parsed_datum))
             cur_idx += 1
         

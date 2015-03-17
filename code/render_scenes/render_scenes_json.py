@@ -27,6 +27,7 @@ class RenderScenes(object):
     
     def __init__(self, opts):
         self.opts = opts
+        self.prev_scene_config_file = ''
         
     def run(self):
         if (self.opts['render']):
@@ -53,35 +54,110 @@ class RenderScenes(object):
         else:
             config_folder = self.opts['--config_dir']
 
-        if (self.opts['--config_file'] == 'USE_DEF'):
-            scene_config_file = os.path.join(config_folder, 'abstract_scenes_v002_data_scene_config.json')
-        else:
-            scene_config_file = os.path.join(config_folder, self.opts['--config_file'])
-
+        self.config_folder = config_folder
         self.render_dir = render_dir
         self.clipart_img_format = clipart_img_format
         self.base_url_interface = base_url_interface
-
-        with open(scene_config_file) as json_fileid:
-            self.scene_config_data = json.load(json_fileid)
-
-        obj_filenames = self.scene_config_data['clipartObjJSONFile']
-        object_data = {}
-        for obj_file in obj_filenames:
-            obj_file_vers = obj_file['file']
-            for obj_dtype, obj_type_file in obj_file_vers.items():
-                with open(os.path.join(config_folder, obj_type_file)) as f:
-                    obj = json.load(f)
-                    if obj['objectType'] not in object_data:
-                        object_data[obj['objectType']] = {}
-                    object_data[obj['objectType']][obj_dtype] = obj
-        self.object_data = object_data
         
         with open(json_file) as json_fileid:
             all_scenes = json.load(json_fileid)
 
         for cur_scene in all_scenes:
             self.render_one_scene(cur_scene)
+        
+    def render_one_scene(self, data):
+
+        img_file = os.path.join(self.render_dir, data['imgName'])
+        
+        # Skip if already exists and no overwrite flag
+        if (not os.path.isfile(img_file) or self.overwrite==True):
+            cur_scene = data['scene']
+            self.read_scene_config_file(cur_scene['sceneConfigFile'])
+            cur_scene_type = cur_scene['sceneType']
+            cur_scene_config = self.scene_config_data[cur_scene_type]
+                
+            def_z_size =  cur_scene_config['defZSize']   
+            img_pad_num = cur_scene_config['imgPadNum']
+            not_used = cur_scene_config['notUsed']
+            num_z_size = cur_scene_config['numZSize']
+            num_depth0 = cur_scene_config['numDepth0']
+            num_depth1 = cur_scene_config['numDepth1']
+            num_flip = cur_scene_config['numFlip']
+            
+            object_type_data = cur_scene_config['objectTypeData']
+            object_type_order = []
+            num_obj_type_show = {}
+            for obj_el in object_type_data:
+
+                cur_name = obj_el['nameType']
+                object_type_order.append(cur_name)
+                num_obj_type_show[cur_name] = obj_el['numShow']
+            
+            cur_avail_obj = cur_scene['availableObject']
+            cur_z_scale = [1.0]
+            for i in range(1, num_z_size):
+                cur_z_scale.append(cur_z_scale[i - 1] * cur_scene_config['zSizeDecay'])
+
+            bg_img_file = os.path.join(self.base_url_interface, 
+                                cur_scene_config['baseDir'], 
+                                cur_scene_config['bgImg'])
+            bg_img = Image.open(bg_img_file)
+            
+            # // Make sure we get the depth ordering correct (render the objects using their depth order)
+            for k in reversed(range(0, num_depth0)): # (num_depth0-1, num_depth0-2, ... 0)
+            #     if (curDepth0Used[k] <= 0) { // not used, just to accelerate the process
+            #         continue;
+            #     }
+                for j in reversed(range(0, num_z_size+1)):
+            #         // for people, choose both the expression and the pose
+                    for L in reversed(range(0, num_depth1)):
+            #             if (curDepth1Used[l] <= 0) { // not used, just to accelerate the process
+            #                 continue;
+            #             }
+                        for i in range(0, len(cur_avail_obj)):
+                            if (cur_avail_obj[i]['instance'][0]['depth0'] == k):
+                                for m in range(0, cur_avail_obj[i]['numInstance']):
+                                    cur_obj = cur_avail_obj[i]['instance'][m]
+                                    if (cur_obj['present'] == True and
+                                        cur_obj['z'] == j and
+                                        cur_obj['depth1'] == L):
+                                        
+                                        if (cur_obj['type'] == 'human'):
+                                            if (cur_obj['deformable'] == True):
+                                                self.overlay_deformable_person(bg_img, img_pad_num,
+                                                                               cur_obj, cur_z_scale)
+                                            else:
+                                                self.overlay_nondeformable_person(bg_img, img_pad_num,
+                                                                                  cur_obj, cur_z_scale)
+                                        else:
+                                            self.overlay_nondeformable_obj(bg_img, img_pad_num,
+                                                                           cur_obj, cur_z_scale)
+
+            bg_img.save(img_file, self.clipart_img_format, compress_level=0, optimize=1)
+            
+    def read_scene_config_file(self, scene_config_filename):
+        
+        scene_config_file = os.path.join(self.config_folder, scene_config_filename)
+        
+        # Only need to load if not the same as previous
+        if (scene_config_file != self.prev_scene_config_file):
+
+            self.prev_scene_config_file = scene_config_file
+            
+            with open(scene_config_file) as json_fileid:
+                self.scene_config_data = json.load(json_fileid)
+
+                obj_filenames = self.scene_config_data['clipartObjJSONFile']
+                object_data = {}
+                for obj_file in obj_filenames:
+                    obj_file_vers = obj_file['file']
+                    for obj_dtype, obj_type_file in obj_file_vers.items():
+                        with open(os.path.join(self.config_folder, obj_type_file)) as f:
+                            obj = json.load(f)
+                            if obj['objectType'] not in object_data:
+                                object_data[obj['objectType']] = {}
+                            object_data[obj['objectType']][obj_dtype] = obj
+                self.object_data = object_data
             
     def get_object_attr_types(self, obj_type, deform_type):
         
@@ -304,80 +380,11 @@ class RenderScenes(object):
         else: 
             flipped = resized.transpose(Image.FLIP_LEFT_RIGHT)
             bg_img.paste(flipped, offset, flipped)
-        
-    def render_one_scene(self, data):
-        
-        img_file = os.path.join(self.render_dir, data['imgName'])
-        
-        # Skip if already exists and no overwrite flag
-        if (not os.path.isfile(img_file) or self.overwrite==True):
-            cur_scene = data['scene']
-            cur_scene_type = cur_scene['sceneType']
-            cur_scene_config = self.scene_config_data[cur_scene_type]
-                
-            def_z_size =  cur_scene_config['defZSize']   
-            img_pad_num = cur_scene_config['imgPadNum']
-            not_used = cur_scene_config['notUsed']
-            num_z_size = cur_scene_config['numZSize']
-            num_depth0 = cur_scene_config['numDepth0']
-            num_depth1 = cur_scene_config['numDepth1']
-            num_flip = cur_scene_config['numFlip']
-            
-            object_type_data = cur_scene_config['objectTypeData']
-            object_type_order = []
-            num_obj_type_show = {}
-            for obj_el in object_type_data:
-
-                cur_name = obj_el['nameType']
-                object_type_order.append(cur_name)
-                num_obj_type_show[cur_name] = obj_el['numShow']
-            
-            cur_avail_obj = cur_scene['availableObject']
-            cur_z_scale = [1.0]
-            for i in range(1, num_z_size):
-                cur_z_scale.append(cur_z_scale[i - 1] * cur_scene_config['zSizeDecay'])
-
-            bg_img_file = os.path.join(self.base_url_interface, 
-                                cur_scene_config['baseDir'], 
-                                cur_scene_config['bgImg'])
-            bg_img = Image.open(bg_img_file)
-            
-            # // Make sure we get the depth ordering correct (render the objects using their depth order)
-            for k in reversed(range(0, num_depth0)): # (num_depth0-1, num_depth0-2, ... 0)
-            #     if (curDepth0Used[k] <= 0) { // not used, just to accelerate the process
-            #         continue;
-            #     }
-                for j in reversed(range(0, num_z_size+1)):
-            #         // for people, choose both the expression and the pose
-                    for L in reversed(range(0, num_depth1)):
-            #             if (curDepth1Used[l] <= 0) { // not used, just to accelerate the process
-            #                 continue;
-            #             }
-                        for i in range(0, len(cur_avail_obj)):
-                            if (cur_avail_obj[i]['instance'][0]['depth0'] == k):
-                                for m in range(0, cur_avail_obj[i]['numInstance']):
-                                    cur_obj = cur_avail_obj[i]['instance'][m]
-                                    if (cur_obj['present'] == True and
-                                        cur_obj['z'] == j and
-                                        cur_obj['depth1'] == L):
-                                        
-                                        if (cur_obj['type'] == 'human'):
-                                            if (cur_obj['deformable'] == True):
-                                                self.overlay_deformable_person(bg_img, img_pad_num,
-                                                                               cur_obj, cur_z_scale)
-                                            else:
-                                                self.overlay_nondeformable_person(bg_img, img_pad_num,
-                                                                                  cur_obj, cur_z_scale)
-                                        else:
-                                            self.overlay_nondeformable_obj(bg_img, img_pad_num,
-                                                                           cur_obj, cur_z_scale)
-
-            bg_img.save(img_file, self.clipart_img_format, compress_level=0, optimize=1)
 
 def main():
     '''
     Usage:
-        render_scenes_json.py render <jsonfile> <outdir> [--overwrite --site_pngs_dir=ID --config_dir=CD --config_file=CF --format=FMT]
+        render_scenes_json.py render <jsonfile> <outdir> [--overwrite --site_pngs_dir=ID --config_dir=CD --format=FMT]
                 
     Options:
         <jsonfile>          Filepath to JSON file (from other code and extracted from results file)
@@ -385,13 +392,11 @@ def main():
         --format=FMT        Image file format [default: png]
         --site_pngs_dir=ID  Path to the site_pngs dir (contains all object images) [default: USE_DEF]
         --config_dir=CD     Path to the config data files (contains all object data) [default: USE_DEF]
-        --config_file=CF    Name of the config data file (contains all object images) [default: USE_DEF]
         --overwrite         Overwrite files even if they exist
     '''
     
     #USE_DEF for --site_pngs_dir is /srv/share/abstract_scenes_v002/site_pngs/
     #USE_DEF for --config_dir is /srv/share/abstract_scenes_v002/site_data/
-    #USE_DEF for --config_file is abstract_scenes_v002_data_scene_config.json
     
     # 1. set up command line interface
     import docopt, textwrap

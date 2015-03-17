@@ -1,20 +1,48 @@
-﻿// You have 3 ways of using this interface:
-// Note: QS is short for query string, i.e., the <name>=<val> stuff after the
+﻿// ### Changing Interface Behavior via the URL
+// (See README.md for additional information.)
+// Note: QS is short for query string, i.e., the <name>=<value> stuff after the
 // question mark (?) in the URL.
-// 1. Specify an ordered list of existing scene JSON files to initialize with.
+// 
+// You have 3 ways of using this interface and 2 demos:
+// 
+// 1. Load-scene-from-JSON demo mode by jsonDemo=1
+// 2. Specify an ordered list of existing scene JSON files to initialize with. 
 //    E.g., QS has sceneJSONFile01=AXOOE_01.json&sceneJSONFile02=AOEUE_11.json
-// 2. Specify an ordered list of scene types to go through. E.g., QS has
+// 3. Specify an ordered list of scene types to go through. E.g., QS has
 //    sceneType01=Park&sceneType02=Living&sceneType03=Kitchen
 //    Note: Kitchen currently doesn't exist
-// 3. Specify the total number of scenes along with which type of scene. E.g.,
+// 4. Specify the total number of scenes along with which type of scene. E.g.,
 //    QS has sceneType=Park&numScene=4
 //    If either one of these are blank, some defaults are used.
 //    If both are blank, demo mode.
-// 4. Demo mode
-// In that order (e.g., 1's parameters supercede 3's)
-
-// sceneConfigFile = "abstract_scenes_v002_data_scene_config.json" by default
-// but you can pass the filename via the sceneConfig QS parameter
+// 5. Blank-scene demo mode by not having anything in the QS (or everything turned off).
+// 
+// This order is also the precedence order (e.g., 1's parameters supercede 3's).
+// 
+// In addition, there are several other QS parameters that you can tweak.
+// You only need to specify these when you want to change from the defaults.
+// 
+// * restrictInput=0 (default is 1) disables checking if 
+//    the user work meets our minimum requirements. 
+// This is convenient for testing/browing the other parts of the interface.
+// * deformHuman=0 uses the original people from Xinlei's version.
+//    deformHuman=1 uses the paperdoll/deformable people, which is the default.
+// * deformHumanPoseInit=0 uses random poses (for deformable people). 
+//    deformHumanPoseInit=1 randomly selects one of the initial poses 
+//    that is specified in ...human_deform.json.
+//    The other object categories are currently hardcoded in ..._head.js into the
+//    deformTypesUse variable. 
+//    Adding some code to process the QS and updating
+//    this variable (and creating the JSON files) accordingly should be all you 
+//    need to do if we add other kinds of deformable categories.
+// * sceneConfigFile=abstract_scenes_v002_data_scene_config.json by default,
+//    but you can pass the filename via the sceneConfig QS parameter.
+//    Note: This is currently only read once at the beginning of the webpage load.
+//    Also, if you're loading scenes from JSON files, 
+//    all of the scenes that you're loading should come from the same sceneConfigFile.
+//    Ideally, we should update the code to be more flexible and 
+//    load the correct scene depending on the 
+//    sceneConfigFile specified in the sceneJSON data.
 
 // Location of the interface on server--not sure why you'd want this over relative
 var baseURL = "https://vision.ece.vt.edu/abstract_scenes_v002/site/";
