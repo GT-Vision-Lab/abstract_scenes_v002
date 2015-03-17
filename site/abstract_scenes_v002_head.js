@@ -169,6 +169,12 @@ if (jsonDemoStr == "") {
     }
 }
 
+// Let users specify the URL of the previous scenes
+var sceneJSONURLStr = decode(gup('sceneJSONURL'));
+if (sceneJSONURLStr != '') {
+    sceneJSONURL = sceneJSONURLStr;
+}
+
 // Enable load-from-JSON demo
 if (jsonDemo) {
     sceneJSONFile = ['35H6S234SA0H5UPSZN4KBGWKULZ65Q_00.min.json',
