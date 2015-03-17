@@ -23,14 +23,14 @@ var baseURL = './'
 // Relative location of the image files for the interface
 var baseURLInterface = baseURL + "../site_pngs/";
 // Use web data location of image files if you don't want to download them locally
-// baseURLInterface = baseURL + "https://vision.ece.vt.edu/abstract_scenes_v002/site_pngs/";
+// baseURLInterface = "https://vision.ece.vt.edu/abstract_scenes_v002/site_pngs/";
 // Location of interface configuration files
 var dataURL = baseURL + "../site_data/";
 // Location of some demo scenes to load
 var sceneJSONURL = baseURL + "../scenes/json/";
 
+// Changing this will affect the non-JSON demo
 var AVAIL_SCENE_TYPES = ["Living-All", "Park-All"];
-// var AVAIL_SCENE_TYPES = ["Living", "Park"]; // SA: For Larry integration
 
 // In case forget to update deformTypesUse
 var deformTypeDefault = 'nondeformable'; 
@@ -130,7 +130,6 @@ var numScene = 3;
 var loadSceneJSON = false;
 var loadedSceneJSON = {};
 
-
 var jsonDemoStr = decode(gup("jsonDemo"));
 if (jsonDemoStr == "") {
     jsonDemo = false;
@@ -142,6 +141,7 @@ if (jsonDemoStr == "") {
     }
 }
 
+// Enable load-from-JSON demo
 if (jsonDemo) {
     sceneJSONFile = ['35H6S234SA0H5UPSZN4KBGWKULZ65Q_00.min.json',
                      '35H6S234SA0H5UPSZN4KBGWKULZ65Q_01.min.json',
@@ -150,10 +150,13 @@ if (jsonDemo) {
                     ];
 
 } else {
+    // Check if URL has any scenes to load
     sceneJSONFile = collect_ordered_QS('sceneJSON', NUM_QS_ZEROPAD);
 }
 
 if (sceneJSONFile.length > 0) {
+    // If loading scenes from JSON,
+    // must call load_scene_json()
     sceneTypeList = [];
     loadSceneJSON = true;
     numScene = sceneJSONFile.length;
@@ -161,10 +164,11 @@ if (sceneJSONFile.length > 0) {
     var sceneJSONData = {};
     load_scene_json(null, null); // Initially null since recursive call
 } else {
-    
+    // First try collecting numbered sceneTypes mode
     sceneTypeList = collect_ordered_QS('sceneType', NUM_QS_ZEROPAD);
-    
-    if (sceneTypeList.length == 0) {
+    numScene = sceneTypeList.length;
+    // If none specified, check the sceneType and numScene mode.
+    if (numScene == 0) {
         var sceneTypeStr = decode(gup("sceneType"));
         var numSceneStr = decode(gup("numScene"));
 
@@ -186,16 +190,26 @@ if (sceneJSONFile.length > 0) {
                 sceneTypeList.push(sceneType);
             }
         }
-    } else {
-        numScene = sceneTypeList.length;
-    }
-    
+    } 
+
     curSceneType = sceneTypeList[0];
     sceneData = Array(numScene);
 }
 
+// Splits scene type on hyphens.
+// This is so you don't need to add a bunch of stuff to the
+// availableScene list in the data_<>.json files for minor 
+// tweaks of the same sceneType.
+// For example, Living-All is the Living Room scene with
+// all possible objects. Living-XinleiSubset has the same
+// available objects, but only shows a random subset of 
+// each category type. The number of random subsets is 
+// consistent with Xinlei's data collection.
+// You're free to add new modified versions to data_scene_config.json
+// in a similar fashion.
 var curSceneTypeBase = extract_scene_type_base(curSceneType)
 
+// Affects what's in the instructions
 var titleStr;
 if (curSceneTypeBase == "Living") {
     titleStr = "Living/Diving Room";
@@ -203,6 +217,15 @@ if (curSceneTypeBase == "Living") {
     titleStr = curSceneTypeBase;
 }
 
+// The scene configuration (for different scene types)
+// MUST come from a JSON file. By default,
+// it is "abstract_scenes_v002_data_scene_config.json",
+// but for your experiments, you probably want to create
+// a new one specific to your project.
+// The sceneConfigFile gets saved into the sceneData
+// that get send back via AMT. The Python script that
+// processes the AMT results file will need those files
+// to exist in the same folder that the interface expects.
 var sceneConfigFile;
 var sceneConfigStr = decode(gup("sceneConfig"));
 
@@ -295,7 +318,7 @@ function load_scene_json(loaded_data, filename) {
                             randSceneType = get_random_int(0, AVAIL_SCENE_TYPES.length);
                             load_scene_json({"scene": {"sceneType": AVAIL_SCENE_TYPES[randSceneType]},
                                              "failed": true}, curSceneFile);
-                        } );    
+                        } );
     } else {
         
         sceneJSONData[filename] = loaded_data;

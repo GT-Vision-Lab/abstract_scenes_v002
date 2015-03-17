@@ -1368,6 +1368,8 @@ function submit_form() {
 //
 var jsonIdx = -1; // Start with -1 because of config
 
+// SA: TODO Update this so it gets called if you're 
+// loading scenes from JSON files.
 function load_config_json() {
     $.getJSON(dataURL+sceneConfigFile).done( function(data) { 
         load_object_config(data, null); 
