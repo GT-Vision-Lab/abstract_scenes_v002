@@ -204,11 +204,11 @@
                     }
                 }
                 
-                document.getElementById('numTotalScenes').innerHTML = numScene;
                 document.getElementById('titleScene').innerHTML = titleStr;
                 document.getElementById('counter').innerHTML = 
                         "Scene " + (curScene+1) + "/" + numScene;
                 if (document.getElementById('exToggle').value == 'Hide Instructions' ) {
+                    document.getElementById('numTotalScenes').innerHTML = numScene;
                     document.getElementById('minNumClipart').innerHTML = 
                         minNumObj + " piece" + ( (minNumObj==1) ? "" : "s");
                     document.getElementById('maxNumClipart').innerHTML = 
