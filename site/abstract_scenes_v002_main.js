@@ -681,7 +681,26 @@ function obj_load_first_imgs() {
     
     curPaperdollPartImgs = Array(numObjTypeShow['human']);
     
-    for (i = 0; i < numAvailableObjects; i++) {
+    var curSceneType = sceneTypeList[curScene];
+    var startCategory = sceneConfigData[curSceneType].startTab;
+    var imgLoadOrderFirst = [];
+    var imgLoadOrderLater = [];
+    
+    // SA: Maybe this will speed up showing the first set of images
+    // based on what the start tab is.
+    for (var i = 0; i < numAvailableObjects; i++) {
+        if (curAvailableObj[i].instance[0].type == startCategory) {
+            imgLoadOrderFirst.push(i);
+        } else {
+            imgLoadOrderLater.push(i);
+        }
+    }
+    
+    var imgLoadOrder = imgLoadOrderFirst.concat(imgLoadOrderLater);
+
+    for (var a = 0; a < numAvailableObjects; a++) {
+        var i = imgLoadOrder[a];
+
         if (curAvailableObj[i].instance[0].type == 'human') {
             if (curAvailableObj[i].instance[0].deformable == true) {            
                 // Load paperdoll heads/expression
