@@ -1718,8 +1718,10 @@ function draw_deformable_person(objIdx, instIdx) {
         }
 
         if (paperdoll.body[partIdx].part == 'Head') {
-            w = curPeopleExprImgs[objIdx][0].width;
-            h = curPeopleExprImgs[objIdx][0].height;
+            // SA: Bug fix: Expression images sometimes are different size!
+            // Thus can't use 0 index.
+            w = curPeopleExprImgs[objIdx][paperdoll.expressionID].width;
+            h = curPeopleExprImgs[objIdx][paperdoll.expressionID].height;
             ctx.drawImage(curPeopleExprImgs[objIdx][paperdoll.expressionID], 0, 0, w, h, 0, 0, w, h);
         } else {
             ctx.drawImage(curPaperdollPartImgs[objIdx][partIdx], 0, 0, w, h, 0, 0, w, h);
@@ -1941,8 +1943,6 @@ function draw_clipart() {
                             continue;
                         }
                         
-                        var exprImg = curPeopleExprImgs[idx][idxAttr];
-
                         if (typeof curPeopleExprImgs[idx] == "undefined") { // just sometimes it is not even loaded yet...
                             continue;
                         }
@@ -1953,6 +1953,7 @@ function draw_clipart() {
                             }
                         }
 
+                        var exprImg = curPeopleExprImgs[idx][idxAttr];
                         var w = exprImg.width;
                         var h = exprImg.height;
                         
