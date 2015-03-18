@@ -43,8 +43,8 @@
     <body class="noSelect">
     
         <div class="noSelect" align="left">
-            <h2 style="color:black; margin:0 0 0 0;">Create a children's illustration 
-                <span id="titleScene"></span>!
+            <h2 style="color:black; margin:0 0 0 0;">Help Us Create Clipart Illustrations! 
+                <span id="titleScene"></span>
             </h2>
         </div>
     
@@ -60,14 +60,14 @@
                         [Images may take some time to load]
                         <b>[Spamming will get blocked]</b> <br />
                         <p>
-                        Please help us create an illustration for a children's story book by creating a <b>realistic</b> scene from the clipart below.
-                        Use your imagination!<br />
+                        Please create an illustration of a <b>realistic</b> scene from the clipart below. <br />
                         </p>
                         <p>Clipart objects (5 instances each) may be added by dragging them onto the scene and removed by dragging them off.
                         They may be <b style="color:red;">resized (CTRL + a/CTRL + z), 
                         flipped (CTRL + c), sent backward (CTRL + s) or brought forward (CTRL + x)</b>.
-                        Please use at least <span id="minNumClipart">6 pieces</span> and
-                        at most <span id="maxNumClipart">20 pieces</span> of clipart in each scene.
+                        <!--Please use at least <span id="minNumClipart">6 pieces</span> and
+                        at most <span id="maxNumClipart">20 pieces</span> of clipart in each scene.-->
+                        Please use at least <span id="minNumClipart">6 pieces</span> of clipart in each scene.
                         </p>
                         <p>
                         <!-- TODO Make number of scenes this dynamically update -->
@@ -211,8 +211,10 @@
                     document.getElementById('numTotalScenes').innerHTML = numScene;
                     document.getElementById('minNumClipart').innerHTML = 
                         minNumObj + " piece" + ( (minNumObj==1) ? "" : "s");
-                    document.getElementById('maxNumClipart').innerHTML = 
-                        maxNumObj + " piece" + ( (maxNumObj==1) ? "" : "s");
+                    if (document.getElementById('maxNumClipart') != undefined) {
+                        document.getElementById('maxNumClipart').innerHTML = 
+                            maxNumObj + " piece" + ( (maxNumObj==1) ? "" : "s");
+                    }
                 }
                 
                 select_good();

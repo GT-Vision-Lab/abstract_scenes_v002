@@ -9,5 +9,5 @@ used to perform the merging of variables into template files.  You can learn mor
      workers will get a scrollbar frame within a scrollbar frame, 
      which can be annoying. 
 -->
-    <FrameHeight>1400</FrameHeight>
+    <FrameHeight>1350</FrameHeight>
 </ExternalQuestion>
