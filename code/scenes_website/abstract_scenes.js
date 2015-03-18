@@ -2,8 +2,9 @@
 // and filter out a list of workers with rmWorkers, and
 // change the number of HITs to show with maxHITsShow (0 means all).
 // The number of HITs filtering happens AFTER removing workers.
+// There are also some dataset-related QS parameters. See the code for that info.
 // For example:
-// abstract_scenes.html?randomize=1&rmWorkers=A18WRDWALD8BXF,A18WRDWALD8BXB&maxHITsShow=0
+// abstract_scenes.html?randomize=1&maxHITsShow=0&rmWorkers=1,2&datasetNames=pilot_lab
 
 // ***************************************************************************
 // Beginning of misc. JS code
@@ -121,26 +122,45 @@ workersToFilter = workerFilterList.reduce(function(obj, k) {
                             return obj;
                         }, {})
 
-var dataset = decode(gup("dataset"));
 var datasetIdx = 0;
-
-if (dataset == "pilot_01") {
-    datasetIdx = 0;
+var datasetIdxStr = decode(gup("datasetIdx"));
+if (datasetIdxStr != "") {
+    datasetIdx = Number(datasetIdxStr);
 }
 
-var base_img_path;
-//base_img_path = 'https://vision.ece.vt.edu/abstract_scenes_v002/data/output/';
-base_img_path = '../../data/output/';
+var base_data_path;
+//base_data_path = 'https://vision.ece.vt.edu/abstract_scenes_v002/data/output/';
+base_data_path = ['../../data/output/'];
 var exp_names_title = ['Abstract Scenes V2'];
 var exp_names_internal = ['amt_simple_launch_demo'];
 var dataset_names = ['pilot_01'];
+
+baseDataPathStr = decode(gup("baseDataPath"));
+if (baseDataPathStr != '') {
+    base_data_path = baseDataPathStr.split(",");
+}
+
+expNamesTitleStr = decode(gup("expNamesTitle"));
+if (expNamesTitleStr != '') {
+    exp_names_title = expNamesTitleStr.split(",");
+}
+
+expNamesIntStr = decode(gup("expNamesInternal"));
+if (expNamesIntStr != '') {
+    exp_names_internal = expNamesIntStr.split(",");
+}
+
+datasetNamesStr = decode(gup("datasetNames"));
+if (datasetNamesStr != '') {
+    dataset_names = datasetNamesStr.split(",");
+}
 
 img_paths = []
 data_filenames = []
 
 exp_names_internal.forEach( function(name, idxExp) {
-    var img_path = base_img_path + name + '/' + dataset_names[idxExp] + '/ills/';
-    var data_file = base_img_path + name + '/' + dataset_names[idxExp] + 
+    var img_path = base_data_path[idxExp] + name + '/' + dataset_names[idxExp] + '/ills/';
+    var data_file = base_data_path[idxExp] + name + '/' + dataset_names[idxExp] + 
                     '/json/' + dataset_names[idxExp] + '_noSceneData.min.json';
     img_paths.push(img_path);
     data_filenames.push(data_file);
