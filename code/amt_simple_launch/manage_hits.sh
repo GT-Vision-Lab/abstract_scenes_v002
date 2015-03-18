@@ -67,7 +67,7 @@ apprFileHITs=0
 apprAllHITs=0
 delAndApproveHITs=0
 
-expType="amt_simple_launch_demo"
+expType="vqa_clipart_collection"
 expName="pilot_01"
 
 # Current directory of script
