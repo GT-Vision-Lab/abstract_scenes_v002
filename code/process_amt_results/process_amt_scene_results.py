@@ -25,7 +25,7 @@ def dir_path(dname):
     return dname
 
 def process_amt_results(filename, output_dir, overwrite, 
-                        filter_name, filter_list):
+                        filter_name, filter_list, gen_apprv_cmnt):
     
     input_file = basename(filename)
     input_file_base, input_file_ext = splitext(input_file)
@@ -43,6 +43,8 @@ def process_amt_results(filename, output_dir, overwrite,
 
     scene_data = extract_scene_data(results)
     save_json(scene_data, output_file)
+    
+    create_approval_file(scene_data, filename, gen_apprv_cmnt)
     
     counter = 0
     filename_base, filename_ext = splitext(output_name)
@@ -152,11 +154,24 @@ def save_json(data, filename):
     with open(filename, 'w') as of, open(filename_min, 'w') as of_min:
         json.dump(data, of_min)
         json.dump(data, of, indent=4, separators=(',', ': '))
+        
+def create_approval_file(data, filename, gen_apprv_cmnt):
+    
+    filename_base, filename_ext = splitext(filename)
+    appr_filename = filename_base + ".approve" 
+    print(appr_filename)
+    
+    with open(appr_filename, 'wb') as of:
+        of.write('"assignmentIdToApprove"\t"assignmentIdToApproveComment"\n');
+        comment = gen_apprv_cmnt
+        for datum in data:
+            str = name = '"{0}"\t"{1}"\n'.format(datum["assignmentId"], comment)
+            of.write(str)
 
 def main():
     '''
     Usage:
-        process_amt_scene_results.py extract <resfile> <outdir> [--fmt=RESFMT --filter=RESFLT --overwrite]
+        process_amt_scene_results.py extract <resfile> <outdir> [--fmt=RESFMT --filter=RESFLT --overwrite --genApprCmnt=AC]
                 
     Options:
         <resfile>           Filepath to AMT results file
@@ -164,6 +179,7 @@ def main():
         --resfmt=RESFMT     AMT results file format: tab, i.e., from CLT, or csv, i.e., from web interface  [default: tab]
         --filter=RESFLT     Filter out: A=Approved, R=Rejected, S=Submitted, N=None or combination  [default: N]
         --overwrite         Overwrite files even if they exist
+        --genApprCmnt=AC    The generic approval comment [default: Good job! Thanks for your work.]
     '''
     
     # 1. set up command line interface
@@ -181,6 +197,7 @@ def main():
         output_dir = main_args['<outdir>']
         filter_str = main_args['--filter']
         overwrite = main_args['--overwrite']
+        gen_apprv_cmnt = main_args['--genApprCmnt']
         
         # TODO Handle filtering better
         filter_list = [];
@@ -190,7 +207,9 @@ def main():
         else:
             filter_list = None
 
-        process_amt_results(input_file, output_dir, overwrite, 'assignmentstatus', filter_list)
+        process_amt_results(input_file, output_dir, overwrite, 
+                            'assignmentstatus', filter_list,
+                            gen_apprv_cmnt)
 
 if __name__ == '__main__':
     main()

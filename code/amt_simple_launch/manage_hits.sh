@@ -128,7 +128,8 @@ fi
 if [ $processResults -gt 0 ]
 then
 cd $currentDir/../process_amt_results
-python process_amt_scene_results.py extract $resultsFile $outputDataJSONDir
+python process_amt_scene_results.py extract $resultsFile $outputDataJSONDir \
+        --genApprCmnt="Good job everyone! Thanks for all your work."
 fi
 
 if [ $renderScenes -gt 0 ]
