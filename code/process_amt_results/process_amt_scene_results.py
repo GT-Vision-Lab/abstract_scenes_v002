@@ -45,6 +45,7 @@ def process_amt_results(filename, output_dir, overwrite,
     save_json(scene_data, output_file)
     
     create_approval_file(scene_data, filename, gen_apprv_cmnt)
+    create_reject_note_files(filename)
     
     counter = 0
     filename_base, filename_ext = splitext(output_name)
@@ -158,8 +159,7 @@ def save_json(data, filename):
 def create_approval_file(data, filename, gen_apprv_cmnt):
     
     filename_base, filename_ext = splitext(filename)
-    appr_filename = filename_base + ".approve" 
-    print(appr_filename)
+    appr_filename = filename_base + ".approve"
     
     with open(appr_filename, 'wb') as of:
         of.write('"assignmentIdToApprove"\t"assignmentIdToApproveComment"\n');
@@ -167,7 +167,28 @@ def create_approval_file(data, filename, gen_apprv_cmnt):
         for datum in data:
             str = name = '"{0}"\t"{1}"\n'.format(datum["assignmentId"], comment)
             of.write(str)
+            
+def create_reject_note_files(filename):
+    
+    filename_base, filename_ext = splitext(filename)
+    rej_filename = filename_base + ".reject"
+    notes_filename = filename_base + ".notes"
+    
+    with open(rej_filename, 'wb') as rf, open(notes_filename, 'wb') as nf:
+        rf.write('"assignmentIdToReject"\t"assignmentIdToRejectComment"\n');
+        nf.write('Add any notes/comments you have while looking through the data here.')
 
+def create_approval_file(data, filename, gen_apprv_cmnt):
+    
+    filename_base, filename_ext = splitext(filename)
+    appr_filename = filename_base + ".approve"
+    
+    with open(appr_filename, 'wb') as of:
+        of.write('"assignmentIdToApprove"\t"assignmentIdToApproveComment"\n');
+        comment = gen_apprv_cmnt
+        for datum in data:
+            str = name = '"{0}"\t"{1}"\n'.format(datum["assignmentId"], comment)
+            of.write(str)
 def main():
     '''
     Usage:
