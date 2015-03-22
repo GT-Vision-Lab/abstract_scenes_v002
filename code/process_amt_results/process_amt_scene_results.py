@@ -4,10 +4,13 @@ import csv
 import json
 import os
 import copy
+import subprocess
 from itertools import izip
 from os.path import basename
 from os.path import splitext
 from os.path import join as dir_join
+import glob
+import shutil
 
 import pdb # python debugger
 
@@ -25,7 +28,7 @@ def dir_path(dname):
     return dname
 
 def process_amt_results(filename, output_dir, overwrite, 
-                        filter_name, filter_list, gen_apprv_cmnt):
+                        gen_apprv_cmnt):
     
     input_file = basename(filename)
     input_file_base, input_file_ext = splitext(input_file)
@@ -35,16 +38,13 @@ def process_amt_results(filename, output_dir, overwrite,
     output_file = dir_join(output_dir, output_name)
     
     results = read_results(filename)
-    orig_len = len(results)
-    filter_results(results, filter_name, filter_list)
-    filt_len = len(results)
-    if (orig_len != filt_len):
-        print('Reduced data from {0} to {1} HITs'.format(orig_len, filt_len))
 
     scene_data = extract_scene_data(results)
     save_json(scene_data, output_file)
     
-    create_approval_file(scene_data, filename, gen_apprv_cmnt)
+    assignment_ids = set([scene['assignmentId'] for scene in scene_data])
+    
+    create_approval_file(assignment_ids, filename, gen_apprv_cmnt)
     create_reject_note_files(filename)
     
     counter = 0
@@ -93,17 +93,6 @@ def read_results(filename):
 
     return results
 
-def filter_results(results, filter_name=None, filter_list=None):
-    '''
-    Remove all elements of results that have their
-    filter_name property value in filter_list
-    '''
-    
-    if (filter_name != None and filter_list != None):
-        results = [result for result in results if (result[filter_name] not in filter_list)]
-
-    return results
-
 def extract_scene_data(hit_data):
     '''
     Extract out the most important data that we might
@@ -128,6 +117,8 @@ def extract_scene_data(hit_data):
         #      for key in ans_fields if key in hit_datum])
         
         parsed_datum['assignmentId'] = hit_datum['assignmentid']
+        parsed_datum['assignmentStatus'] = hit_datum['assignmentstatus']
+        
         result = json_list = json.loads(hit_datum[ans_res])
         cur_idx = 0
         for scene in result:
@@ -156,49 +147,51 @@ def save_json(data, filename):
         json.dump(data, of_min)
         json.dump(data, of, indent=4, separators=(',', ': '))
         
-def create_approval_file(data, filename, gen_apprv_cmnt):
+def create_approval_file(assignment_ids, filename, gen_apprv_cmnt):
     
     filename_base, filename_ext = splitext(filename)
     appr_filename = filename_base + ".approve"
     
+    is_new = not os.path.isfile(appr_filename)
+
+    if (not is_new):
+        appr_files = glob.glob(appr_filename + '.~*~')
+        appr_files.sort()
+        if (len(appr_files) == 0):
+            appr_filename_back = '{0}.~{1:04d}~'.format(appr_filename, 
+                                                        0)
+        else:
+            appr_filename_back = '{0}.~{1:04d}~'.format(appr_filename,
+                                                        len(appr_files))
+        print(appr_filename_back)
+        shutil.copy(appr_filename, appr_filename_back)
+    
     with open(appr_filename, 'wb') as of:
         of.write('"assignmentIdToApprove"\t"assignmentIdToApproveComment"\n');
-        comment = gen_apprv_cmnt
-        for datum in data:
-            str = name = '"{0}"\t"{1}"\n'.format(datum["assignmentId"], comment)
-            of.write(str)
+        for assignment_id in assignment_ids:
+            name = '"{0}"\t"{1}"\n'.format(assignment_id, 
+                                           gen_apprv_cmnt)
+            of.write(name)
             
 def create_reject_note_files(filename):
     
     filename_base, filename_ext = splitext(filename)
     rej_filename = filename_base + ".reject"
     notes_filename = filename_base + ".notes"
-    
-    with open(rej_filename, 'wb') as rf, open(notes_filename, 'wb') as nf:
-        rf.write('"assignmentIdToReject"\t"assignmentIdToRejectComment"\n');
-        nf.write('Add any notes/comments you have while looking through the data here.')
+    if not os.path.isfile(rej_filename):
+        with open(rej_filename, 'wb') as rf, open(notes_filename, 'wb') as nf:
+            rf.write('"assignmentIdToReject"\t"assignmentIdToRejectComment"\n');
+            nf.write('Add any notes/comments you have while looking through the data here.')
 
-def create_approval_file(data, filename, gen_apprv_cmnt):
-    
-    filename_base, filename_ext = splitext(filename)
-    appr_filename = filename_base + ".approve"
-    
-    with open(appr_filename, 'wb') as of:
-        of.write('"assignmentIdToApprove"\t"assignmentIdToApproveComment"\n');
-        comment = gen_apprv_cmnt
-        for datum in data:
-            str = name = '"{0}"\t"{1}"\n'.format(datum["assignmentId"], comment)
-            of.write(str)
 def main():
     '''
     Usage:
-        process_amt_scene_results.py extract <resfile> <outdir> [--fmt=RESFMT --filter=RESFLT --overwrite --genApprCmnt=AC]
+        process_amt_scene_results.py extract <resfile> <outdir> [--fmt=RESFMT --overwrite --genApprCmnt=AC]
                 
     Options:
         <resfile>           Filepath to AMT results file
         <outdir>            Directory to put the processed result files, i.e., JSON
         --resfmt=RESFMT     AMT results file format: tab, i.e., from CLT, or csv, i.e., from web interface  [default: tab]
-        --filter=RESFLT     Filter out: A=Approved, R=Rejected, S=Submitted, N=None or combination  [default: N]
         --overwrite         Overwrite files even if they exist
         --genApprCmnt=AC    The generic approval comment [default: Good job! Thanks for your work.]
     '''
@@ -210,26 +203,14 @@ def main():
     print('')
     print(main_args)
     print('')
-    
-    filter_mapping = { "A": "Approved", "R": "Rejected", "S": "Submitted", "N": "" }
-    
+
     if (main_args['extract']):
         input_file = main_args['<resfile>']
         output_dir = main_args['<outdir>']
-        filter_str = main_args['--filter']
         overwrite = main_args['--overwrite']
         gen_apprv_cmnt = main_args['--genApprCmnt']
         
-        # TODO Handle filtering better
-        filter_list = [];
-        if "N" not in filter_str:
-            for filt_char in filter_str:
-                filter_list.append(filter_mapping[filt_char])
-        else:
-            filter_list = None
-
         process_amt_results(input_file, output_dir, overwrite, 
-                            'assignmentstatus', filter_list,
                             gen_apprv_cmnt)
 
 if __name__ == '__main__':

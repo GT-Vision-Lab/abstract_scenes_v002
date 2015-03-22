@@ -122,6 +122,26 @@ workersToFilter = workerFilterList.reduce(function(obj, k) {
                             return obj;
                         }, {})
 
+// Let people filter out worker by
+// assignmentStatus, e.g., Rejected
+assgnStatStr = decode(gup("rmAssgnStat"));
+assgnStatFilterList = [];
+if (assgnStatStr != '') {
+    assgnStatFilterList = assgnStatStr.split(",");
+}
+
+assgnStatToFilter = assgnStatFilterList.reduce(function(obj, k) {
+                            if (k == 'S') {
+                                k = 'Submitted'
+                            } else if (k == 'A') {
+                                k = 'Approved'
+                            } else if (k == 'R') {
+                                k = 'Rejected'
+                            }
+                            obj[k] = true; // Value doesn't matter
+                            return obj;
+                        }, {})
+
 var datasetIdx = 0;
 var datasetIdxStr = decode(gup("datasetIdx"));
 if (datasetIdxStr != "") {
@@ -161,7 +181,7 @@ data_filenames = []
 exp_names_internal.forEach( function(name, idxExp) {
     var img_path = base_data_path[idxExp] + name + '/' + dataset_names[idxExp] + '/ills/';
     var data_file = base_data_path[idxExp] + name + '/' + dataset_names[idxExp] + 
-                    '/json/' + dataset_names[idxExp] + '_noSceneData.min.json';
+                    '/json/' + dataset_names[idxExp] + '_noSceneData.json';
     img_paths.push(img_path);
     data_filenames.push(data_file);
 })
@@ -248,7 +268,8 @@ function visualizeit(indata) {
     }
     
     assignmentIdNestSubset = assignmentIdNestAll.filter(function(d) {
-        return !(d.values[0].workerId in workersToFilter);
+        return !( d.values[0].workerId in workersToFilter ||
+                  d.values[0].assignmentStatus in assgnStatToFilter);
     });
     
     // Only use part of the dataset, after filtering out workers
