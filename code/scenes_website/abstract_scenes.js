@@ -181,7 +181,7 @@ data_filenames = []
 exp_names_internal.forEach( function(name, idxExp) {
     var img_path = base_data_path[idxExp] + name + '/' + dataset_names[idxExp] + '/ills/';
     var data_file = base_data_path[idxExp] + name + '/' + dataset_names[idxExp] + 
-                    '/json/' + dataset_names[idxExp] + '_noSceneData.json';
+                    '/json/' + dataset_names[idxExp] + '_noSceneData.min.json';
     img_paths.push(img_path);
     data_filenames.push(data_file);
 })
