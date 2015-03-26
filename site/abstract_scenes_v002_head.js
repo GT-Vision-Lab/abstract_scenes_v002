@@ -88,7 +88,6 @@ var minNumObj = 1; // How many clipart objects they need to use.
 var maxNumObj = 20; // How many clipart objects they should at most use.
 var minJSONPosChange = 10; // How many pixels does object need to move to count as change.
 var minJSONSceneChange = 3; // How many things need to change if initializing from JSON.
-var minPerCatType = 1; // How many clipart of each type is required (unused).
 var minPosChange = 20; // The minimum distance (pixels) to count as change
 var minAngleThreshRandInit = 0.05; // The minimum angle (radians) to count as change
 var minAnglesChangeRandInit = 3; // How many deformable parts need to change

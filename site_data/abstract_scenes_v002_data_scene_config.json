@@ -22,7 +22,6 @@
         "numZSize": 5,
         "minNumObj": 6,
         "maxNumObj": 100,
-        "minPerCatType": 1,
         "minAngleThreshRandInit": 0.2, 
         "minAnglesChangeRandInit": 3,
         "minAngleThreshJSONInit": 0.2, 
@@ -32,10 +31,10 @@
         "numDepth0": 3,
         "numDepth1": 10,
         "numFlip": 2,
-        "objectTypeData": [{"nameType": "human", "numShow": 8}, 
-                           {"nameType": "animal", "numShow": 12}, 
-                           {"nameType": "largeObject", "numShow": 16},
-                           {"nameType": "smallObject", "numShow": 20}]
+        "objectTypeData": [{"nameType": "human", "numShow": 8, "reqNum": 1, "reqProb": 0.75}, 
+                           {"nameType": "animal", "numShow": 12, "reqNum": 0, "reqProb": 0.5}, 
+                           {"nameType": "largeObject", "numShow": 16, "reqNum": 0, "reqProb": 0.5},
+                           {"nameType": "smallObject", "numShow": 20, "reqNum": 0, "reqProb": 0.5}]
     },
     "Living": {
         "baseDir": "Living",
@@ -48,7 +47,6 @@
         "numZSize": 5,
         "minNumObj": 6,
         "maxNumObj": 100,
-        "minPerCatType": 1,
         "minAngleThreshRandInit": 0.2, 
         "minAnglesChangeRandInit": 3,
         "minAngleThreshJSONInit": 0.2, 
@@ -58,10 +56,10 @@
         "numDepth0": 3,
         "numDepth1": 10,
         "numFlip": 2,
-        "objectTypeData": [{"nameType": "human", "numShow": 8}, 
-                           {"nameType": "animal", "numShow": 8}, 
-                           {"nameType": "largeObject", "numShow": 20},
-                           {"nameType": "smallObject", "numShow": 20}]
+        "objectTypeData": [{"nameType": "human", "numShow": 8, "reqNum": 1, "reqProb": 0.75}, 
+                           {"nameType": "animal", "numShow": 8, "reqNum": 0, "reqProb": 0.5}, 
+                           {"nameType": "largeObject", "numShow": 20, "reqNum": 0, "reqProb": 0.5},
+                           {"nameType": "smallObject", "numShow": 20, "reqNum": 0, "reqProb": 0.5}]
     },
     "Park-XinleiSubset": {
         "baseDir": "Park",
@@ -74,7 +72,6 @@
         "numZSize": 5,
         "minNumObj": 6,
         "maxNumObj": 100,
-        "minPerCatType": 1,
         "minAngleThreshRandInit": 0.2, 
         "minAnglesChangeRandInit": 3,
         "minAngleThreshJSONInit": 0.2, 
@@ -84,10 +81,10 @@
         "numDepth0": 3,
         "numDepth1": 10,
         "numFlip": 2,
-        "objectTypeData": [{"nameType": "human", "numShow": 8}, 
-                           {"nameType": "animal", "numShow": 12}, 
-                           {"nameType": "largeObject", "numShow": 16},
-                           {"nameType": "smallObject", "numShow": 20}]
+        "objectTypeData": [{"nameType": "human", "numShow": 8, "reqNum": 1, "reqProb": 0.75}, 
+                           {"nameType": "animal", "numShow": 12, "reqNum": 0, "reqProb": 0.5}, 
+                           {"nameType": "largeObject", "numShow": 16, "reqNum": 0, "reqProb": 0.5},
+                           {"nameType": "smallObject", "numShow": 20, "reqNum": 0, "reqProb": 0.5}]
     },
     "Living-XinleiSubset": {
         "baseDir": "Living",
@@ -100,7 +97,6 @@
         "numZSize": 5,
         "minNumObj": 6,
         "maxNumObj": 100,
-        "minPerCatType": 1,
         "minAngleThreshRandInit": 0.2, 
         "minAnglesChangeRandInit": 3,
         "minAngleThreshJSONInit": 0.2, 
@@ -110,10 +106,10 @@
         "numDepth0": 3,
         "numDepth1": 10,
         "numFlip": 2,
-        "objectTypeData": [{"nameType": "human", "numShow": 8}, 
-                           {"nameType": "animal", "numShow": 8}, 
-                           {"nameType": "largeObject", "numShow": 20},
-                           {"nameType": "smallObject", "numShow": 20}]
+        "objectTypeData": [{"nameType": "human", "numShow": 8, "reqNum": 1, "reqProb": 0.75}, 
+                           {"nameType": "animal", "numShow": 8, "reqNum": 0, "reqProb": 0.5}, 
+                           {"nameType": "largeObject", "numShow": 20, "reqNum": 0, "reqProb": 0.5},
+                           {"nameType": "smallObject", "numShow": 20, "reqNum": 0, "reqProb": 0.5}]
     },
     "Park-All": {
         "baseDir": "Park",
@@ -126,7 +122,6 @@
         "numZSize": 5,
         "minNumObj": 6,
         "maxNumObj": 100,
-        "minPerCatType": 1,
         "minAngleThreshRandInit": 0.2, 
         "minAnglesChangeRandInit": 3,
         "minAngleThreshJSONInit": 0.2, 
@@ -136,10 +131,10 @@
         "numDepth0": 3,
         "numDepth1": 10,
         "numFlip": 2,
-        "objectTypeData": [{"nameType": "human", "numShow": 21}, 
-                           {"nameType": "animal", "numShow": 31}, 
-                           {"nameType": "largeObject", "numShow": 17},
-                           {"nameType": "smallObject", "numShow": 34}]
+        "objectTypeData": [{"nameType": "human", "numShow": 21, "reqNum": 1, "reqProb": 0.75}, 
+                           {"nameType": "animal", "numShow": 31, "reqNum": 0, "reqProb": 0.5}, 
+                           {"nameType": "largeObject", "numShow": 17, "reqNum": 0, "reqProb": 0.5},
+                           {"nameType": "smallObject", "numShow": 34, "reqNum": 0, "reqProb": 0.5}]
     },
     "Living-All": {
         "baseDir": "Living",
@@ -152,7 +147,6 @@
         "numZSize": 5,
         "minNumObj": 6,
         "maxNumObj": 100,
-        "minPerCatType": 1,
         "minAngleThreshRandInit": 0.2, 
         "minAnglesChangeRandInit": 3,
         "minAngleThreshJSONInit": 0.2, 
@@ -162,9 +156,9 @@
         "numDepth0": 3,
         "numDepth1": 10,
         "numFlip": 2,
-        "objectTypeData": [{"nameType": "human", "numShow": 21}, 
-                           {"nameType": "animal", "numShow": 10}, 
-                           {"nameType": "largeObject", "numShow": 23},
-                           {"nameType": "smallObject", "numShow": 40}]
+        "objectTypeData": [{"nameType": "human", "numShow": 21, "reqNum": 1, "reqProb": 0.75}, 
+                           {"nameType": "animal", "numShow": 10, "reqNum": 0, "reqProb": 0.5}, 
+                           {"nameType": "largeObject", "numShow": 23, "reqNum": 0, "reqProb": 0.5}, 
+                           {"nameType": "smallObject", "numShow": 40, "reqNum": 0, "reqProb": 0.5}]
     }
 }
