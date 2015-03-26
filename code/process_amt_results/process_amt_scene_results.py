@@ -64,10 +64,30 @@ def process_amt_results(filename, output_dir, overwrite,
     no_scene_data_name = '{0}_{1}{2}'.format(filename_base, 'noSceneData', filename_ext)
     no_scene_data_fn = dir_join(output_dir, no_scene_data_name)
     for scene_datum in scene_data:
+        scene_datum['counts'] = extract_scene_stats(scene_datum['scene'])
         scene_datum['sceneType'] = scene_datum['scene']['sceneType']
         del scene_datum['scene']
         
     save_json(scene_data, no_scene_data_fn)
+
+def extract_scene_stats(scene):
+    avail_objs = scene['availableObject']
+    counts = {}
+    for avail_obj in avail_objs:
+        cur_type = avail_obj['instance'][0]['type']
+        cur_name = avail_obj['instance'][0]['name']
+        cur_count = 0
+        if cur_type not in counts:
+            counts[cur_type] = {'count': 0,
+                                'names': []};
+        
+        for inst in avail_obj['instance']:
+            if inst['present']:
+                cur_count += 1
+            
+        counts[cur_type]['count'] += cur_count
+        counts[cur_type]['names'].append({'name': cur_name, 'count': cur_count})
+    return counts
 
 def read_results(filename):
     '''Read the results file'''

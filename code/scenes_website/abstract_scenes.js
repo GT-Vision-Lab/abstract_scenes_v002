@@ -297,6 +297,99 @@ function visualizeit(indata) {
         .key(function(d) { return d.assignmentId; } )
         .key(function(d) { return d.hitIdx; } )
         .entries(jsonDataSubset);
+        
+// ************ START COMPUTE STATS *****************
+        
+    var humansInScenesSubset = [];
+    var humansInScenesWorkerFractionsSubset = [];
+    var unqCommentsSubset = d3.set([]);     
+    var numHITsSubset = [];
+    var hitDurationsSubset = [];
+    var unqCommentsSubsetData = [];
+    
+    var humansInScenesAll = [];
+    var humansInScenesWorkerFractionsAll = [];
+    var humansInScenesWorkerAll = {};
+    var unqCommentsAll = d3.set([]);    
+    var numHITsAll = [];
+    var hitDurationsAll = [];
+    var unqCommentsAllData = [];
+    
+    jsonDataSubset.forEach( function(d) {
+        // TODO: Fix assumption that humans available as category
+        var humanCount = Number(d.counts.human.count);
+        var addToArray = 0;
+        
+        if (humanCount > 0) {
+            addToArray = 1;
+        }
+
+        humansInScenesSubset.push(addToArray)
+    });
+    
+    jsonDataAll.forEach( function(d) {
+        // TODO: Fix assumption that humans available as category
+        var humanCount = d.counts.human.count;
+        var addToArray = 0;
+        var workerId = d.workerId;
+        
+        if (humanCount > 0) {
+            addToArray = 1;
+        }
+
+        if (humansInScenesWorkerAll[workerId] == undefined) {
+            humansInScenesWorkerAll[workerId] = {'list': [], 'fraction': 0};
+        }
+        
+        humansInScenesWorkerAll[workerId].list.push(addToArray);
+        
+        humansInScenesAll.push(addToArray)
+    });
+    
+    for (var workerId in humansInScenesWorkerAll) {
+        if (humansInScenesWorkerAll.hasOwnProperty(workerId)) {
+            var list = humansInScenesWorkerAll[workerId].list
+            
+            var sum = list.reduce(function(a, b) { return a + b });
+            var avg = sum / list.length;
+    
+            humansInScenesWorkerAll[workerId].fraction = avg;
+        }
+    }
+
+    workerNestSubset.forEach( function (d) {
+            var fraction = humansInScenesWorkerAll[d.key].fraction;
+            humansInScenesWorkerFractionsSubset.push(fraction);
+            numHITsSubset.push(d.values.length); 
+            d.values.forEach( function(e) { 
+                var dp = e.values[0].values[0];
+                var comment = dp.hitComment.trim();
+                if (comment.length > 0) {
+                    unqCommentsSubset.add(dp.workerId + ": " + comment);
+                }
+                hitDurationsSubset.push(Number(dp.hitDuration)); 
+        });    
+    });
+
+    unqCommentsSubset.forEach(function(d) { unqCommentsSubsetData.push(d); });
+    
+    workerNestAll.forEach( function (d) {
+        var fraction = humansInScenesWorkerAll[d.key].fraction;
+        humansInScenesWorkerFractionsAll.push(fraction);
+        numHITsAll.push(d.values.length);
+        d.values.forEach( function(e) { 
+            var dp = e.values[0].values[0];
+            var comment = dp.hitComment.trim();
+            if (comment.length > 0) {
+                unqCommentsAll.add(dp.workerId + ": " + comment);
+            }
+            hitDurationsAll.push(Number(dp.hitDuration)); 
+        });    
+    });
+
+    unqCommentsAll.forEach(function(d) { unqCommentsAllData.push(d); });
+    
+// ************ END COMPUTE STATS *****************
     
     var titleStr = "<h1 align='center'>" + exp_names_title[datasetIdx] + " " + dataset_names[datasetIdx] + "</h1>" + 
                    "<h4 align='right'>Right-click to show or hide descriptions (if available).</h4>";
@@ -311,7 +404,9 @@ function visualizeit(indata) {
         .attr("class", "row worker")
         .attr("style", "border-top: 8px dashed;")
         .html(function(d) {
-                return "<h4>Worker: " + d.key + "</h4>";
+                var fraction = humansInScenesWorkerAll[d.key].fraction.toFixed(2);
+                return "<h4>Worker: " + d.key +"</h4>" +
+                        "<h5>Fraction w/ humans: " + fraction + "</h5>";
             })
         .selectAll("div.row.hit")
         .data(function(d) {return d.values})
@@ -337,45 +432,6 @@ function visualizeit(indata) {
         .on("mouseout", mouseout) // Just proof-of-concept, feel free to comment out
         .html(imgHTML) // TODO Better, more D3/JS way to do this?
     
-
-    var unqCommentsSubset = d3.set([]);     
-    var numHITsSubset = [];
-    var hitDurationsSubset = [];
-    var unqCommentsSubsetData = [];
-    
-    var unqCommentsAll = d3.set([]);    
-    var numHITsAll = [];
-    var hitDurationsAll = [];
-    var unqCommentsAllData = [];
-    
-    workerNestSubset.forEach( function (d) {
-            numHITsSubset.push(d.values.length); 
-            d.values.forEach( function(e) { 
-                var dp = e.values[0].values[0];
-                var comment = dp.hitComment.trim();
-                if (comment.length > 0) {
-                    unqCommentsSubset.add(dp.workerId + ": " + comment);
-                }
-                hitDurationsSubset.push(Number(dp.hitDuration)); 
-        });    
-    });
-
-    unqCommentsSubset.forEach(function(d) { unqCommentsSubsetData.push(d); });
-    
-    workerNestAll.forEach( function (d) {
-        numHITsAll.push(d.values.length);
-        d.values.forEach( function(e) { 
-            var dp = e.values[0].values[0];
-            var comment = dp.hitComment.trim();
-            if (comment.length > 0) {
-                unqCommentsAll.add(dp.workerId + ": " + comment);
-            }
-            hitDurationsAll.push(Number(dp.hitDuration)); 
-        });    
-    });
-
-    unqCommentsAll.forEach(function(d) { unqCommentsAllData.push(d); });
-    
     if (numHITsSubset.length > 0) {
         cont.append("div")
             .attr("class", "row comments")
@@ -388,7 +444,10 @@ function visualizeit(indata) {
             .attr("class", "col-xs-12 comment")
             .html(function(dp) {return "<p>" + dp + "</p>"; } )
         
-        statsStrSubset = createStatsStr(workerNestSubset.length, numHITsSubset, hitDurationsSubset);
+        statsStrSubset = createStatsStr(workerNestSubset.length, 
+                                        numHITsSubset, hitDurationsSubset,
+                                        humansInScenesSubset,
+                                        humansInScenesWorkerFractionsSubset);
         cont.append("div")
             .attr("class", "row stats")
             .attr("style", "border-top: 8px solid;")
@@ -407,7 +466,10 @@ function visualizeit(indata) {
             .attr("class", "col-xs-12 comment")
             .html(function(dp) {return "<p>" + dp + "</p>"; } )
 
-        statsStrAll = createStatsStr(workerNestAll.length, numHITsAll, hitDurationsAll);
+        statsStrAll = createStatsStr(workerNestAll.length, 
+                                     numHITsAll, hitDurationsAll, 
+                                     humansInScenesAll,
+                                     humansInScenesWorkerFractionsAll);
         cont.append("div")
             .attr("class", "row stats")
             .attr("style", "border-top: 8px solid;")
@@ -415,7 +477,7 @@ function visualizeit(indata) {
     }
 }
 
-function createStatsStr(numWorkers, numHITs, hitDurations) {
+function createStatsStr(numWorkers, numHITs, hitDurations, humansInScenes, humansInScenesWorkerFractions) {
 
     var sumHITDurations = hitDurations.reduce(function(a, b) { return a + b });
     var avgHITDurations = sumHITDurations / hitDurations.length;
@@ -423,13 +485,28 @@ function createStatsStr(numWorkers, numHITs, hitDurations) {
     var sumHITs = numHITs.reduce(function(a, b) { return a + b });
     var avgHITs = sumHITs / numHITs.length;
     
+    var sumHumansInScene = humansInScenes.reduce(function(a, b) { return a + b });
+    var avgHumansInScene = sumHumansInScene / humansInScenes.length;
+    humansInScenesWorkerFractions[0] = 0.3333333;
+    
+    humansInScenesWorkerFractions.sort(compareNumbers);
+    var humansInScenesWorkerFractionsStrs = [];
+    humansInScenesWorkerFractions.forEach(function(d) {
+        humansInScenesWorkerFractionsStrs.push(d.toFixed(2));
+    });
+    
     statsStr = '';
+    statsStr += "<p>Total Scenes: " + humansInScenes.length + "</p>";
+    statsStr += "<p>Fraction with humans: " + avgHumansInScene.toFixed(2) + "</p>";
     statsStr += "<p>Unique workers: " + numWorkers + "</p>";
+    statsStr += "<div class='row'><div class='col-xs-10'><p>Fraction with Humans List: " + 
+                humansInScenesWorkerFractionsStrs.join(', ') + "</p></div></div>";
     statsStr += "<p>Mean # HITs: " + avgHITs + "</p>";
     statsStr += "<p>Median # HITs: " + d3.median(numHITs) + "</p>";
     statsStr += "<p>Min # HITs: " + d3.min(numHITs) + "</p>";
     statsStr += "<p>Max # HITs: " + d3.max(numHITs) + "</p>";
-    statsStr += "<p>HIT # List: " + numHITs.sort(compareNumbers) + "</p>";
+    statsStr += "<div class='row'><div class='col-xs-10'><p>HIT # List: " + 
+                numHITs.sort(compareNumbers).join(', ') + "</p></div></div>";
     statsStr += "<p>Mean HIT Duration: " + avgHITDurations + "</p>";
     statsStr += "<p>Median HIT Duration: " + d3.median(hitDurations) + "</p>";
     statsStr += "<p>Min HIT Duration: " + d3.min(hitDurations) + "</p>";
