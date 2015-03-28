@@ -309,8 +309,8 @@
             // ===========================================================
             // add dialog for the website (like minimum requirements)
             // ===========================================================
-            function render_dialog(errorMsg) {
-                if ( errorMsg == "expression" ) {
+            function render_dialog(errorMsg, objCat, objReq) {
+                if (errorMsg == "expression") {
                     var text = "Please pick facial expressions for people. Thanks!";
                 } else if (errorMsg == "minClipart") {
                     var text = "Please use at least " + 
@@ -330,10 +330,27 @@
                                 " to the original scene. Thanks!";
                 } else if (errorMsg == "deformHuman") {
                     var text = "Please change the limb positions of the people some more. Thanks!";
+                } else if (errorMsg == "minCat") {
+                    var objText;
+                    if (objCat == 'human') {                        
+                        objText = 'people';
+                    } else if (objCat == 'animal') {
+                        objText = 'animals';
+                    } else if (objCat == 'largeObject') {
+                        objText = 'large objects';
+                    } else if (objCat == 'smallObject') {
+                        objText = 'small objects';
+                    } else {
+                        objText = 'Objects';
+                    }
+
+                    var text = "How about adding some " +
+                    ((objReq==1) ? "" : "more ") +
+                    objText + " to <em>this</em> scene?";
                 }
                 
                 
-                $("#dialog-modal").text(text);
+                $("#dialog-modal").html(text);
                 $("#dialog-modal").dialog('open');
             }
 

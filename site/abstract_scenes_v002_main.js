@@ -9,6 +9,7 @@ var objectTypeOrder;
 // objectType name -> idx for menu stuff
 var objectTypeToIdx; 
 var numObjTypeShow;
+var numObjTypeReqs;
 
  // Start off on which tab? Set in scene config file.
 var selectedTab;
@@ -223,7 +224,6 @@ function reset_scene() {
         defZSize = curSceneConfigData.defZSize;
         minNumObj = curSceneConfigData.minNumObj;
         maxNumObj = curSceneConfigData.maxNumObj;
-        minPerCatType = curSceneConfigData.minPerCatType;
         minAngleThreshRandInit = curSceneConfigData.minAngleThreshRandInit;
         minAnglesChangeRandInit = curSceneConfigData.minAnglesChangeRandInit;
         minAngleThreshJSONInit = curSceneConfigData.minAngleThreshJSONInit;
@@ -296,6 +296,7 @@ function reset_scene() {
             curSceneTypeBase = extract_scene_type_base(curSceneType)
             curInitHistory = curSceneData.initHistory;
             curDeformTypesUse = curSceneData.deformTypesUse;
+            curReqsOn = curSceneData.reqsOn;
             
         } else { // Randomly or from previous JSON initialization
             
@@ -342,11 +343,14 @@ function reset_scene() {
             curSceneData.initHistory = curInitHistory;
             curSceneData.deformTypesUse = curDeformTypesUse;
             curSceneData.sceneConfigFile = sceneConfigFile;
+            curSceneData.reqsOn = curReqsOn;
         }
+
         loadedObjectsAndBG = true;
     } else {
         console.log('reset_skipped');
     }
+    
     draw_scene();
 }
 
@@ -1202,6 +1206,8 @@ function validate_scene() {
         return validScene;
     }
     
+    // Separate validation when loading from 
+    // previous json scene
     if (loadSceneJSON == true) {
         var curFile = sceneJSONFile[curScene];
         var curLoaded = loadedSceneJSON[curFile];
@@ -1215,40 +1221,24 @@ function validate_scene() {
             return validScene;
         }
     }
-
-//     ////////////////////// NO REQUIREMENT FOR CATEGORY //////////////////////
-//     TODO Might need to update if using
-//     for (i = 0; i < objectTypeOrder.length; i++) {
-//         numAvailableObjectsUsed = 0;
-//         for (j = 0; j < numObjTypeShow[objectTypeOrder[i]]; j++) {
-//                 curObjIdx = clipartIdxStart[objectTypeOrder[i]] + j;
-//             for (m = 0; m < curAvailableObj[curObjIdx].numInstance; m++) {
-//                 if (curAvailableObj[curObjIdx].instance[m].present == true) {
-//                     numAvailableObjectsUsed++;
-//                     break;
-//                 }
-//             }
-//             if (numAvailableObjectsUsed > minPerCatType) {
-//                 break;
-//             }
-//         }
-//         if (numAvailableObjectsUsed < minPerCatType) {
-//             render_dialog("minType");
-//             validScene = false;
-//             return validScene;
-//         }
-//     }
-
-    numAvailableObjectsUsed = 0;
+    
+    // Counts number of present objects per category and total.
+    // And also makes sure that humans have expressions.
+    // Then, if the requirement is (randomly) on
+    // it enforces a category to have a certain 
+    // number of objects present for a given category.
+    var objTypeCounts = {};
+    for (i = 0; i < objectTypeOrder.length; i++) {
+        objTypeCounts[objectTypeOrder[i]] = 0;
+    }
     
     for (i = 0; i < numAvailableObjects; i++) {
         for (m = 0; m < curAvailableObj[i].numInstance; m++) {
-            if (curAvailableObj[i].instance[m].present) {
-                
-                numAvailableObjectsUsed++;
-                if (curAvailableObj[i].instance[m].type == 'human') {
-                    
-                    if (curAvailableObj[i].instance[m].expressionID == 0) {
+            var curObj = curAvailableObj[i].instance[m];
+            if (curObj.present) {
+                objTypeCounts[curObj.type] += 1
+                if (curObj.type == 'human') {
+                    if (curObj.expressionID == 0) {
                         render_dialog("expression");
                         validScene = false;
                         return validScene;
@@ -1258,6 +1248,27 @@ function validate_scene() {
         }
     }
     
+    var curType;
+    var curCount;
+    var curReq;
+    var randVal;
+    numAvailableObjectsUsed = 0;
+    for (i = 0; i < objectTypeOrder.length; i++) {
+        var curType = objectTypeOrder[i];
+        curCount = objTypeCounts[curType];
+        numAvailableObjectsUsed += curCount;
+        curReq = numObjTypeReqs[curType];
+        curReqOn = curReqsOn[curType];
+        if (curReqOn) {
+            if (curCount < curReq) {
+                render_dialog("minCat", curType, curReq);
+                validScene = false;
+                return validScene;
+            }
+        }
+    }
+    
+    // Deformable objects have different checks
     if (deformTypesUse["human"] == "deformable") {
         var defPerChange = check_deformable_people_change(curAvailableObj,
                                                         curAvailableObjInit,
@@ -1270,12 +1281,14 @@ function validate_scene() {
         }
     }
     
+    // Check to see if the minimum number of objects present
     if (numAvailableObjectsUsed < minNumObj) {
         render_dialog("minClipart");
         validScene = false;
         return validScene;
     }
     
+    // Check to see if more than the maximum number of objects present
     if (numAvailableObjectsUsed > maxNumObj) {
         render_dialog("maxClipart");
         validScene = false;
@@ -1347,7 +1360,8 @@ function submit_form() {
                 sceneType: sceneData[i].sceneType,
                 initHistory: sceneData[i].initHistory,
                 deformTypesUse: sceneData[i].deformTypesUse,
-                sceneConfigFile: sceneData[i].sceneConfigFile
+                sceneConfigFile: sceneData[i].sceneConfigFile,
+                reqsOn: sceneData[i].reqsOn
             }
         );
     }
@@ -1357,7 +1371,7 @@ function submit_form() {
     $("input[name='hitDuration']").val(duration);
     $("input[name='hitResult']").val(ans);
     $("input[name='hitComment']").val(comment);
-
+    
     // set the resp to send back to the server here
     // the values to send to MTurk has already defined inside #mturk_form
     // if you don't need to bother to set value here
@@ -1489,12 +1503,20 @@ function load_obj_category_data() {
             var objectTypeData = sceneConfigData[curSceneType].objectTypeData;
             objectTypeOrder = [];
             numObjTypeShow = {};
+            numObjTypeReqs = {};
+            curReqsOn = {}; // This is technically getting calculated
+                            // multiple times (for a given scene)
+                            // but only one of them is being stored
+                            // and propogated across prev/next.
             for (var idxObjT in objectTypeData) {
                 var curName = objectTypeData[idxObjT].nameType;
                 objectTypeOrder.push(curName);
                 numObjTypeShow[curName] = objectTypeData[idxObjT].numShow;
+               
+                curReqsOn[curName] = (Math.random() < objectTypeData[idxObjT].reqProb);
+                numObjTypeReqs[curName] = objectTypeData[idxObjT].reqNum;
             }
-
+            
             // In case scene config is bad, we overwrite values
             // that suggest putting more objects than available for
             // that category and prevents an infinite loop

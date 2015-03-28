@@ -3,6 +3,7 @@ data/*
 site_pngs/*
 scenes/*
 interface/*
+tmp_site/*
 
 # Images and other files
 ###################

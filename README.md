@@ -202,6 +202,8 @@ A dictionary that contains the following fields:
   * objectTypeData - A list of dictionaries which contain which object categories should be present
    for this sceneType and how many of them should randomly be available to the user 
    (setting this to a larger number than available objects is fine and will just have all available objects).
+   Also contains reqNum and reqProb, which govern that with reqProb probability, the category will
+   be required to have at least reqNum objects present.
    Note that this list affects the interface menu 
    (i.e., you can switch the ordering of the object category tabs)
    **as well as the rendering order** (i.e., given that all other rendering parameters (e.g., depth1, z) constant,
@@ -220,5 +222,3 @@ For example, Park-All is the Park scene with all possible objects.
 Park-XinleiSubset has the same available objects, 
 but only shows a random subset of each category type.
 The number of random subsets is consistent with [Xinlei](http://www.cs.cmu.edu/~xinleic/)'s data collection.
-
-
