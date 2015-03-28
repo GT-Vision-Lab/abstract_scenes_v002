@@ -333,24 +333,24 @@
                 } else if (errorMsg == "minCat") {
                     var objText;
                     if (objCat == 'human') {                        
-                        objText = 'People';
+                        objText = 'people';
                     } else if (objCat == 'animal') {
-                        objText = 'Animals';
+                        objText = 'animals';
                     } else if (objCat == 'largeObject') {
-                        objText = 'Large objects';
+                        objText = 'large objects';
                     } else if (objCat == 'smallObject') {
-                        objText = 'Small objects';
+                        objText = 'small objects';
                     } else {
                         objText = 'Objects';
                     }
-                    
-                    var text = "Please use at least " + 
-                                objReq + " piece" + ((objReq==1) ? "" : "s") + 
-                                " of clipart from the " + objText + " tab. Thanks!";
+
+                    var text = "How about adding some " +
+                    ((objReq==1) ? "" : "more ") +
+                    objText + " to <em>this</em> scene?";
                 }
                 
                 
-                $("#dialog-modal").text(text);
+                $("#dialog-modal").html(text);
                 $("#dialog-modal").dialog('open');
             }
 
