@@ -60,7 +60,7 @@ You have 3 ways of using this interface and 2 demos:
 
 1. Load-scene-from-JSON demo mode by jsonDemo=1
 2. Specify an ordered list of existing scene JSON files to initialize with. 
-   E.g., QS has sceneJSONFile01=AXOOE_01.json&sceneJSONFile02=AOEUE_11.json
+   E.g., QS has sceneJSON01=AXOOE_01.json&sceneJSON02=AOEUE_11.json
 3. Specify an ordered list of scene types to go through. E.g., QS has
    sceneType01=Park&sceneType02=Living&sceneType03=Kitchen
    Note: Kitchen currently doesn't exist
