@@ -55,7 +55,7 @@
 # Run for real!
 sandbox=""
 # Run in the sandbox
-sandbox="-sandbox"
+#sandbox="-sandbox"
 
 #RunTasks variables
 createHITs=0
@@ -68,7 +68,7 @@ apprAllHITs=0
 delAndApproveHITs=0
 
 expType="vqa_clipart_collection"
-expName="pilot_01"
+expName="pilot_02"
 
 # Current directory of script
 currentDir=`eval "cd \"$SCRIPT_PATH\" && pwd"`
@@ -139,7 +139,7 @@ cd $currentDir/../render_scenes
 python render_scenes_json.py render $sceneJSONFile $outputDataIllDir \
         --site_pngs_dir=$codeBaseDir/site_pngs/ \
         --config_dir=$codeBaseDir/site_data/ \
-        --overwrite
+#        --overwrite
 fi
 
 if [ $rejFileHITs -gt 0 ]
