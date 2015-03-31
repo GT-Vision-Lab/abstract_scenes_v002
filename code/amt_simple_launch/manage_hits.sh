@@ -109,7 +109,7 @@ rejectFile=$outputDataDir/$expName.reject
 
 if [ $createInputFile -gt 0 ]
 then
-python create_input_file.py create $inputFile 5000
+python create_input_file.py create $inputFile 500
 fi
 
 if [ $createHITs -gt 0 ]
