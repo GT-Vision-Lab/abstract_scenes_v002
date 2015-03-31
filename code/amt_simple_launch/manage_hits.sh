@@ -58,7 +58,8 @@ sandbox=""
 #sandbox="-sandbox"
 
 #RunTasks variables
-createHITs=0
+createInputFile=1
+createHITs=1
 dlHITs=0
 processResults=0
 renderScenes=0
@@ -68,7 +69,7 @@ apprAllHITs=0
 delAndApproveHITs=0
 
 expType="vqa_clipart_collection"
-expName="pilot_02"
+expName="full_scale_01"
 
 # Current directory of script
 currentDir=`eval "cd \"$SCRIPT_PATH\" && pwd"`
@@ -105,6 +106,11 @@ resultsFile=$outputDataDir/$expName.results
 sceneJSONFile=$outputDataJSONDir/$expName.min.json
 approveFile=$outputDataDir/$expName.approve
 rejectFile=$outputDataDir/$expName.reject
+
+if [ $createInputFile -gt 0 ]
+then
+python create_input_file.py create $inputFile 5000
+fi
 
 if [ $createHITs -gt 0 ]
 then
