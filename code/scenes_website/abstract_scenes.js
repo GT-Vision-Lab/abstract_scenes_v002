@@ -109,6 +109,12 @@ if (maxHITsShow == '') {
     maxHITsShow = Number(maxHITsShow);
 }
 
+var maxPerWorker = decode(gup("maxPerWorker")); 
+if (maxPerWorker == '') {
+    maxPerWorker = 0; // Show all data
+} else {
+    maxPerWorker = Number(maxPerWorker);
+}
 // Let people remove workers from display by
 // specifying QS of rmWorkers=workedid1,workerid2,...
 workerFilterStr = decode(gup("rmWorkers"));
@@ -298,6 +304,10 @@ function visualizeit(indata) {
         .key(function(d) { return d.hitIdx; } )
         .entries(jsonDataSubset);
         
+    if (randomize) {
+        workerNestSubset= d3.shuffle(workerNestSubset)
+    }
+        
 // ************ START COMPUTE STATS *****************
         
     var humansInScenesSubset = [];
@@ -409,7 +419,17 @@ function visualizeit(indata) {
                         "<h5>Fraction w/ humans: " + fraction + "</h5>";
             })
         .selectAll("div.row.hit")
-        .data(function(d) {return d.values})
+        .data(function(d) { 
+            if (randomize) {
+                data = d3.shuffle(d.values);
+            } else {
+                data = d.values;
+            }
+            if (maxPerWorker > 0) {
+                data = data.slice(0, maxPerWorker);
+            }
+            return data; 
+        })
         .enter()
         .append("div")
         .attr("class", "row hit")
@@ -418,7 +438,7 @@ function visualizeit(indata) {
                 return "<h4>HIT: " + d.key + "</h4>";
             })
         .selectAll("div.ill")
-        .data(function(d) { return d.values;})
+        .data(function(d) {return d.values;})
         .enter()
         .append("div")
         .attr("style", "margin-top:30px; margin-bottom:30px;")
