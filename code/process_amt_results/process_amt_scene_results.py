@@ -67,6 +67,11 @@ def process_amt_results(filename, output_dir, overwrite,
         scene_datum['counts'] = extract_scene_stats(scene_datum['scene'])
         scene_datum['sceneType'] = scene_datum['scene']['sceneType']
         del scene_datum['scene']
+
+    no_scene_data_name = '{0}_{1}{2}'.format(filename_base, 'noSceneNoCountsData', filename_ext)
+    no_scene_data_fn = dir_join(output_dir, no_scene_data_name)
+    for scene_datum in scene_data:
+        del scene_datum['counts']
         
     save_json(scene_data, no_scene_data_fn)
 
@@ -136,8 +141,11 @@ def extract_scene_data(hit_data):
         #dict([(key[start_idx:], hit_datum[i]) 
         #      for key in ans_fields if key in hit_datum])
         
+        parsed_datum['hitTypeId'] = hit_datum['hittypeid']
+        parsed_datum['hitId'] = hit_datum['hitid']
         parsed_datum['assignmentId'] = hit_datum['assignmentid']
         parsed_datum['assignmentStatus'] = hit_datum['assignmentstatus']
+        #pdb.set_trace()
         
         result = json_list = json.loads(hit_datum[ans_res])
         cur_idx = 0
