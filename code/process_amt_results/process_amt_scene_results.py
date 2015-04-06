@@ -40,7 +40,7 @@ def process_amt_results(filename, output_dir, overwrite,
     results = read_results(filename)
 
     scene_data = extract_scene_data(results)
-    save_json(scene_data, output_file)
+    save_json(scene_data, output_file, saveNonMin=False)
     
     assignment_ids = set([scene['assignmentId'] for scene in scene_data])
     
@@ -58,7 +58,7 @@ def process_amt_results(filename, output_dir, overwrite,
         indv_output_file = dir_join(indv_output_dir, new_fn)
         # Skip if already exists and no overwrite flag
         if (not os.path.isfile(indv_output_file) or overwrite==True):
-            save_json(scene_data_single, indv_output_file)
+            save_json(scene_data_single, indv_output_file, saveNonMin=False)
         counter += 1
     
     no_scene_data_name = '{0}_{1}{2}'.format(filename_base, 'noSceneData', filename_ext)
@@ -68,12 +68,14 @@ def process_amt_results(filename, output_dir, overwrite,
         scene_datum['sceneType'] = scene_datum['scene']['sceneType']
         del scene_datum['scene']
 
+    save_json(scene_data, no_scene_data_fn, saveNonMin=True)
+    
     no_scene_data_name = '{0}_{1}{2}'.format(filename_base, 'noSceneNoCountsData', filename_ext)
     no_scene_data_fn = dir_join(output_dir, no_scene_data_name)
     for scene_datum in scene_data:
         del scene_datum['counts']
         
-    save_json(scene_data, no_scene_data_fn)
+    save_json(scene_data, no_scene_data_fn, saveNonMin=True)
 
 def extract_scene_stats(scene):
     avail_objs = scene['availableObject']
@@ -162,7 +164,7 @@ def extract_scene_data(hit_data):
         
     return hit_result
 
-def save_json(data, filename):
+def save_json(data, filename, saveNonMin=False):
     '''
     Save the object as both a readable json file (i.e., with indentation
     and a min version (i.e., without indenation)
@@ -173,7 +175,8 @@ def save_json(data, filename):
 
     with open(filename, 'w') as of, open(filename_min, 'w') as of_min:
         json.dump(data, of_min)
-        json.dump(data, of, indent=4, separators=(',', ': '))
+        if saveNonMin:
+            json.dump(data, of, indent=4, separators=(',', ': '))
         
 def create_approval_file(assignment_ids, filename, gen_apprv_cmnt):
     
