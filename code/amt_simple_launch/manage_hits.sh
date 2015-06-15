@@ -58,13 +58,13 @@ sandbox=""
 #sandbox="-sandbox"
 
 #RunTasks variables
-createInputFile=1
-createHITs=1
+createInputFile=0
+createHITs=0
 dlHITs=0
 processResults=0
 renderScenes=0
 rejFileHITs=0
-apprFileHITs=0
+apprFileHITs=1
 apprAllHITs=0
 delAndApproveHITs=0
 
