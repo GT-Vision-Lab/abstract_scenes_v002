@@ -59,17 +59,17 @@ sandbox=""
 
 #RunTasks variables
 createInputFile=0
-createHITs=0
+createHITs=1
 dlHITs=0
 processResults=0
 renderScenes=0
 rejFileHITs=0
-apprFileHITs=1
+apprFileHITs=0
 apprAllHITs=0
 delAndApproveHITs=0
 
 expType="vqa_clipart_collection"
-expName="full_scale_01"
+expName="full_scale_02"
 
 # Current directory of script
 currentDir=`eval "cd \"$SCRIPT_PATH\" && pwd"`
