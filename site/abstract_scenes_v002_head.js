@@ -82,6 +82,11 @@ var NUM_GOOD_EXAMPLES = 5;
 // Maybe not good to do...
 var ex_total = NUM_GOOD_EXAMPLES+1;
 
+// Names of the object types (e.g., smallObject)
+// in a defined order that governs their index
+// into availableObject
+var objectTypeOrder;
+
 // These come from scene_config.json!
 // Will be overwritten in reset_scene()
 var minNumObj = 1; // How many clipart objects they need to use.
