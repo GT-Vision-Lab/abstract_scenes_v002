@@ -114,7 +114,7 @@
             <div class="noSelect" align=left id="top_bar" style="background-color:lightblue">
                 <span id="counter" class="topBar noSelect" style="color:black;">Scene</span>
                 
-                <div class="buttonHolder noSelect" style="display:inline-block; padding-bottom:5px; padding-top:5px; padding-left:414px">
+                <div class="buttonHolder noSelect" style="display:inline-block; float:right;padding-bottom:0px; padding-top:3px; padding-right:10px;">
                     <input id="prevButton" type="button" name="Prev" value="Prev">
                     <input id="nextButton" type="button" name="Next" value="Next">
                 </div>
@@ -204,6 +204,57 @@
                 document.getElementById('exToggle').onclick = hideExamples;
             }
             
+            function write_obj_reqs() {
+                var origText = 'Also need at least: ';
+                if (objectTypeOrder != undefined) {
+                    reqStr = origText;
+                    for (i = 0; i < objectTypeOrder.length; i++) {
+                        var objCat = objectTypeOrder[i];
+                        curReq = numObjTypeReqs[objCat];
+                        curReqOn = curReqsOn[objCat];
+                        if (curReqOn && curReq > 0) {
+                            var objText;
+                            if (objCat == 'human') {
+                                if (curReq == 1) {
+                                    objText = 'person';
+                                } else {
+                                    objText = 'people';
+                                }
+                            } else if (objCat == 'animal') {
+                                if (curReq == 1) {
+                                    objText = 'animal';
+                                } else {
+                                    objText = 'animals';
+                                }
+                            } else if (objCat == 'largeObject') {
+                                if (curReq == 1) {
+                                    objText = 'large object';
+                                } else {
+                                    objText = 'large objects';
+                                }
+                            } else if (objCat == 'smallObject') {
+                                if (curReq == 1 ) {
+                                    objText = 'small object';
+                                } else {
+                                    objText = 'small objects';
+                                }
+                            } else {
+                                if (curReq == 1) {
+                                    objText = 'Object';
+                                } else {
+                                    objText = 'Objects';
+                                }
+                            }
+                            reqStr += curReq + ' ' + objText + ', ';
+                        }
+                    }
+                    if (reqStr.length > origText.length) {
+                        reqStr = reqStr.slice(0, -2);
+                        document.getElementById('counter').innerHTML += ' - ' + reqStr;
+                    }
+                }
+            }
+            
             function update_instructions() {
                 if (curSceneTypeBase == "Living") {
                     titleStr = "(<b style='color:red;'>" + "Living/Dining Room" + "</b>)";
@@ -229,6 +280,7 @@
                 }
                 
                 select_good();
+                write_obj_reqs();
             }
             
             update_instructions();

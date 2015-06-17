@@ -2,10 +2,7 @@
 var init_time;
 
 var NUM_TABS = 0;
-// Names of the object types (e.g., smallObject)
-// in a defined order that governs their index
-// into availableObject
-var objectTypeOrder;
+
 // objectType name -> idx for menu stuff
 var objectTypeToIdx; 
 var numObjTypeShow;
