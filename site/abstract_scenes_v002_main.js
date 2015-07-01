@@ -167,6 +167,11 @@ function init() {
     init_time = $.now();
     curScene = 0;
     
+    // Hide prev button if only one scene
+    if (numScene == 1) {
+        $('#prevButton').hide();
+    }
+
     // Setup the HTML canvas that the entire interactive part will be displayed on
     canvas_fix = document.getElementById("scene_canvas");
     ctx = canvas_fix.getContext("2d");
