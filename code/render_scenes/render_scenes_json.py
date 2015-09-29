@@ -36,7 +36,7 @@ class RenderScenes(object):
     def render_scenes(self):
         
         #"pilot_01.json"
-        json_file = self.opts['<jsonfile>']
+        json_data = self.opts['<jsondata>']
         #render_dir = '../imgs/'
         render_dir = dir_path(self.opts['<outdir>'])
         clipart_img_format = self.opts['--format']
@@ -59,15 +59,34 @@ class RenderScenes(object):
         self.clipart_img_format = clipart_img_format
         self.base_url_interface = base_url_interface
         
-        with open(json_file) as json_fileid:
-            all_scenes = json.load(json_fileid)
+        if path.isdir(json_data):
+            search_str = path.join(json_data, '*.json')
+            json_files = glob.glob(search_str)
+            json_files.sort()
+            for json_file in json_files:
+                with open(json_file) as json_fileid:
+                    scene = json.load(json_fileid)    
+                self.render_one_scene(scene)
+        else:
+            with open(json_data) as json_fileid:
+                all_scenes = json.load(json_fileid)
 
-        for cur_scene in all_scenes:
-            self.render_one_scene(cur_scene)
+            if type(all_scenes) == list:
+                for cur_scene in all_scenes:
+                    self.render_one_scene(cur_scene)
+            elif type(all_scenes) == dict:
+                self.render_one_scene(all_scenes)
         
     def render_one_scene(self, data):
+        
+        if 'imgName' in data:
+            img_name = data['imgName']
+        elif 'file_name' in data:
+            img_name = data['file_name']
+        elif 'id' in data:
+            img_name = '{}.png'.format(data['id'])
 
-        img_file = os.path.join(self.render_dir, data['imgName'])
+        img_file = os.path.join(self.render_dir, img_name)
         
         # Skip if already exists and no overwrite flag
         if (not os.path.isfile(img_file) or self.overwrite==True):
@@ -384,10 +403,10 @@ class RenderScenes(object):
 def main():
     '''
     Usage:
-        render_scenes_json.py render <jsonfile> <outdir> [--overwrite --site_pngs_dir=ID --config_dir=CD --format=FMT]
+        render_scenes_json.py render <jsondata> <outdir> [--overwrite --site_pngs_dir=ID --config_dir=CD --format=FMT]
                 
     Options:
-        <jsonfile>          Filepath to JSON file (from other code and extracted from results file)
+        <jsondata>         Either a filepath to JSON file (from other code and extracted from results file) or directory filled with per-scene JSON files.
         <outdir>            Directory to put the processed result files, i.e., JSON
         --format=FMT        Image file format [default: png]
         --site_pngs_dir=ID  Path to the site_pngs dir (contains all object images) [default: USE_DEF]
