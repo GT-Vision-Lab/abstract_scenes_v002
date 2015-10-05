@@ -1,11 +1,50 @@
 # abstract_scenes_v002
+<img src="http://visualqa.org/data/abstract_v002/scene_img/img/4.png" alt="Example scene" width="400"/>
+<img src="http://visualqa.org/data/abstract_v002/scene_img/img/55.png" alt="Example scene" width="400"/>
+
 The second version of the interface for the [Abstract Scenes research project](http://research.microsoft.com/en-us/um/people/larryz/clipart/abstract_scenes.html).
 The master branch of the interface can be found [here](https://vision.ece.vt.edu/abstract_scenes_v002/site/abstract_scenes_v002.html).
+
+## Scene JSON Format
+
+Every scene is a dictionary/object that has the following keys/fields (and a few more AMT-specific ones if you get the JSON data from AMT):
+* file_name - PNG filename in the train/val/test format.
+* id - The integer scene id.
+* scene - The dictionary/object that contains all of the scene data.
+
+scene has the following main keys/fields:
+* sceneConfigFile - Filename where interface was initialized from (e.g., abstract_scenes_v002_data_scene_config.json)
+* sceneType - String saying which scene type (e.g., Living, Park) it is (maps to the name in sceneConfigFile)
+* availableObject - [object] - A list of objects that could have been in the scene.
+
+object - A dictionary/object that contains three keys:
+* numInstance - How many instances/copies of that object are allowed in the scene.
+* smallestUnusedInstanceIdx - An index into instance of the first unused instance.
+* instance - [inst] - An aarray of the different instances of the object.
+
+inst - Contains the actually data for that particular instance of an object, via the following main keys/fields:
+* type - The object category (currently one of: human, animal, smallObject, largeObject).
+* name - The name (corresponding to the name from the object config file, e.g., abstract_scenes_v002_data_animal_nondeform.json).
+* present (Boolean) - Is this instance in the scene?
+* deformable (Boolean) - Is this a deformable (i.e., paper doll) object?
+* flip - Is the object facing the original direction (0) or was it flipped (1). For most objects, (e.g., animals, humans), the original direction (i.e., what you see when you open the object's png file) should be facing left.
+* x/y - The x/y pixel (measured from the left side/top) corresponding to the center of the object (based on the image's center).
+* z - "depth" of the object (currently, there are 5 depths). A smaller number means bigger/closer to the "camera".
+* poseID/typeID - For animals, which pose it is. For small/large objects, which "type" it is Please note that sometimes different types correspond to very different objects (like the toys) but sometimes just color differences/orientations.
+* numPose/numType - The total number of poses/types for that kind of object.
+
+For deformable people, they also have the following keys/fields:
+* expressionID - Which of the expressions/heads for that person is used (0 is no face).
+* numExpression - The total number of expressions possible for that object
+* partIdxList - A dictionary/object that contains the part to index look-up (e.g., "Head"->1).
+* deformableX/Y - A list of x/y pixels for the different parts. Index corresponds to the ones in partIdxList. Note that these numbers need to be multipled by globalScale and the appropriate z scale value (depends on scene type and z) to match the pixel coordinate in the scene's PNG file.
+* deformableGlobalRot - A list of angles (in radians) of that body part with respect to the image frame.
+* deformableLocalRot - A list of angles (in radians) of that body part with respect to the body part it's attached to.
 
 ## Interface Images
 To use the web interface (or render scenes in general), you will need to download the images.
 You can find the majority of the images [here](https://vision.ece.vt.edu/abstract_scenes_v002/site_pngs/site_pngs_without_HumanNondeformable.zip).
-If you need the nondeformable human images (1.5GB), 
+If you need the nondeformable human images (1.5GB) (not needed for the VQA dataset), 
 you can find them [here](https://vision.ece.vt.edu/abstract_scenes_v002/site_pngs/site_pngs_just_HumanNondeformable.zip).
 These images should be placed in a folder called `site_pngs/`.
 If you don't feel like downloading the images and know you'll have Internet,
@@ -30,24 +69,6 @@ As of 2015/03/17, it just uses [docopt](http://docopt.org/) (installable via pip
 [Pillow](http://pillow.readthedocs.org/en/latest/index.html) (installable via pip).
 To run a basic launch AMT task->download results->process and render results pipeline, 
 there is the example script `code/amt_simple_launch/manage_hits.sh`.
-
-If you're running on the lab servers, you can just load the lab virtualenv.
-To do this, you can, into the terminal, type:
-
-`bash /srv/share/lab_venv_2.7/bin/activate`
-
-or you can append the following at the end of your `~/.bashrc` file, 
-if you want this virtualenv to be loaded whenever you log onto a server machine:
-
-`source "/srv/share/lab_venv_2.7/bin/activate"`
-
-(You'll need to either login again or type `source ~/.bashrc` to load the changes in your `~/.bashrc` file.)
-
-Now your terminal should look like **(lab_venv_2.7)**santol@godel:~$ (emphasis mine). 
-You now will have access to a bunch of Python packages that we installed, such as numpy and scipy. 
-Running the command `pip list` will display all pip-installable packages that the virtualenv currently has installed. 
-[Envplus](https://github.com/jsvine/envplus) is one way of being able to create your own virtualenv on top of the lab one. 
-Or you can just install whatever you need in your own personal virtualenv.
 
 ## How to Operate the Interface
 
