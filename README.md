@@ -1,6 +1,6 @@
 # abstract_scenes_v002
-<img src="http://visualqa.org/data/abstract_v002/scene_img/img/4.png" alt="Example scene" width="300"/>
-<img src="http://visualqa.org/data/abstract_v002/scene_img/img/55.png" alt="Example scene" width="300"/>
+<img src="http://visualqa.org/data/abstract_v002/scene_img/img/4.png" alt="Example scene" width="45%"/>
+<img src="http://visualqa.org/data/abstract_v002/scene_img/img/55.png" alt="Example scene" width="45%"/>
 
 The second version of the interface for the [Abstract Scenes research project](http://research.microsoft.com/en-us/um/people/larryz/clipart/abstract_scenes.html).
 The master branch of the interface can be found [here](https://vision.ece.vt.edu/abstract_scenes_v002/site/abstract_scenes_v002.html).
