@@ -1,9 +1,15 @@
 {
     "baseDirectory": "HumanDeformable",
     "attributeTypeList": ["Expression"],
+    "sexes": ["female", "male"],
+    "races": ["Asian", "Black", "White"],
+    "ages": ["toddler", "child", "teenager", "adult", "elder"],
     "type": [
         {
             "name": "Doll01",
+            "sex": "male",
+            "race": "Black",
+            "age": "adult",
             "availableScene": [
                 {
                     "numInstance": 5,
@@ -209,6 +215,9 @@
         },
         {
             "name": "Doll02",
+            "sex": "female",
+            "race": "Black",
+            "age": "adult",
             "availableScene": [
                 {
                     "numInstance": 5,
@@ -414,6 +423,9 @@
         },
         {
             "name": "Doll03",
+            "sex": "male",
+            "race": "White",
+            "age": "adult",
             "availableScene": [
                 {
                     "numInstance": 5,
@@ -619,6 +631,9 @@
         },
         {
             "name": "Doll04",
+            "sex": "female",
+            "race": "White",
+            "age": "adult",
             "availableScene": [
                 {
                     "numInstance": 5,
@@ -824,6 +839,9 @@
         },
         {
             "name": "Doll05",
+            "sex": "male",
+            "race": "Asian",
+            "age": "adult",
             "availableScene": [
                 {
                     "numInstance": 5,
@@ -1029,6 +1047,9 @@
         },
         {
             "name": "Doll06",
+            "sex": "female",
+            "race": "Asian",
+            "age": "adult",
             "availableScene": [
                 {
                     "numInstance": 5,
@@ -1234,6 +1255,9 @@
         },
         {
             "name": "Doll07",
+            "sex": "male",
+            "race": "White",
+            "age": "elder",
             "availableScene": [
                 {
                     "numInstance": 5,
@@ -1439,6 +1463,9 @@
         },
         {
             "name": "Doll08",
+            "sex": "female",
+            "race": "White",
+            "age": "elder",
             "availableScene": [
                 {
                     "numInstance": 5,
@@ -1644,6 +1671,9 @@
         },
         {
             "name": "Doll09",
+            "sex": "male",
+            "race": "Asian",
+            "age": "elder",
             "availableScene": [
                 {
                     "numInstance": 5,
@@ -1849,6 +1879,9 @@
         },
         {
             "name": "Doll10",
+            "sex": "female",
+            "race": "Asian",
+            "age": "elder",
             "availableScene": [
                 {
                     "numInstance": 5,
@@ -2054,6 +2087,9 @@
         },
         {
             "name": "Doll11",
+            "sex": "male",
+            "race": "White",
+            "age": "teenager",
             "availableScene": [
                 {
                     "numInstance": 5,
@@ -2259,6 +2295,9 @@
         },
         {
             "name": "Doll12",
+            "sex": "female",
+            "race": "White",
+            "age": "teenager",
             "availableScene": [
                 {
                     "numInstance": 5,
@@ -2464,6 +2503,9 @@
         },
         {
             "name": "Doll13",
+            "sex": "male",
+            "race": "Asian",
+            "age": "teenager",
             "availableScene": [
                 {
                     "numInstance": 5,
@@ -2669,6 +2711,9 @@
         },
         {
             "name": "Doll14",
+            "sex": "female",
+            "race": "Asian",
+            "age": "teenager",
             "availableScene": [
                 {
                     "numInstance": 5,
@@ -2874,6 +2919,9 @@
         },
         {
             "name": "Doll15",
+            "sex": "male",
+            "race": "White",
+            "age": "child",
             "availableScene": [
                 {
                     "numInstance": 5,
@@ -3079,6 +3127,9 @@
         },
         {
             "name": "Doll16",
+            "sex": "female",
+            "race": "White",
+            "age": "child",
             "availableScene": [
                 {
                     "numInstance": 5,
@@ -3284,6 +3335,9 @@
         },
         {
             "name": "Doll17",
+            "sex": "male",
+            "race": "Asian",
+            "age": "child",
             "availableScene": [
                 {
                     "numInstance": 5,
@@ -3489,6 +3543,9 @@
         },
         {
             "name": "Doll18",
+            "sex": "female",
+            "race": "Asian",
+            "age": "child",
             "availableScene": [
                 {
                     "numInstance": 5,
@@ -3694,6 +3751,9 @@
         },
         {
             "name": "Doll19",
+            "sex": "male",
+            "race": "White",
+            "age": "toddler",
             "availableScene": [
                 {
                     "numInstance": 5,
@@ -3815,6 +3875,9 @@
         },
         {
             "name": "Doll20",
+            "sex": "male",
+            "race": "Asian",
+            "age": "toddler",
             "availableScene": [
                 {
                     "numInstance": 5,
