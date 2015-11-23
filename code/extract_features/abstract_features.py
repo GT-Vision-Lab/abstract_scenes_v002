@@ -26,7 +26,7 @@ class AbstractFeatures(object):
     def __init__(self, 
                  config_folder, 
                  instance_ordering='random', 
-                 scale_pos=True, 
+                 scale_pos=False, 
                  z_scalar=False, 
                  gmm_abs_k=9, 
                  gmm_rel_k=24,
@@ -36,19 +36,7 @@ class AbstractFeatures(object):
                  gmm_rel_pos_fn='gmm_rel_pos.npy',
                  DEBUG_PRINT=False
                  ):
-        
-        # How many absolute position GMMs
-        self.gmm_abs_k = gmm_abs_k
-        # How many relative position GMMs
-        self.gmm_rel_k = gmm_rel_k
-        
-        self.coords_occur_fn = coords_occur_fn
-        self.coords_cooccur_fn = coords_cooccur_fn
-        self.gmm_abs_pos_fn = gmm_abs_pos_fn
-        self.gmm_rel_pos_fn = gmm_rel_pos_fn
-        
-        self.config_folder = config_folder
-        
+
         # Whether or not to normalize the x/y dimensions 
         # (affects raw x/y and GMM)
         # TODO Figure out which makes more sense
@@ -60,6 +48,35 @@ class AbstractFeatures(object):
         # TODO Figure out which makes more sense
         self.instance_ordering = instance_ordering
         
+        # How many absolute position GMMs
+        self.gmm_abs_k = gmm_abs_k
+        # How many relative position GMMs
+        self.gmm_rel_k = gmm_rel_k
+        
+        if self.scale_pos:
+            scale_str = 'scaled'
+        else:
+            scale_str = 'unscaled'
+    
+        coords_fmt = '{}_{}{}'
+        base, ext = os.path.splitext(coords_occur_fn)
+        coords_occur_fn = coords_fmt.format(base, scale_str, ext)
+        base, ext = os.path.splitext(coords_cooccur_fn)
+        coords_cooccur_fn = coords_fmt.format(base, scale_str, ext)
+
+        gmm_fmt = '{}_{}_k-{:02d}{}'
+        base, ext = os.path.splitext(gmm_abs_pos_fn)
+        gmm_abs_pos_fn = gmm_fmt.format(base, scale_str, gmm_abs_k, ext)
+        base, ext = os.path.splitext(gmm_rel_pos_fn)
+        gmm_rel_pos_fn = gmm_fmt.format(base, scale_str, gmm_rel_k, ext)
+        
+        self.coords_occur_fn = coords_occur_fn
+        self.coords_cooccur_fn = coords_cooccur_fn
+        self.gmm_abs_pos_fn = gmm_abs_pos_fn
+        self.gmm_rel_pos_fn = gmm_rel_pos_fn
+        
+        self.config_folder = config_folder
+        
         self.gmm_abs_pos = None
         self.gmm_rel_pos = None
         
@@ -67,6 +84,9 @@ class AbstractFeatures(object):
         self.empty_human_pose_contact_features = None
         self.empty_human_pose_global_features = None
         self.empty_human_pose_orientation_features = None
+        
+        self.unq_cat_idx = None
+        self.unq_obj_idx = None
         
         self.prev_scene_config_file = ''
         self.DEBUG_PRINT = DEBUG_PRINT
@@ -278,24 +298,27 @@ class AbstractFeatures(object):
 
         return gmm_abs_pos, gmm_rel_pos
 
-    def calc_num_objs_in_clipart_library(self, scene_config,
+    def calc_clipart_library_details(self, scene_config,
                                          scene_type=None,
                                          deform_types=None):
         
         self.read_scene_config_file(scene_config)
         
+        # TODO Make a function of the configuration file
         deform_types = {'human': 'deformable', 
                         'animal': 'nondeformable', 
                         'smallObject': 'nondeformable', 
                         'largeObject': 'nondeformable'}
         cur_deform_types = deform_types
         
-        order_by_obj_type = {}    
+        order_by_obj_cat = {}    
         all_names = []
         all_objs = 0
         all_kinds = 0
         object_data_keys = self.object_data.keys()
         object_data_keys.sort()
+        
+        unq_cat_idx = {cat: idx for idx, cat in enumerate(object_data_keys) }
 
         all_avail_obj = {}
         
@@ -303,13 +326,13 @@ class AbstractFeatures(object):
         # are different when different type.
         # This is not strictly true, 
         # as some are just in different poses.
-        unique_obj_idx = {}
+        unq_obj_idx = {}
         
-        for obj_type in object_data_keys:
+        for obj_cat in object_data_keys:
             names = []
-            obj_type_data = self.object_data[obj_type]
-            deform_type = obj_type_data[cur_deform_types[obj_type]]
-            self.debug_print(obj_type)
+            obj_cat_data = self.object_data[obj_cat]
+            deform_type = obj_cat_data[cur_deform_types[obj_cat]]
+            self.debug_print(obj_cat)
             self.debug_print(deform_type.keys())
 
             attr_types = deform_type['attributeTypeList']
@@ -333,34 +356,46 @@ class AbstractFeatures(object):
 
                 if avail:
                     all_objs += 1
-                    names.append(atype['name'])
+                    obj_name = atype['name']
+                    names.append(obj_name)
 
                     # TODO Also need to check for deformable for human?
                     # If non-deformable people, might be different styles
                     # (e.g., clothes)
-                    if obj_type != 'human' and obj_type != 'animal':
+                    if obj_cat != 'human' and obj_cat != 'animal':
                         assert len(attr_types) == 1, 'Not setup for more'
                         num_kinds = atype['num' + attr_types[0]]
                         
                         for idx_kind in range(0, num_kinds):
-                            uoi_name = '{}.{}'.format(atype['name'],
+                            uoi_name = '{}.{}'.format(obj_name,
                                                       idx_kind)
-                            unique_obj_idx[uoi_name] = all_kinds+idx_kind
+                            uio_name = self.unique_obj_idx_name(obj_cat, obj_name, idx_kind)
+                            unq_obj_idx[uoi_name] = all_kinds+idx_kind
                     else:
                         num_kinds = 1
-                        unique_obj_idx[atype['name']] = all_kinds
+                        uoi_name = self.unique_obj_idx_name(obj_cat, obj_name, None)
+                        unq_obj_idx[uoi_name] = all_kinds
                     
                     all_kinds += num_kinds
                     
             sorted_names = sorted(names)
-            order_by_obj_type[obj_type] = sorted_names
+            order_by_obj_cat[obj_cat] = sorted_names
             all_names.extend(sorted_names)
         self.debug_print(len(all_names))
         self.debug_print(all_kinds)
-        self.debug_print( (sorted(unique_obj_idx.keys()),
-                           len(unique_obj_idx)) )
+        self.debug_print( (sorted(unq_obj_idx.keys()),
+                           len(unq_obj_idx)) )
 
-        return all_names, all_objs, all_kinds
+        return all_names, all_objs, all_kinds, unq_cat_idx, unq_obj_idx
+    
+    def unique_obj_idx_name(self, obj_cat, obj_name, obj_type_idx=None):
+        
+        if obj_cat != 'human' and obj_cat != 'animal':
+            uoi_name = '{}.{}'.format(obj_name, obj_type_idx)
+        else:
+            uoi_name = '{}'.format(obj_name)
+
+        return uoi_name
     
     def get_all_clipart_objects(self, cur_scene):
 
@@ -480,6 +515,168 @@ class AbstractFeatures(object):
             all_objs.append(obj)
 
         return all_objs, human_properties, doll_properties
+    
+    def extract_one_scene_relation_features(self, data, primary_obj=None, second_obj=None):
+
+        try:
+            cur_scene = data['scene']
+        except:
+            print('XRT type')
+            cur_scene = data
+        
+        
+        if primary_obj is None and second_obj is None:
+            # {idx, ins} corresponding to which index
+            # in availableObject and then which instance of 
+            # that object
+            primary_obj = cur_scene['primaryObject']
+            second_obj = cur_scene['secondaryObject']
+        
+        scene_config = cur_scene['sceneConfigFile']
+        
+        self.read_scene_config_file(scene_config)
+        
+        cur_deform_types = cur_scene['deformTypesUse']
+        cur_scene_type = cur_scene['sceneType']
+        cur_scene_config = self.scene_config_data[cur_scene_type]
+
+        not_used = cur_scene_config['notUsed']
+        num_z_size = cur_scene_config['numZSize']
+        z_scale_decay = cur_scene_config['zSizeDecay']
+        num_flip = cur_scene_config['numFlip']
+        
+        cur_z_scale = self.calc_z_scale_vals(z_scale_decay,
+                                             num_z_size)
+        
+        all_objs, human_properties, doll_properties = \
+                self.get_all_clipart_objects(cur_scene)
+
+        human_count = 0
+        humans = []
+        
+        features = []
+        feat_name_fmt = '{}-{}'
+        inst_name_fmt = '{}.{}'
+        
+        features.extend(self.get_scene_features(cur_scene))
+        
+        if self.instance_ordering == 'random':
+            random.seed(1)
+        
+        cur_avail_obj = cur_scene['availableObject']
+        
+        obj1 = cur_avail_obj[primary_obj['idx']]['instance'][primary_obj['ins']]
+        obj2 = cur_avail_obj[second_obj['idx']]['instance'][second_obj['ins']]
+        
+        x1 = obj1['x']
+        y1 = obj1['y']
+        z1 = obj1['z']
+        flip1 = obj1['flip']
+        x2 = obj2['x']
+        y2 = obj2['y']
+        z2 = obj2['z']
+        flip2 = obj2['flip']
+        
+        if self.scale_pos:
+            x1 = x1/self.scene_dims[0]
+            y1 = y1/self.scene_dims[1]
+            x2 = x2/self.scene_dims[0]
+            y2 = y2/self.scene_dims[1]
+
+        rel_coord1= self.calc_rel_pos_coords(x1, y1, z1, flip1, x2, y2, cur_z_scale)
+        cur_f1 = self.get_gmm_rel_feats(rel_coord1)
+        
+        rel_coord2= self.calc_rel_pos_coords(x2, y2, z2, flip2, x1, y1, cur_z_scale)
+        cur_f2 = self.get_gmm_rel_feats(rel_coord2)
+        
+        if self.unq_cat_idx is None or self.unq_obj_idx is None:
+            _, _, _, self.unq_cat_idx, self.unq_obj_idx = \
+                self.calc_clipart_library_details(scene_config, scene_type=None)
+        
+        primary_cat_feat = np.zeros(len(self.unq_cat_idx))
+        primary_obj_feat = np.zeros(len(self.unq_obj_idx))
+            
+        obj = cur_avail_obj[primary_obj['idx']]['instance'][primary_obj['ins']]
+        
+        type_name = obj['type']
+        obj_name = obj['name']
+        inst_name = inst_name_fmt.format(obj_name, primary_obj['ins'])
+        
+        primary_common_feat = self.create_common_features(feat_name_fmt, type_name, 
+                                                        obj_name, inst_name, obj, 
+                                                        num_flip, num_z_size, not_used)
+        
+        cat_idx = self.unq_cat_idx[obj['type']]
+                        
+        # TODO Don't hardcode this for type?
+        if 'typeID' in obj:
+            uoi_name = self.unique_obj_idx_name(obj['type'], obj['name'], obj['typeID'])
+        else:
+            uoi_name = self.unique_obj_idx_name(obj['type'], obj['name'])
+        obj_idx = self.unq_obj_idx[uoi_name]
+        primary_cat_feat[cat_idx] = 1
+        primary_obj_feat[obj_idx] = 1
+        
+        secondary_cat_feat = np.zeros(len(self.unq_cat_idx))
+        secondary_obj_feat = np.zeros(len(self.unq_obj_idx))
+        
+        obj = cur_avail_obj[second_obj['idx']]['instance'][second_obj['ins']]
+        
+        type_name = obj['type']
+        obj_name = obj['name']
+        inst_name = inst_name_fmt.format(obj_name, primary_obj['ins'])
+        
+        second_common_feat = self.create_common_features(feat_name_fmt, type_name, 
+                                                        obj_name, inst_name, obj, 
+                                                        num_flip, num_z_size, not_used)
+        
+        cat_idx = self.unq_cat_idx[obj['type']]
+                        
+        # TODO Don't hardcode this for type?
+        if 'typeID' in obj:
+            uoi_name = self.unique_obj_idx_name(obj['type'], obj['name'], obj['typeID'])
+        else:
+            uoi_name = self.unique_obj_idx_name(obj['type'], obj['name'])
+        obj_idx = self.unq_obj_idx[uoi_name]
+        secondary_cat_feat[cat_idx] = 1
+        secondary_obj_feat[obj_idx] = 1
+        
+        other_cat_feat = np.zeros(len(self.unq_cat_idx))
+        other_obj_feat = np.zeros(len(self.unq_obj_idx))
+        
+        p_obj = (primary_obj['idx'], primary_obj['ins'])
+        s_obj = (second_obj['idx'], second_obj['ins']) 
+                    
+        for idx_obj, objs in enumerate(cur_avail_obj):
+            cardinality = 0
+            num_inst = objs['numInstance']
+            inst_idxs = self.get_instance_ordering(num_inst)
+
+            for idx_ins in inst_idxs:    
+                obj = objs['instance'][idx_ins]
+                
+                if obj['present']:
+                    cur_obj = (idx_obj, idx_ins)
+                    
+                    is_bg_obj = cur_obj != p_obj and cur_obj != s_obj
+                                 
+                    if is_bg_obj:
+                        print('hi')
+                        cat_idx = self.unq_cat_idx[obj['type']]
+                        
+                        # TODO Don't hardcode this for type?
+                        if 'typeID' in obj:
+                            uoi_name = self.unique_obj_idx_name(obj['type'], obj['name'], obj['typeID'])
+                        else:
+                            uoi_name = self.unique_obj_idx_name(obj['type'], obj['name'])
+                        obj_idx = self.unq_obj_idx[uoi_name]
+                        other_cat_feat[cat_idx] = 1
+                        other_obj_feat[obj_idx] = 1
+                        
+        
+        pdb.set_trace()
+        
+        return features
         
     def extract_one_scene_features(self, data):
 
@@ -937,7 +1134,7 @@ class AbstractFeatures(object):
 
         features = []
         if coords is not None:
-            output = self.gmm_rel_pos[depth].predict_proba(coords)[0]
+            output = self.gmm_rel_pos.predict_proba(coords)[0]
             features.extend(output)
         else:
             features.extend(empty_gmm_abs)

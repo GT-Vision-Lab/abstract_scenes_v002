@@ -6,12 +6,46 @@ import glob
 import os
 import cPickle
 import multiprocessing
+import pdb
 
 import numpy as np
 #pip install joblib==0.9.0b2
 from joblib import Parallel, delayed
 
 import abstract_features as af
+
+def extract_relation_features(AF, json_dir, metafeat_dir, overwrite=False):
+        
+    all_scene_fns = glob.glob(os.path.join(json_dir, '*.json'))
+    AF.sort_nicely(all_scene_fns)
+    
+    all_scene_fns = [all_scene_fns[-1]]
+    
+    for scene_fn in all_scene_fns:
+        extract_relation_features_one_scene(scene_fn, AF,
+                                   json_dir, metafeat_dir, overwrite)
+
+def extract_relation_features_one_scene(scene_fn, AF, json_dir, 
+                                        metafeat_dir, overwrite=False):
+        
+    af.dir_path(metafeat_dir)
+    filename, file_extension = os.path.splitext(scene_fn[len(json_dir):])
+    cur_feat_name = '{}_relations_instances-{}.cpickle'.format(filename,
+                                                     AF.instance_ordering)
+    cur_feat_fn = os.path.join(metafeat_dir, cur_feat_name)
+    
+    if (not os.path.isfile(cur_feat_fn) or overwrite==True):
+        
+        print('Extracting features for {}'.format(scene_fn))
+
+        with open(scene_fn, 'rb') as jf:
+            cur_scene = json.load(jf)
+
+        cur_features = AF.extract_one_scene_relation_features(cur_scene)
+        
+        # TODO Save as cross-language-compatible format
+        with open(cur_feat_fn, 'wb') as cur_feat_fp:
+            cPickle.dump(cur_features, cur_feat_fp)
             
 def extract_features_parallel(AF, json_dir, metafeat_dir, overwrite=False, num_jobs=1):
         
@@ -148,8 +182,8 @@ def collect_features(AF, json_files, metafeat_dir,
 
 def get_num_objects_in_clipart_library(AF, scene_type=None, config_file='abstract_scenes_v002_data_scene_config.json'):
     
-    all_names, all_objs, all_kinds = \
-        AF.calc_num_objs_in_clipart_library(config_file, scene_type=scene_type)
+    all_names, all_objs, all_kinds, _, _ = \
+        AF.calc_clipart_library_details(config_file, scene_type=scene_type)
     
     if scene_type == None:
         print("Across all scene types")
@@ -161,11 +195,13 @@ def get_num_objects_in_clipart_library(AF, scene_type=None, config_file='abstrac
 def main():
     '''
     Usage:
-        abstract_features_helper.py create_gmms <jsondir> <outdir> [--overwrite --configdir=CD]
-        abstract_features_helper.py extract_features <jsondir> <outdir> [--overwrite --configdir=CD --instord=IO]
-        abstract_features_helper.py extract_features_parallel <jsondir> <outdir> <num_jobs> [--overwrite --configdir=CD --instord=IO]
-        abstract_features_helper.py create_feat_matrix <jsondir> <outdir> <featname> [--overwrite --configdir=CD --instord=IO]
+        abstract_features_helper.py create_gmms <jsondir> <outdir> [--overwrite --configdir=CD --scaled=SB --absK=K --relK=K]
+        abstract_features_helper.py extract_features <jsondir> <outdir> [--overwrite --configdir=CD --instord=IO --scaled=SB --absK=K --relK=K --zScalar=ZB]
+        abstract_features_helper.py extract_relation_features <jsondir> <outdir> [--overwrite --configdir=CD --instord=IO --scaled=SB --absK=K --relK=K --zScalar=ZB]
+        abstract_features_helper.py extract_features_parallel <jsondir> <outdir> <num_jobs> [--overwrite --configdir=CD --instord=IO --scaled=SB --absK=K --relK=K --zScalar=ZB]
+        abstract_features_helper.py create_feat_matrix <jsondir> <outdir> <featname> [--overwrite --configdir=CD --instord=IO --scaled=SB --absK=K --relK=K --zScalar=ZB]
         abstract_features_helper.py clipart_library [--configdir=CD]
+        
         
     Options:
         <jsondir>        Directory to scene JSON files to run on
@@ -174,6 +210,10 @@ def main():
         --overwrite      Overwrite files even if they exist
         --configdir=CD   Path to the config data files (contains all object data) [default: USE_DEF]
         --instord=IO     Ordering of the instances for feature extraction, one of: original, random, from_center [default: random]
+        --scaled=SB      Scale the x/y coordinates to (0,1) [default: True]
+        --absK=K         Number of GMMs for absolute location [default: 9]
+        --relK=K         Number of GMMs for relative location [default: 24]
+        --zScalar=ZB     Should z/depth be scalar or one-hot [default: False]
     '''
     
     #USE_DEF for --config_dir is /srv/share/abstract_scenes_v002/site_data/
@@ -199,10 +239,15 @@ def main():
 
         if opts['create_gmms']:
             instance_ordering = None
+            z_scalar = False # Doesn't matter here...
         else:
             #instance_orders = ['original', 'random', 'from_center']
             instance_ordering = opts['--instord']
-    
+            if opts['--zScalar'] == 'True':
+                z_scalar = True
+            else:
+                z_scalar = False
+
         overwrite = opts['--overwrite']
         
         json_dir = opts['<jsondir>']
@@ -217,12 +262,24 @@ def main():
         gmm_abs_pos_fn = os.path.join(gmm_dir, 'gmm_abs_pos.npy') 
         gmm_rel_pos_fn = os.path.join(gmm_dir, 'gmm_rel_pos.npy')
 
+        if opts['--scaled'] == 'True':
+            scale_pos = True
+        else:
+            scale_pos = False
+            
+        gmm_abs_k = int(opts['--absK'])
+        gmm_rel_k = int(opts['--relK'])
+
         AF = af.AbstractFeatures(config_folder,
                                 instance_ordering=instance_ordering,
                                 coords_occur_fn=coords_occur_fn,
                                 coords_cooccur_fn=coords_cooccur_fn,
                                 gmm_abs_pos_fn=gmm_abs_pos_fn, 
-                                gmm_rel_pos_fn=gmm_rel_pos_fn)
+                                gmm_rel_pos_fn=gmm_rel_pos_fn,
+                                scale_pos=scale_pos,
+                                z_scalar=z_scalar,
+                                gmm_abs_k=gmm_abs_k,
+                                gmm_rel_k=gmm_rel_k)
         
         if (opts['create_gmms']):
             all_scene_fns = glob.glob(os.path.join(json_dir, '*.json'))
@@ -233,6 +290,8 @@ def main():
             num_jobs = int(opts['<num_jobs>'])
             extract_features_parallel(AF, json_dir, metafeat_dir, 
                                       overwrite=overwrite, num_jobs=num_jobs)
+        elif (opts['extract_relation_features']):
+            extract_relation_features(AF, json_dir, metafeat_dir, overwrite=overwrite)
         elif (opts['create_feat_matrix']):
             feat_fn_base = opts['<featname>']
             create_feature_matrix(AF, json_dir, metafeat_dir, 

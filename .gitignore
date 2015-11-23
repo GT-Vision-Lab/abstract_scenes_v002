@@ -25,6 +25,7 @@ tmp_site/*
 *.exe
 *.o
 *.so
+*.pyc
 
 # Packages #
 ############
