@@ -14,7 +14,7 @@ from joblib import Parallel, delayed
 
 import abstract_features as af
 
-def extract_relation_features(AF, json_dir, metafeat_dir, overwrite=False):
+def extract_relation_feats(AF, json_dir, metafeat_dir, overwrite=False):
         
     all_scene_fns = glob.glob(os.path.join(json_dir, '*.json'))
     AF.sort_nicely(all_scene_fns)
@@ -22,11 +22,11 @@ def extract_relation_features(AF, json_dir, metafeat_dir, overwrite=False):
     all_scene_fns = [all_scene_fns[-1]]
     
     for scene_fn in all_scene_fns:
-        extract_relation_features_one_scene(scene_fn, AF,
+        extract_relation_feats_one_scene(scene_fn, AF,
                                    json_dir, metafeat_dir, overwrite)
 
-def extract_relation_features_one_scene(scene_fn, AF, json_dir, 
-                                        metafeat_dir, overwrite=False):
+def extract_relation_feats_one_scene(scene_fn, AF, json_dir, 
+                                     metafeat_dir, overwrite=False):
         
     af.dir_path(metafeat_dir)
     filename, file_extension = os.path.splitext(scene_fn[len(json_dir):])
@@ -41,23 +41,23 @@ def extract_relation_features_one_scene(scene_fn, AF, json_dir,
         with open(scene_fn, 'rb') as jf:
             cur_scene = json.load(jf)
 
-        cur_features = AF.extract_one_scene_relation_features(cur_scene)
+        cur_features = AF.extract_one_scene_relation_feats(cur_scene)
         
         # TODO Save as cross-language-compatible format
         with open(cur_feat_fn, 'wb') as cur_feat_fp:
             cPickle.dump(cur_features, cur_feat_fp)
             
-def extract_features_parallel(AF, json_dir, metafeat_dir, overwrite=False, num_jobs=1):
+def extract_feats_parallel(AF, json_dir, metafeat_dir, overwrite=False, num_jobs=1):
         
     all_scene_fns = glob.glob(os.path.join(json_dir, '*.json'))
     AF.sort_nicely(all_scene_fns)
     
     Parallel(n_jobs=num_jobs, verbose=1024, batch_size=1)\
-        (delayed(extract_features_one_scene)(scene_fn, AF, json_dir, 
-                                             metafeat_dir, overwrite)\
-                                                 for scene_fn in all_scene_fns)
+        (delayed(extract_feats_one_scene)(scene_fn, AF, json_dir, 
+                                          metafeat_dir, overwrite)\
+                                              for scene_fn in all_scene_fns)
 
-def extract_features(AF, json_dir, metafeat_dir, overwrite=False):
+def extract_feats(AF, json_dir, metafeat_dir, overwrite=False):
         
     all_scene_fns = glob.glob(os.path.join(json_dir, '*.json'))
     AF.sort_nicely(all_scene_fns)
@@ -66,7 +66,7 @@ def extract_features(AF, json_dir, metafeat_dir, overwrite=False):
         extract_features_one_scene(scene_fn, AF,
                                    json_dir, metafeat_dir, overwrite)
 
-def extract_features_one_scene(scene_fn, AF, json_dir, metafeat_dir, overwrite=False):
+def extract_feats_one_scene(scene_fn, AF, json_dir, metafeat_dir, overwrite=False):
         
     af.dir_path(metafeat_dir)
     filename, file_extension = os.path.splitext(scene_fn[len(json_dir):])
@@ -81,14 +81,14 @@ def extract_features_one_scene(scene_fn, AF, json_dir, metafeat_dir, overwrite=F
         with open(scene_fn, 'rb') as jf:
             cur_scene = json.load(jf)
 
-        cur_features = AF.extract_one_scene_features(cur_scene)
+        cur_features = AF.extract_one_scene_feats(cur_scene)
         
         # TODO Save as cross-language-compatible format
         with open(cur_feat_fn, 'wb') as cur_feat_fp:
             cPickle.dump(cur_features, cur_feat_fp)
             
-def create_feature_matrix(AF, json_dir, metafeat_dir, feat_dir,
-                          feat_fn_base, overwrite=False):
+def create_feat_matrix(AF, json_dir, metafeat_dir, feat_dir,
+                       feat_fn_base, overwrite=False):
     
     tags = ['scene-level', 'Doll01'] # Filter based on these
     tags = None # Filter nothing (i.e., keep all features)
@@ -130,7 +130,7 @@ def create_feature_matrix(AF, json_dir, metafeat_dir, feat_dir,
         with open(json_file, 'wb') as fp:
             json.dump(json_files, fp, indent=4, separators=(',', ': '))
         
-        feats, feat_names = collect_features(AF, json_files, metafeat_dir, 
+        feats, feat_names = collect_feats(AF, json_files, metafeat_dir, 
                                             tags, keep_or_remove)
 
         # TODO Save as cross-language-compatible format
@@ -145,7 +145,7 @@ def create_feature_matrix(AF, json_dir, metafeat_dir, feat_dir,
         with open(feat_unq_name_file, 'wb') as fp:
             json.dump(feat_unq_names, fp, indent=4, separators=(',', ': '))
 
-def collect_features(AF, json_files, metafeat_dir, 
+def collect_feats(AF, json_files, metafeat_dir, 
                      tags=None, keep_or_remove=None):
     all_feats = []
     get_names = True
@@ -163,13 +163,13 @@ def collect_features(AF, json_files, metafeat_dir,
         
         if get_names:
             cur_feats, feat_names = \
-                AF.scene_metafeatures_to_features(cur_metafeats, 
+                AF.scene_metafeatures_to_feats(cur_metafeats, 
                                                   tags, 
                                                   keep_or_remove,
                                                   get_names)
             get_names = False
         else:
-            cur_feats, _ = AF.scene_metafeatures_to_features(cur_metafeats, 
+            cur_feats, _ = AF.scene_metafeatures_to_feats(cur_metafeats, 
                                                         tags, 
                                                         keep_or_remove,
                                                         get_names)
@@ -285,13 +285,13 @@ def main():
             all_scene_fns = glob.glob(os.path.join(json_dir, '*.json'))
             AF.create_gmms_models(all_scene_fns, overwrite=overwrite)
         elif (opts['extract_features']):
-            extract_features(AF, json_dir, metafeat_dir, overwrite=overwrite)
+            extract_feats(AF, json_dir, metafeat_dir, overwrite=overwrite)
         elif (opts['extract_features_parallel']):
             num_jobs = int(opts['<num_jobs>'])
-            extract_features_parallel(AF, json_dir, metafeat_dir, 
-                                      overwrite=overwrite, num_jobs=num_jobs)
+            extract_feats_parallel(AF, json_dir, metafeat_dir, 
+                                   overwrite=overwrite, num_jobs=num_jobs)
         elif (opts['extract_relation_features']):
-            extract_relation_features(AF, json_dir, metafeat_dir, overwrite=overwrite)
+            extract_relation_feats(AF, json_dir, metafeat_dir, overwrite=overwrite)
         elif (opts['create_feat_matrix']):
             feat_fn_base = opts['<featname>']
             create_feature_matrix(AF, json_dir, metafeat_dir, 
