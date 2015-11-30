@@ -29,7 +29,7 @@ z_scalar='False'
 calc_gmms=0
 calc_feats_single=0
 calc_feats_parallel=0
-calc_relation_feats=1
+calc_relation_feats=0
 calc_feats_matrix=0
 
 python abstract_features_helper.py clipart_library \

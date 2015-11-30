@@ -57,6 +57,15 @@ class AbstractFeatures(object):
             scale_str = 'scaled'
         else:
             scale_str = 'unscaled'
+        
+        self.scale_str = scale_str
+        
+        if self.z_scalar:
+            z_scalar_str = 'zScale-Scalar'
+        else:
+            z_scalar_str = 'zScale-OneHot'
+    
+        self.z_scalar_str = z_scalar_str
     
         coords_fmt = '{}_{}{}'
         base, ext = os.path.splitext(coords_occur_fn)

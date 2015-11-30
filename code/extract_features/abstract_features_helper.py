@@ -30,8 +30,16 @@ def extract_relation_feats_one_scene(scene_fn, AF, json_dir,
         
     af.dir_path(metafeat_dir)
     filename, file_extension = os.path.splitext(scene_fn[len(json_dir):])
-    cur_feat_name = '{}_relations_instances-{}.cpickle'.format(filename,
-                                                     AF.instance_ordering)
+    ext = 'cpickle'
+    cur_feat_name = ('{}_relationFeats_{}'
+                    '_gmmAbsK-{:02d}_gmmRelK-{:02d}'
+                    '_{}_instances-{}.{}').format(filename,
+                                                AF.scale_str,
+                                                AF.gmm_abs_k,
+                                                AF.gmm_rel_k,
+                                                AF.z_scalar_str,
+                                                AF.instance_ordering,
+                                                ext)
     cur_feat_fn = os.path.join(metafeat_dir, cur_feat_name)
     
     if (not os.path.isfile(cur_feat_fn) or overwrite==True):
@@ -70,8 +78,16 @@ def extract_feats_one_scene(scene_fn, AF, json_dir, metafeat_dir, overwrite=Fals
         
     af.dir_path(metafeat_dir)
     filename, file_extension = os.path.splitext(scene_fn[len(json_dir):])
-    cur_feat_name = '{}_instances-{}.cpickle'.format(filename,
-                                                     AF.instance_ordering)
+    ext = 'cpickle'
+    cur_feat_name = ('{}_{}'
+                     '_gmmAbsK-{:02d}_gmmRelK-{:02d}'
+                     '_{}_instances-{}.{}').format(filename,
+                                                   AF.scale_str,
+                                                   AF.gmm_abs_k,
+                                                   AF.gmm_rel_k,
+                                                   AF.z_scalar_str,
+                                                   AF.instance_ordering,
+                                                   ext)
     cur_feat_fn = os.path.join(metafeat_dir, cur_feat_name)
     
     if (not os.path.isfile(cur_feat_fn) or overwrite==True):
@@ -96,24 +112,29 @@ def create_feat_matrix(AF, json_dir, metafeat_dir, feat_dir,
     keep_or_remove = 'keep'
     #keep_or_remove = 'remove'
     
-    json_fn = '{}_instances-{}_files.json'.format(feat_fn_base,
-                                                  AF.instance_ordering)
+    
+    base_name = ('{}_{}'
+                 '_gmmAbsK-{:02d}_gmmRelK-{:02d}'
+                 '_{}_instances-{}').format(feat_fn_base,
+                                            AF.scale_str,
+                                            AF.gmm_abs_k,
+                                            AF.gmm_rel_k,
+                                            AF.z_scalar_str,
+                                            AF.instance_ordering,
+                                            )        
+    
+    json_fn = '{}_files.json'.format(base_name)
     json_file = os.path.join(feat_dir, json_fn)
     
-    feat_fn = '{}_instances-{}_features.npy'.format(feat_fn_base,
-                                                    AF.instance_ordering)
+    feat_fn = '{}_features.npy'.format(base_name)
     feat_file = os.path.join(feat_dir, feat_fn)
     
     by_dim_name = 'feature_names_by_dimension'
-    names_fn = '{}_instances-{}_{}.json'.format(feat_fn_base,
-                                                AF.instance_ordering,
-                                                by_dim_name)
+    names_fn = '{}_{}.json'.format(base_name, by_dim_name)
     feat_name_file = os.path.join(feat_dir, names_fn)
     
     feat_name = 'feature_names'
-    unq_names_fn = '{}_instances-{}_{}.json'.format(feat_fn_base,
-                                                    AF.instance_ordering,
-                                                    feat_name)
+    unq_names_fn = '{}_{}.json'.format(base_name, feat_name)
     feat_unq_name_file = os.path.join(feat_dir, unq_names_fn)
     
     both_files_exist = (os.path.isfile(feat_file) 
@@ -152,9 +173,16 @@ def collect_feats(AF, json_files, metafeat_dir,
     
     for scene_fn in json_files:
         filename, file_extension = os.path.splitext(scene_fn)
-        metafeat_fn = '{}_instances-{}.cpickle'.format(filename,
-                                                       AF.instance_ordering)
-        
+        ext = 'cpickle'
+        metafeat_fn = ('{}_{}'
+                       '_gmmAbsK-{:02d}_gmmRelK-{:02d}'
+                       '_{}_instances-{}.{}').format(filename,
+                                                     AF.scale_str,
+                                                     AF.gmm_abs_k,
+                                                     AF.gmm_rel_k,
+                                                     AF.z_scalar_str,
+                                                     AF.instance_ordering,
+                                                     ext)        
         cur_metafeat_fn = os.path.join(metafeat_dir, 
                                        metafeat_fn)
         
@@ -294,8 +322,8 @@ def main():
             extract_relation_feats(AF, json_dir, metafeat_dir, overwrite=overwrite)
         elif (opts['create_feat_matrix']):
             feat_fn_base = opts['<featname>']
-            create_feature_matrix(AF, json_dir, metafeat_dir, 
-                                  feat_dir, feat_fn_base, overwrite=overwrite)
+            create_feat_matrix(AF, json_dir, metafeat_dir, 
+                               feat_dir, feat_fn_base, overwrite=overwrite)
         else:
             print("Not a valid command.")
 
