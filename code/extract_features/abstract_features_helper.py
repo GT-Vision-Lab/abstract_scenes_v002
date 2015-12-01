@@ -19,8 +19,6 @@ def extract_relation_feats(AF, json_dir, metafeat_dir, overwrite=False):
     all_scene_fns = glob.glob(os.path.join(json_dir, '*.json'))
     AF.sort_nicely(all_scene_fns)
     
-    all_scene_fns = [all_scene_fns[-1]]
-    
     for scene_fn in all_scene_fns:
         extract_relation_feats_one_scene(scene_fn, AF,
                                    json_dir, metafeat_dir, overwrite)
