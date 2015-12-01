@@ -29,8 +29,10 @@ z_scalar='False'
 calc_gmms=0
 calc_feats_single=0
 calc_feats_parallel=0
-calc_relation_feats=0
 calc_feats_matrix=0
+calc_relation_feats_single=0
+calc_relation_feats_parallel=0
+calc_relation_feats_matrix=0
 
 python abstract_features_helper.py clipart_library \
         --configdir=$configDir
@@ -63,20 +65,6 @@ then
             --zScalar=$z_scalar
 fi
 
-if [ $calc_relation_feats -gt 0 ]
-then
-python abstract_features_helper.py extract_relation_features \
-        $sceneJSONFeatDir \
-        $outputDataDir \
-        --instord=$inst_ord \
-        --configdir=$configDir \
-        --overwrite \
-        --scaled=$pos_scaled \
-        --absK=$gmm_abs_K \
-        --relK=$gmm_rel_K \
-        --zScalar=$z_scalar
-fi
-
 if [ $calc_feats_parallel -gt 0 ]
 then
     python abstract_features_helper.py extract_features_parallel \
@@ -101,6 +89,54 @@ then
             --instord=$inst_ord \
             --configdir=$configDir \
             --overwrite \
+            --scaled=$pos_scaled \
+            --absK=$gmm_abs_K \
+            --relK=$gmm_rel_K \
+            --zScalar=$z_scalar
+fi
+
+if [ $calc_relation_feats_single -gt 0 ]
+then
+#     If you don't want to install joblib,
+#     you can use the non-parallel version
+    python abstract_features_helper.py extract_relation_features \
+        $sceneJSONFeatDir \
+        $outputDataDir \
+        --instord=$inst_ord \
+        --configdir=$configDir \
+        --overwrite \
+        --scaled=$pos_scaled \
+        --absK=$gmm_abs_K \
+        --relK=$gmm_rel_K \
+        --zScalar=$z_scalar
+fi
+
+if [ $calc_relation_feats_parallel -gt 0 ]
+then
+    python abstract_features_helper.py extract_features_parallel \
+            $sceneJSONFeatDir \
+            $outputDataDir \
+            $num_jobs \
+            --instord=$inst_ord \
+            --configdir=$configDir \
+            --overwrite \
+            --relation \
+            --scaled=$pos_scaled \
+            --absK=$gmm_abs_K \
+            --relK=$gmm_rel_K \
+            --zScalar=$z_scalar
+fi
+
+if [ $calc_relation_feats_matrix -gt 0 ]
+then
+    python abstract_features_helper.py create_feat_matrix \
+            $sceneJSONFeatDir \
+            $outputDataDir \
+            $feat_base \
+            --instord=$inst_ord \
+            --configdir=$configDir \
+            --overwrite \
+            --relation \
             --scaled=$pos_scaled \
             --absK=$gmm_abs_K \
             --relK=$gmm_rel_K \

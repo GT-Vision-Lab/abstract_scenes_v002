@@ -96,6 +96,8 @@ class AbstractFeatures(object):
         
         self.unq_cat_idx = None
         self.unq_obj_idx = None
+        self.max_human_expr = None
+        self.max_animal_pose = None
         
         self.prev_scene_config_file = ''
         self.DEBUG_PRINT = DEBUG_PRINT
@@ -324,6 +326,8 @@ class AbstractFeatures(object):
         all_names = []
         all_objs = 0
         all_kinds = 0
+        max_human_expr = 0
+        max_animal_pose = 0
         object_data_keys = self.object_data.keys()
         object_data_keys.sort()
         
@@ -348,6 +352,15 @@ class AbstractFeatures(object):
             
             for atype in deform_type['type']:
                 
+                if obj_cat == 'human':
+                    cur_num_human_expr = atype['numExpression']
+                    if cur_num_human_expr > max_human_expr:
+                        max_human_expr = cur_num_human_expr
+                elif obj_cat == 'animal':
+                    cur_num_animal_pose = atype['numPose']
+                    if cur_num_animal_pose > max_animal_pose:
+                        max_animal_pose = cur_num_animal_pose
+
                 scenes = atype['availableScene']
                 if scene_type is None:
                     avail = True
@@ -395,7 +408,8 @@ class AbstractFeatures(object):
         self.debug_print( (sorted(unq_obj_idx.keys()),
                            len(unq_obj_idx)) )
 
-        return all_names, all_objs, all_kinds, unq_cat_idx, unq_obj_idx
+        return (all_names, all_objs, all_kinds, unq_cat_idx, 
+                unq_obj_idx, max_human_expr, max_animal_pose)
     
     def unique_obj_idx_name(self, obj_cat, obj_name, obj_type_idx=None):
         
@@ -525,11 +539,26 @@ class AbstractFeatures(object):
 
         return all_objs, human_properties, doll_properties
     
-    def extract_one_scene_relation_feats(self, data, primary_obj=None, second_obj=None):
+    def extract_one_scene_relation_feats(self, data, 
+                                         primary_obj=None, second_obj=None,
+                                         scene_type=None):
+        '''
+        Some minor differences with the Common Sense ICCV 2015 code.
+        -flip is one-hot, so it's 2D instead of 1D (i.e., +1Dx2)
+        -Added x/y position in addition to the absolute position GMMs (i.e., +2Dx2)
+        -Added overall body/torso angle to the person (was part of Basic features) (i.e., +12Dx2)
+        -Added scene type feature, though they only used Living (i.e., +2D)
+        -Actually go through object data to find out max human expressions (currently 9) 
+         instead of hardcoding it to 10 (i.e., -1Dx2)
+        -Actually going through object data to find out max animal poses (currently 6)
+         instead of hardcoding it to 10 (i.e., -4Dx2)
+        -Get all 'unique' objects via JSON files based on scene_type. If None, across
+         both scene types (e.g., +83Dx3)
+        '''
 
-        try:
+        if 'scene' in data:
             cur_scene = data['scene']
-        except:
+        else:
             print('XRT type')
             cur_scene = data
 
@@ -556,11 +585,11 @@ class AbstractFeatures(object):
         cur_z_scale = self.calc_z_scale_vals(z_scale_decay,
                                              num_z_size)
         
-        if self.unq_cat_idx is None or self.unq_obj_idx is None:
-            _, _, _, self.unq_cat_idx, self.unq_obj_idx = \
-                self.calc_clipart_library_details(scene_config, scene_type='Living')
+        if self.unq_cat_idx is None:
+            _, _, _, self.unq_cat_idx, self.unq_obj_idx, self.max_human_expr, self.max_animal_pose = \
+                self.calc_clipart_library_details(scene_config, scene_type=scene_type)
     
-    
+        print(len(self.unq_obj_idx))
         # TODO Don't call this every time
         _, human_properties, doll_properties = \
             self.get_all_clipart_objects(cur_scene)
@@ -568,8 +597,6 @@ class AbstractFeatures(object):
         features = []
         feat_name_fmt = '{}-{}'
         inst_name_fmt = '{}.{}'
-        
-        features.extend(self.get_scene_feats(cur_scene))
 
         cur_avail_obj = cur_scene['availableObject']
         
@@ -596,7 +623,8 @@ class AbstractFeatures(object):
         features.extend(obj2_feats)
         
         rel_pos_feats = self.create_relation_obj_rel_pos_feats(feat_name_fmt, 
-                                                               obj1, obj2, 
+                                                               inst_name_fmt,
+                                                               obj1, obj2,                                                                
                                                                cur_z_scale)
         features.extend(rel_pos_feats)
         
@@ -607,9 +635,15 @@ class AbstractFeatures(object):
                                                                      card=False)
         features.extend(other_obj_feats)
 
+
+        scene_f = self.get_scene_feats(cur_scene)
+        for sf in scene_f:
+            sf['tags'].append('relation')
+        features.extend(scene_f)
+                
         num_feats = 0
         for idx, feat in enumerate(features):
-            print((idx, feat.keys()))
+            print('{:3d}: {:3d} {}'.format(idx, len(feat['feature']), feat['name']))
             num_feats += len(feat['feature'])
         print(num_feats)
         
@@ -625,11 +659,6 @@ class AbstractFeatures(object):
         
         common_meta = []
         
-        common_meta.append(self.create_presence_feat(feat_name_fmt,
-                                                        type_name, 
-                                                        obj_name, 
-                                                        inst_name, 
-                                                        obj))
         common_meta.append(self.create_flip_feat(feat_name_fmt, 
                                                     type_name, 
                                                     obj_name, 
@@ -647,14 +676,14 @@ class AbstractFeatures(object):
                                                     inst_name, 
                                                     obj, 
                                                     not_used))
-        
+
         cat_idx = self.unq_cat_idx[obj['type']]
                         
         # TODO Don't hardcode this for type?
         if 'typeID' in obj:
-            uoi_name = self.unique_obj_idx_name(obj['type'], obj['name'], obj['typeID'])
+            uoi_name = self.unique_obj_idx_name(type_name, obj_name, obj['typeID'])
         else:
-            uoi_name = self.unique_obj_idx_name(obj['type'], obj['name'])
+            uoi_name = self.unique_obj_idx_name(type_name, obj_name)
         obj_idx = self.unq_obj_idx[uoi_name]
     
         cur_cat_feat = np.zeros(len(self.unq_cat_idx), dtype=bool)
@@ -662,40 +691,54 @@ class AbstractFeatures(object):
         cur_cat_feat[cat_idx] = True
         cur_obj_feat[obj_idx] = True
 
-        feat_type = 'obj{}'.format(obj_num)
-        feat_name = feat_name_fmt.format('category', feat_type)
+        feat_type = 'category'
+        feat_name = feat_name_fmt.format(feat_type, inst_name)
         feat_tags = ['relation', 'instance-level', feat_type, 
                      type_name, obj_name, inst_name]    
         cat_meta = self.create_feat(feat_name, feat_tags, cur_cat_feat)
         common_meta.append(cat_meta)
         
-        feat_name = feat_name_fmt.format('type', feat_type)
+        feat_type = 'type'
+        feat_name = feat_name_fmt.format(feat_type, inst_name)
         feat_tags = ['relation', 'instance-level', feat_type,
                      type_name, obj_name, inst_name]    
         obj_meta = self.create_feat(feat_name, feat_tags, cur_obj_feat)
         common_meta.append(obj_meta)
         
-        max_expr = 9 # TODO Get from looping through objects
-        human_f = self.create_relation_human_feats(obj, feat_name_fmt,
-                              doll_properties, human_properties, 
-                              cur_z_scale, max_expr)
+        max_expr = self.max_human_expr
+        human_f = self.create_relation_human_feats(obj, 
+                                                   feat_name_fmt,
+                                                   inst_name, 
+                                                   doll_properties, 
+                                                   human_properties, 
+                                                   cur_z_scale, 
+                                                   max_expr)
         common_meta.extend(human_f)
         
-        max_pose = 10 # TODO Get from looping through all available objects
-        common_meta.extend(self.create_relation_animal_feats(obj, max_pose))
+        max_pose = self.max_animal_pose
+        animal_f = self.create_relation_animal_feats(obj, feat_name_fmt, 
+                                                     inst_name, max_pose)
+        common_meta.extend(animal_f)
         
         return common_meta
         
-    def create_relation_obj_rel_pos_feats(self, feat_name_fmt, obj1, 
-                                          obj2, cur_z_scale):
+    def create_relation_obj_rel_pos_feats(self, feat_name_fmt, inst_name_fmt,
+                                          obj1, obj2,
+                                          cur_z_scale):
         x1 = obj1['x']
         y1 = obj1['y']
         z1 = obj1['z']
         flip1 = obj1['flip']
+        obj_type1 = obj1['type']
+        obj_name1 = obj1['name']
+        inst_name1 = inst_name_fmt.format(obj_name1, obj1['instanceID'])
         x2 = obj2['x']
         y2 = obj2['y']
         z2 = obj2['z']
         flip2 = obj2['flip']
+        obj_type2 = obj2['type']
+        obj_name2 = obj2['name']
+        inst_name2 = inst_name_fmt.format(obj_name2, obj2['instanceID'])
         
         if self.scale_pos:
             x1 = x1/self.scene_dims[0]
@@ -708,15 +751,16 @@ class AbstractFeatures(object):
         
         rel_coord2 = self.calc_rel_pos_coords(x2, y2, z2, flip2, x1, y1, cur_z_scale)
         rel_feat2 = self.get_gmm_rel_feats(rel_coord2)
-        
-        feat_type = 'obj1'
-        feat_name = feat_name_fmt.format(feat_type, 'relgmm')
-        feat_tags = ['instance-level', 'relgmm', feat_type]    
+
+        feat_type = 'relgmm'
+        feat_name = feat_name_fmt.format(feat_type, inst_name1)
+        feat_tags = ['relation', 'instance-level', feat_type, 
+                     obj_type1, obj_name1, inst_name1]
         obj1_meta = self.create_feat(feat_name, feat_tags, rel_feat1)
         
-        feat_type = 'obj2'
-        feat_name = feat_name_fmt.format(feat_type, 'relgmm')
-        feat_tags = ['relation', 'instance-level', 'relgmm', feat_type]    
+        feat_name = feat_name_fmt.format(feat_type, inst_name2)
+        feat_tags = ['relation', 'instance-level', feat_type, 
+                     obj_type2, obj_name2, inst_name2] 
         obj2_meta = self.create_feat(feat_name, feat_tags, rel_feat2)
     
         return [obj1_meta, obj2_meta]
@@ -758,17 +802,19 @@ class AbstractFeatures(object):
                         other_obj_feat[obj_idx] += 1
 
         if card:
-            feat_type = 'cardinality'
+            count_type = 'cardinality'
         else:
-            feat_type = 'presence'
+            count_type = 'presence'
             other_cat_feat = other_cat_feat.astype(bool)
             other_obj_feat = other_obj_feat.astype(bool)
 
-        feat_name = feat_name_fmt.format('category', feat_type)
+        feat_type = '{}-{}'.format('category', count_type)
+        feat_name = feat_name_fmt.format(feat_type, 'others')
         feat_tags = ['relation', 'category-level', feat_type]    
         cat_meta = self.create_feat(feat_name, feat_tags, other_cat_feat)
         
-        feat_name = feat_name_fmt.format('type', feat_type)
+        feat_type = '{}-{}'.format('type', count_type)
+        feat_name = feat_name_fmt.format(feat_type, 'others')
         feat_tags = ['relation', 'type-level', feat_type]    
         obj_meta = self.create_feat(feat_name, feat_tags, other_obj_feat)
 
@@ -1086,9 +1132,9 @@ class AbstractFeatures(object):
         if self.z_scalar:
             if obj['present']:
                 z = obj['z']
-                cur_feat = (z+1)*self.convert_to_one_hot(0, 1) 
+                z_feat = (z+1)*self.convert_to_one_hot(0, 1) 
             else:
-                self.convert_to_one_hot(None, 1)
+                z_feat = self.convert_to_one_hot(None, 1)
         else:
             if obj['present']:
                 z = obj['z']
@@ -1305,10 +1351,13 @@ class AbstractFeatures(object):
         
         return human_meta
     
-    def create_relation_human_feats(self, obj, feat_name_fmt,
+    def create_relation_human_feats(self, obj, feat_name_fmt, inst_name,
                               doll_properties, human_properties, 
                               cur_z_scale, max_expr):
     
+
+        type_name = obj['type']
+        obj_name = obj['name']
         human_meta = []
         
         sexes = human_properties['sexes']
@@ -1325,30 +1374,49 @@ class AbstractFeatures(object):
             sex = None
             race = None
 
+        feat_type = 'humansex'
+        feat_name = feat_name_fmt.format(feat_type, inst_name)
+        feat_tags = ['instance-level', 'category-specific', 
+                     feat_type, type_name, obj_name, inst_name]
         num_sexes = len(sexes)
         sex = self.convert_to_one_hot(sex, num_sexes)
-
+        sex_meta = self.create_feat(feat_name, feat_tags, sex)
+        human_meta.append(sex_meta)
+        
+        feat_type = 'humanrace'
+        feat_name = feat_name_fmt.format(feat_type, inst_name)
+        feat_tags = ['instance-level', 'category-specific', 
+                     feat_type, type_name, obj_name, inst_name]
         num_races = len(races)
         race = self.convert_to_one_hot(race, num_races)
+        race_meta = self.create_feat(feat_name, feat_tags, race)
+        human_meta.append(race_meta)
         
+        feat_type = 'humanage'
+        feat_name = feat_name_fmt.format(feat_type, inst_name)
+        feat_tags = ['instance-level', 'category-specific', 
+                     feat_type, type_name, obj_name, inst_name]
         num_ages = len(ages)
         age = self.convert_to_one_hot(age, num_ages)
-
+        age_meta = self.create_feat(feat_name, feat_tags, age)
+        human_meta.append(age_meta)
+        
+        feat_type = 'humanexpr'
+        feat_name = feat_name_fmt.format(feat_type, inst_name)
+        feat_tags = ['instance-level', 'category-specific', 
+                     feat_type, type_name, obj_name, inst_name]
         if obj['type'] == 'human':
             expr = self.convert_to_one_hot(obj['expressionID'],
                                            max_expr)
         else:
             expr = self.convert_to_one_hot(None, max_expr)
-        
-        human_feat = np.hstack([sex, race, age, expr])
-        human_meta = []
-        feat_name = 'humanprop'
-        feat_tags = ['relation', 'instance-level', 'category-specific', 'properties']
-        human_meta.append(self.create_feat(feat_name, feat_tags, human_feat))
+        expr_meta = self.create_feat(feat_name, feat_tags, expr)
+        human_meta.append(expr_meta)
      
-        pose_feat = self.relation_human_pose_feats(obj, cur_z_scale, feat_name_fmt)
+        pose_feat = self.relation_human_pose_feats(obj, cur_z_scale, feat_name_fmt, inst_name)
 
         human_meta.extend(pose_feat)
+        
         return human_meta
 
     def create_animal_feats(self, feat_name_fmt, type_name, 
@@ -1371,13 +1439,17 @@ class AbstractFeatures(object):
 
         return animal_meta
     
-    def create_relation_animal_feats(self, obj, max_pose):
-
+    def create_relation_animal_feats(self, obj,feat_name_fmt, 
+                                     inst_name, max_pose):
+        type_name = obj['type']
+        obj_name = obj['name']
+        
         animal_meta = []
-
-        feat_name = 'animalpose'
+        
+        feat_type = 'animalpose'
+        feat_name = feat_name_fmt.format(feat_type, inst_name)
         feat_tags = ['relation', 'instance-level', 'poseid',
-                     feat_name]
+                     feat_type, type_name, obj_name, inst_name]
 
         if obj['type'] == 'animal':
             pose_feat = self.convert_to_one_hot(obj['poseID'], max_pose)
@@ -1797,7 +1869,7 @@ class AbstractFeatures(object):
                                                   type_name, obj_name,
                                                   inst_name)
     
-    def relation_human_pose_feats(self, obj, cur_z_scale, feat_name_fmt):
+    def relation_human_pose_feats(self, obj, cur_z_scale, feat_name_fmt, inst_name):
         
         if obj['type'] == 'human':
             present = obj['present']
@@ -1815,10 +1887,9 @@ class AbstractFeatures(object):
         # feature extraction does not need torso
         X = X[1:]
         Y = Y[1:]
-
-        type_name = 'fill-in'
-        obj_name = 'fill-in'
-        inst_name = 'fill-in'
+        
+        type_name = obj['type']
+        obj_name = obj['name']
         return self.calculate_human_pose_feats(present, X, Y,
                                                   feat_name_fmt, 
                                                   type_name, obj_name,
@@ -1834,7 +1905,8 @@ class AbstractFeatures(object):
                                       feat_global=True, 
                                       num_gauss=3, 
                                       feat_orient=True, 
-                                      num_orient=12):
+                                      num_orient=12,
+                                      add_overall_orient=True):
         
         if self.human_pose_ft_param is None:
             ft_param = {}
@@ -1987,7 +2059,7 @@ class AbstractFeatures(object):
                 # Not what the common sense paper used
                 pose_feat = self.human_pose_orientation_feats(ft_param, 
                                                 [(X, Y)], 
-                                                get_overall_orientation=True)
+                                                get_overall_orientation=add_overall_orient)
                 pose_feat = np.array(pose_feat)
             else:
                 if self.empty_human_pose_orientation_features is None:
@@ -1995,7 +2067,7 @@ class AbstractFeatures(object):
                     pose_feat = \
                         self.human_pose_orientation_feats(ft_param, 
                                                 [(X, Y)], 
-                                                get_overall_orientation=True) 
+                                                get_overall_orientation=add_overall_orient) 
                     pose_feat = np.zeros(len(pose_feat))
                     self.empty_human_pose_orientation_features = pose_feat
                 else:
@@ -2003,7 +2075,7 @@ class AbstractFeatures(object):
             
             pose_meta = self.create_feat(feat_name, feat_tags, pose_feat)
             feats.append(pose_meta)
-
+        
         return feats
     
     def human_pose_orientation_feats(self, ft_param, partXY,

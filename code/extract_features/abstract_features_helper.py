@@ -41,6 +41,9 @@ def extract_relation_feats_one_scene(scene_fn, AF, json_dir,
                                                 AF.instance_ordering,
                                                 ext)
     cur_feat_fn = os.path.join(metafeat_dir, cur_feat_name)
+
+    scene_type = 'Living' # Only considers objects that appear in Living Room
+    scene_type = None # Considers all objects that appear in any scenes
     
     if (not os.path.isfile(cur_feat_fn) or overwrite==True):
         
@@ -49,16 +52,28 @@ def extract_relation_feats_one_scene(scene_fn, AF, json_dir,
         with open(scene_fn, 'rb') as jf:
             cur_scene = json.load(jf)
 
-        cur_features = AF.extract_one_scene_relation_feats(cur_scene)
-        
+        cur_metafeats = AF.extract_one_scene_relation_feats(cur_scene, scene_type)
+        cur_feats, _ = AF.scene_metafeatures_to_feats(cur_metafeats, None, 
+                                                      'keep', False)
+        nonzero = 0
+        for f in cur_feats:
+            if f != 0:
+                nonzero += 1
+        print(nonzero)
+        pdb.set_trace()
         # TODO Save as cross-language-compatible format
         with open(cur_feat_fn, 'wb') as cur_feat_fp:
-            cPickle.dump(cur_features, cur_feat_fp)
+            cPickle.dump(cur_metafeats, cur_feat_fp)
             
-def extract_feats_parallel(AF, json_dir, metafeat_dir, overwrite=False, num_jobs=1):
+def extract_feats_parallel(AF, json_dir, metafeat_dir, overwrite=False, num_jobs=1, relation=False):
         
     all_scene_fns = glob.glob(os.path.join(json_dir, '*.json'))
     AF.sort_nicely(all_scene_fns)
+    
+    if relation:
+        feat_func = extract_relation_feats_one_scene
+    else:
+        feat_func = extract_feats_one_scene
     
     Parallel(n_jobs=num_jobs, verbose=1024, batch_size=1)\
         (delayed(extract_feats_one_scene)(scene_fn, AF, json_dir, 
@@ -104,7 +119,7 @@ def extract_feats_one_scene(scene_fn, AF, json_dir, metafeat_dir, overwrite=Fals
             cPickle.dump(cur_features, cur_feat_fp)
             
 def create_feat_matrix(AF, json_dir, metafeat_dir, feat_dir,
-                       feat_fn_base, overwrite=False):
+                       feat_fn_base, relation=False, overwrite=False):
     
     tags = ['scene-level', 'Doll01'] # Filter based on these
     tags = None # Filter nothing (i.e., keep all features)
@@ -112,10 +127,14 @@ def create_feat_matrix(AF, json_dir, metafeat_dir, feat_dir,
     keep_or_remove = 'keep'
     #keep_or_remove = 'remove'
     
-    
-    base_name = ('{}_{}'
+    if relation:
+        rel_str = '_relationFeats'
+    else:
+        rel_str = ''
+    base_name = ('{}{}_{}'
                  '_gmmAbsK-{:02d}_gmmRelK-{:02d}'
                  '_{}_instances-{}').format(feat_fn_base,
+                                            rel_str,
                                             AF.scale_str,
                                             AF.gmm_abs_k,
                                             AF.gmm_rel_k,
@@ -152,7 +171,7 @@ def create_feat_matrix(AF, json_dir, metafeat_dir, feat_dir,
             json.dump(json_files, fp, indent=4, separators=(',', ': '))
         
         feats, feat_names = collect_feats(AF, json_files, metafeat_dir, 
-                                            tags, keep_or_remove)
+                                            tags, keep_or_remove, relation=relation)
 
         # TODO Save as cross-language-compatible format
         np.save(feat_file, feats)
@@ -167,16 +186,22 @@ def create_feat_matrix(AF, json_dir, metafeat_dir, feat_dir,
             json.dump(feat_unq_names, fp, indent=4, separators=(',', ': '))
 
 def collect_feats(AF, json_files, metafeat_dir, 
-                     tags=None, keep_or_remove=None):
+                     tags=None, keep_or_remove=None, relation=False):
     all_feats = []
     get_names = True
+    
+    if relation:
+        rel_str = '_relationFeats'
+    else:
+        rel_str = ''
     
     for scene_fn in json_files:
         filename, file_extension = os.path.splitext(scene_fn)
         ext = 'cpickle'
-        metafeat_fn = ('{}_{}'
+        metafeat_fn = ('{}{}_{}'
                        '_gmmAbsK-{:02d}_gmmRelK-{:02d}'
                        '_{}_instances-{}.{}').format(filename,
+                                                     rel_str,
                                                      AF.scale_str,
                                                      AF.gmm_abs_k,
                                                      AF.gmm_rel_k,
@@ -210,7 +235,7 @@ def collect_feats(AF, json_files, metafeat_dir,
 
 def get_num_objects_in_clipart_library(AF, scene_type=None, config_file='abstract_scenes_v002_data_scene_config.json'):
     
-    all_names, all_objs, all_kinds, _, _ = \
+    all_names, all_objs, all_kinds, _, _, _, _ = \
         AF.calc_clipart_library_details(config_file, scene_type=scene_type)
     
     if scene_type == None:
@@ -226,8 +251,8 @@ def main():
         abstract_features_helper.py create_gmms <jsondir> <outdir> [--overwrite --configdir=CD --scaled=SB --absK=K --relK=K]
         abstract_features_helper.py extract_features <jsondir> <outdir> [--overwrite --configdir=CD --instord=IO --scaled=SB --absK=K --relK=K --zScalar=ZB]
         abstract_features_helper.py extract_relation_features <jsondir> <outdir> [--overwrite --configdir=CD --instord=IO --scaled=SB --absK=K --relK=K --zScalar=ZB]
-        abstract_features_helper.py extract_features_parallel <jsondir> <outdir> <num_jobs> [--overwrite --configdir=CD --instord=IO --scaled=SB --absK=K --relK=K --zScalar=ZB]
-        abstract_features_helper.py create_feat_matrix <jsondir> <outdir> <featname> [--overwrite --configdir=CD --instord=IO --scaled=SB --absK=K --relK=K --zScalar=ZB]
+        abstract_features_helper.py extract_features_parallel <jsondir> <outdir> <num_jobs> [--relation --overwrite --configdir=CD --instord=IO --scaled=SB --absK=K --relK=K --zScalar=ZB]
+        abstract_features_helper.py create_feat_matrix <jsondir> <outdir> <featname> [--relation --overwrite --configdir=CD --instord=IO --scaled=SB --absK=K --relK=K --zScalar=ZB]
         abstract_features_helper.py clipart_library [--configdir=CD]
         
         
@@ -242,6 +267,7 @@ def main():
         --absK=K         Number of GMMs for absolute location [default: 9]
         --relK=K         Number of GMMs for relative location [default: 24]
         --zScalar=ZB     Should z/depth be scalar or one-hot [default: False]
+        --relation       Creates relation feature-based matrix
     '''
     
     #USE_DEF for --config_dir is /srv/share/abstract_scenes_v002/site_data/
@@ -314,16 +340,19 @@ def main():
             AF.create_gmms_models(all_scene_fns, overwrite=overwrite)
         elif (opts['extract_features']):
             extract_feats(AF, json_dir, metafeat_dir, overwrite=overwrite)
-        elif (opts['extract_features_parallel']):
-            num_jobs = int(opts['<num_jobs>'])
-            extract_feats_parallel(AF, json_dir, metafeat_dir, 
-                                   overwrite=overwrite, num_jobs=num_jobs)
         elif (opts['extract_relation_features']):
             extract_relation_feats(AF, json_dir, metafeat_dir, overwrite=overwrite)
+        elif (opts['extract_features_parallel']):
+            num_jobs = int(opts['<num_jobs>'])
+            rel = opts['--relation']
+            extract_feats_parallel(AF, json_dir, metafeat_dir, 
+                                   overwrite=overwrite, num_jobs=num_jobs,
+                                   relation=rel)
         elif (opts['create_feat_matrix']):
             feat_fn_base = opts['<featname>']
+            rel = opts['--relation']
             create_feat_matrix(AF, json_dir, metafeat_dir, 
-                               feat_dir, feat_fn_base, overwrite=overwrite)
+                               feat_dir, feat_fn_base, relation=rel, overwrite=overwrite)
         else:
             print("Not a valid command.")
 
