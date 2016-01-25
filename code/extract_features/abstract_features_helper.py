@@ -84,8 +84,8 @@ def extract_feats(AF, json_dir, metafeat_dir, overwrite=False):
     AF.sort_nicely(all_scene_fns)
     
     for scene_fn in all_scene_fns:
-        extract_features_one_scene(scene_fn, AF,
-                                   json_dir, metafeat_dir, overwrite)
+        extract_feats_one_scene(scene_fn, AF,
+                                json_dir, metafeat_dir, overwrite)
 
 def extract_feats_one_scene(scene_fn, AF, json_dir, metafeat_dir, overwrite=False):
         
