@@ -8,6 +8,7 @@ import copy
 from collections import defaultdict
 import pdb
 import math
+import string
 
 import numpy as np
 import sklearn.mixture
@@ -99,6 +100,9 @@ class AbstractFeatures(object):
         self.max_human_expr = None
         self.max_animal_pose = None
         
+        self.category_info = None
+        self.name_to_cat_id = None
+
         self.prev_scene_config_file = ''
         self.DEBUG_PRINT = DEBUG_PRINT
         
@@ -419,6 +423,168 @@ class AbstractFeatures(object):
             uoi_name = '{}'.format(obj_name)
 
         return uoi_name
+
+    def calc_clipart_library_annotations(self, scene_config,
+                                         scene_type=None,
+                                         deform_types=None):
+
+        simple_name_pretty = {
+            u'hotdog': u'hot dog',
+            u'petbed': u'pet bed',
+            u'kitten': u'cat',
+            u'puppy': u'dog',
+            u'monkeybars': u'monkey bars',
+            u'gamesystem': u'game system',
+            u'diningchair': u'dining chair',
+            u'jumprope': u'jump rope',
+            u'buildingtoy': u'building toy',
+            u'pigeon': u'bird',
+            u'eagle': u'bird',
+            u'owl': u'bird',
+            u'duck': u'bird',
+            u'bluejay': u'bird',
+            u'robin': u'bird',
+            u'finch': u'bird',
+            u'hawk': u'bird',
+            u'dishessnack': u'plate',
+            u'teaset': u'tea set',
+            u'dogbone': u'dog bone',
+            u'dishesmeal': u'plate',
+            u'coffeetable': u'table',
+            u'endtable': u'table',
+            u'diningtable': u'table',
+            u'coatrack': u'coat rack',
+            u'popcan': u'pop can',
+            u'sofa': u'couch',
+        }
+
+        self.read_scene_config_file(scene_config)
+
+        # TODO Make a function of the configuration file
+        deform_types = {'human': 'deformable',
+                        'animal': 'nondeformable',
+                        'smallObject': 'nondeformable',
+                        'largeObject': 'nondeformable'}
+        cur_deform_types = deform_types
+
+        object_data_keys = self.object_data.keys()
+        object_data_keys.sort()
+
+        if 'human' in object_data_keys and 'animal' in object_data_keys:
+            temp = ['human', 'animal']
+            for key in object_data_keys:
+                if key not in temp:
+                    temp.append(key)
+            object_data_keys = temp
+
+        name_to_cat_id = {}
+
+        simple_name_dict = {}
+        cat_id = 0
+        supercategory_names = []
+        for obj_cat in object_data_keys:
+            obj_cat_data = self.object_data[obj_cat]
+            deform_type = obj_cat_data[cur_deform_types[obj_cat]]
+            self.debug_print(obj_cat)
+            self.debug_print(deform_type.keys())
+
+            for atype in deform_type['type']:
+                scenes = atype['availableScene']
+                if scene_type is None:
+                    avail = True
+                else:
+                    avail = False
+                    for scene in scenes:
+                        if scene_type in scene['scene']:
+                            avail = True
+                            break
+
+                if avail:
+                    obj_name = atype['name']
+                    simple_name = ''.join([ch for ch in obj_name if ch not in string.digits]).lower()
+
+                    if simple_name in simple_name_pretty:
+                        simple_name = simple_name_pretty[simple_name]
+
+                    # TODO Also need to check for deformable for human?
+                    # If non-deformable people, might be different styles
+                    # (e.g., clothes)
+                    if obj_cat != 'human' and obj_cat != 'animal':
+                        if simple_name not in simple_name_dict:
+                            cat_id += 1
+                            if obj_cat == 'smallObject':
+                                new_obj_cat = u'small object'
+                            elif obj_cat == 'largeObject':
+                                new_obj_cat = u'large object'
+                            else:
+                                new_obj_cat = obj_cat
+
+                            simple_name_dict[simple_name] = {'cat_id': cat_id, 'supercategory': new_obj_cat}
+                            if new_obj_cat not in supercategory_names:
+                                    supercategory_names.append(new_obj_cat)
+                    else:
+                        if obj_cat == 'human':
+                            if simple_name == 'doll':
+                                new_obj_cat = u'person'
+
+                            if new_obj_cat not in simple_name_dict:
+                                cat_id += 1
+                                simple_name_dict[new_obj_cat] = {'cat_id': cat_id, 'supercategory': new_obj_cat}
+                                if new_obj_cat not in supercategory_names:
+                                    supercategory_names.append(new_obj_cat)
+
+                            simple_name = new_obj_cat
+                        elif obj_cat == 'animal':
+                            new_obj_cat = u'animal'
+                            if simple_name not in simple_name_dict:
+                                cat_id += 1
+                                simple_name_dict[simple_name] = {'cat_id': cat_id, 'supercategory': new_obj_cat}
+
+                                if new_obj_cat not in supercategory_names:
+                                    supercategory_names.append(new_obj_cat)
+
+                    name_to_cat_id[obj_name] = simple_name_dict[simple_name]['cat_id']
+
+        # Alphabetize the categories (within a supercategory)
+        supercategory_groups = {}
+        for key, val in simple_name_dict.iteritems():
+            sc = val['supercategory']
+            if sc not in supercategory_groups:
+                supercategory_groups[sc] = []
+            supercategory_groups[sc].append(key)
+
+        cat_id = 0
+        cat_id_mapping = {}
+        for sc in supercategory_names:
+            group = supercategory_groups[sc]
+            group.sort()
+            for name in group:
+                cat_id += 1
+                old_cat_id = simple_name_dict[name]['cat_id']
+                cat_id_mapping[old_cat_id] = cat_id
+
+        category_info = []
+        for idx in range(1, len(simple_name_dict)+1):
+            for key, val in simple_name_dict.iteritems():
+                if idx == cat_id_mapping[val['cat_id']]:
+                    info = { 'cat_id': idx,
+                            'supercategory': val['supercategory'],
+                            'name': key,
+                           }
+                    category_info.append(info)
+        for name, cat_id in name_to_cat_id.iteritems():
+            name_to_cat_id[name] = cat_id_mapping[cat_id]
+
+        self.debug_print('\n')
+        if self.DEBUG_PRINT:
+            for obj in category_info:
+                self.debug_print(obj)
+            self.debug_print(len(category_info))
+            for obj in name_to_cat_id:
+                self.debug_print((name_to_cat_id[obj], obj))
+            self.debug_print(len(name_to_cat_id))
+
+        return (category_info, name_to_cat_id)
     
     def get_all_clipart_objects(self, cur_scene):
 
@@ -539,6 +705,46 @@ class AbstractFeatures(object):
 
         return all_objs, human_properties, doll_properties
     
+    def extract_one_scene_annotations(self, data):
+
+        try:
+            cur_scene = data['scene']
+            image_id = data['id']
+        except:
+            print('XRT type')
+            cur_scene = data
+            image_id = 1
+
+        self.read_scene_config_file(cur_scene['sceneConfigFile'])
+        cur_scene_type = cur_scene['sceneType']
+        cur_scene_config = self.scene_config_data[cur_scene_type]
+
+        assert cur_scene_config['maxNumObj'] == 100, 'max no. objects different'
+
+        if self.category_info is None or self.name_to_cat_id is None:
+            self.category_info, self.name_to_cat_id = \
+                self.calc_clipart_library_annotations(cur_scene['sceneConfigFile'],
+                                                      scene_type=None)
+
+        cur_avail_obj = cur_scene['availableObject']
+
+        # assuming maxNumObj == 100
+        ann_idx = image_id * 100
+        ann_objs = []
+        for objs in cur_avail_obj:
+            for obj in objs['instance']:
+                if obj['present']:
+                    ann_obj = {
+                        'image_id': image_id,
+                        'id': ann_idx,
+                        'category_id': self.name_to_cat_id[obj['name']],
+                        'position': [obj['x'], obj['y']],
+                    }
+                    ann_idx += 1
+                    ann_objs.append(ann_obj)
+
+        return ann_objs
+
     def extract_one_scene_relation_feats(self, data, 
                                          primary_obj=None, second_obj=None,
                                          scene_type=None):

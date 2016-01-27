@@ -232,16 +232,43 @@ def collect_feats(AF, json_files, metafeat_dir,
     return all_feats, feat_names
 
 def get_num_objects_in_clipart_library(AF, scene_type=None, config_file='abstract_scenes_v002_data_scene_config.json'):
-    
+
     all_names, all_objs, all_kinds, _, _, _, _ = \
         AF.calc_clipart_library_details(config_file, scene_type=scene_type)
-    
+
     if scene_type == None:
         print("Across all scene types")
     else:
         print("For the {} scene type".format(scene_type))
     print('\tNumber of objects in clipart library: {}'.format(all_objs))
     print('\tNumber of kinds of objects in clipart library: {}'.format(all_kinds))
+
+def extract_annotations(AF, json_dir, ann_dir, overwrite=False):
+
+    if 'train2015' in json_dir:
+        fn = 'abstract_v002_instances_train2015.json'
+    elif 'val2015' in json_dir:
+        fn = 'abstract_v002_instances_val2015.json'
+    elif 'test2015' in json_dir:
+        fn = 'abstract_v002_instances_test2015.json'
+    else:
+        fn = 'abstract_v002_instances_???.json'
+    ann_file = os.path.join(ann_dir, fn)
+
+    if not os.path.isfile(ann_file) or overwrite == True:
+
+        all_scene_fns = glob.glob(os.path.join(json_dir, '*.json'))
+        AF.sort_nicely(all_scene_fns)
+
+        all_anns = []
+        for scene_fn in all_scene_fns:
+            with open(scene_fn, 'rb') as jf:
+                cur_scene = json.load(jf)
+            cur_anns = AF.extract_one_scene_annotations(cur_scene)
+            all_anns.extend(cur_anns)
+
+        with open(ann_file, 'w') as ofp:
+            json.dump(all_anns, ofp)
 
 def main():
     '''
@@ -252,7 +279,7 @@ def main():
         abstract_features_helper.py extract_features_parallel <jsondir> <outdir> <num_jobs> [--relation --overwrite --configdir=CD --instord=IO --scaled=SB --absK=K --relK=K --zScalar=ZB]
         abstract_features_helper.py create_feat_matrix <jsondir> <outdir> <featname> [--relation --overwrite --configdir=CD --instord=IO --scaled=SB --absK=K --relK=K --zScalar=ZB]
         abstract_features_helper.py clipart_library [--configdir=CD]
-        
+        abstract_features_helper.py annotations <jsondir> <outdir> [--overwrite --configdir=CD]
         
     Options:
         <jsondir>        Directory to scene JSON files to run on
@@ -287,6 +314,13 @@ def main():
         get_num_objects_in_clipart_library(AF, scene_type='Living')
         get_num_objects_in_clipart_library(AF, scene_type='Park')
         get_num_objects_in_clipart_library(AF, scene_type=None)
+    elif (opts['annotations']):
+        AF = af.AbstractFeatures(config_folder)
+        af.dir_path(opts['<outdir>'])
+        extract_annotations(AF,
+                            opts['<jsondir>'],
+                            opts['<outdir>'],
+                            opts['--overwrite'])
     else:
 
         if opts['create_gmms']:

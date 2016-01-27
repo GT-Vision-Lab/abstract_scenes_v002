@@ -14,10 +14,12 @@ configDir='../../site_data/'
 else
 num_jobs=50
 sceneJSONGMMDir='/srv/share/vqa/release_data/abstract_v002/scene_json/scene_train2015_indv/'
-sceneJSONFeatDir='/srv/share/vqa/release_data/abstract_v002/scene_json/scene_indv/'
+#sceneJSONFeatDir='/srv/share/vqa/release_data/abstract_v002/scene_json/scene_indv/'
+sceneJSONFeatDir='/srv/share/vqa/release_data/abstract_v002/scene_json/scene_val2015_indv/'
 feat_base='abstract_v002'
 inst_ord='random'
-outputDataDir='/srv/share/vqa/release_data/abstract_v002/scene_json/features_v3/'
+#outputDataDir='/srv/share/vqa/release_data/abstract_v002/scene_json/features_v3/'
+outputDataDir='/srv/share/vqa/release_data/abstract_v002/scene_json/annotations/'
 configDir='/srv/share/abstract_scenes_v002/site_data/'
 fi
 
@@ -27,6 +29,7 @@ gmm_rel_K=24
 z_scalar='False'
 
 calc_gmms=0
+calc_anns=1
 calc_feats_single=0
 calc_feats_parallel=0
 calc_feats_matrix=0
@@ -36,6 +39,14 @@ calc_relation_feats_matrix=0
 
 python abstract_features_helper.py clipart_library \
         --configdir=$configDir
+
+if [ $calc_anns -gt 0 ]
+then
+    python abstract_features_helper.py annotations \
+            $sceneJSONFeatDir \
+            $outputDataDir \
+            --configdir=$configDir
+fi
 
 if [ $calc_gmms -gt 0 ]
 then
