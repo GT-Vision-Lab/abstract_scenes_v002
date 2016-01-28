@@ -567,7 +567,7 @@ class AbstractFeatures(object):
         for idx in range(1, len(simple_name_dict)+1):
             for key, val in simple_name_dict.iteritems():
                 if idx == cat_id_mapping[val['cat_id']]:
-                    info = { 'cat_id': idx,
+                    info = { 'id': idx,
                             'supercategory': val['supercategory'],
                             'name': key,
                            }
@@ -710,10 +710,13 @@ class AbstractFeatures(object):
         try:
             cur_scene = data['scene']
             image_id = data['id']
+            file_name = data['file_name']
         except:
+            # TODO Fix this for the relation data
             print('XRT type')
             cur_scene = data
             image_id = 1
+            file_name = 'ERROR'
 
         self.read_scene_config_file(cur_scene['sceneConfigFile'])
         cur_scene_type = cur_scene['sceneType']
@@ -743,7 +746,7 @@ class AbstractFeatures(object):
                     ann_idx += 1
                     ann_objs.append(ann_obj)
 
-        return ann_objs
+        return ({'file_name': file_name, 'id': image_id}, self.category_info, ann_objs)
 
     def extract_one_scene_relation_feats(self, data, 
                                          primary_obj=None, second_obj=None,

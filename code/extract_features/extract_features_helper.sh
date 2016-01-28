@@ -28,8 +28,8 @@ gmm_abs_K=9
 gmm_rel_K=24
 z_scalar='False'
 
+calc_anns=0
 calc_gmms=0
-calc_anns=1
 calc_feats_single=0
 calc_feats_parallel=0
 calc_feats_matrix=0

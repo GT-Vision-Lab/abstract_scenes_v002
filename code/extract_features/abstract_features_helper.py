@@ -260,15 +260,19 @@ def extract_annotations(AF, json_dir, ann_dir, overwrite=False):
         all_scene_fns = glob.glob(os.path.join(json_dir, '*.json'))
         AF.sort_nicely(all_scene_fns)
 
+        all_img_ids = []
         all_anns = []
+        categories = None
         for scene_fn in all_scene_fns:
             with open(scene_fn, 'rb') as jf:
                 cur_scene = json.load(jf)
-            cur_anns = AF.extract_one_scene_annotations(cur_scene)
+            img_id, categories, cur_anns = AF.extract_one_scene_annotations(cur_scene)
+            all_img_ids.append(img_id)
             all_anns.extend(cur_anns)
 
+        ann_file_data = {'images': all_img_ids, 'categories': categories, 'annotations': all_anns}
         with open(ann_file, 'w') as ofp:
-            json.dump(all_anns, ofp)
+            json.dump(ann_file_data, ofp)
 
 def main():
     '''
