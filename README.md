@@ -1,9 +1,8 @@
 # abstract_scenes_v002
-<img src="http://visualqa.org/data/abstract_v002/scene_img/img/4.png" alt="Example scene" width="45%"/>
-<img src="http://visualqa.org/data/abstract_v002/scene_img/img/55.png" alt="Example scene" width="45%"/>
+<img src="https://s3.amazonaws.com/cvmlp/vqa/abstract_v002/scene_img/img/4.png" alt="Example scene" width="45%"/>
+<img src="https://s3.amazonaws.com/cvmlp/vqa/abstract_v002/scene_img/img/55.png" alt="Example scene" width="45%"/>
 
-The second version of the interface for the [Abstract Scenes research project](https://vision.ece.vt.edu/clipart/).
-The master branch of the interface can be found [here](https://vision.ece.vt.edu/abstract_scenes_v002/site/abstract_scenes_v002.html).
+This repo contains the second version of the interface for the Abstract Scenes research project under Larry Zitnick and Devi Parikh.
 
 ## Scene JSON Format
 
@@ -43,9 +42,9 @@ For deformable people, they also have the following keys/fields:
 
 ## Interface Images
 To use the web interface (or render scenes in general), you will need to download the images.
-You can find the majority of the images [here](https://vision.ece.vt.edu/abstract_scenes_v002/site_pngs/site_pngs_without_HumanNondeformable.zip).
+You can find the majority of the images [here](https://drive.google.com/file/d/1Is5PKqepYs_VMoM6lnL5ENDtWuAXULf8/view).
 If you need the nondeformable human images (1.5GB) (not needed for the VQA dataset), 
-you can find them [here](https://vision.ece.vt.edu/abstract_scenes_v002/site_pngs/site_pngs_just_HumanNondeformable.zip).
+you can find them [here](https://drive.google.com/file/d/1QKt5ottCEtTlbS8MVhPKXr2MDVCfK3rd/view).
 These images should be placed in a folder called `site_pngs/`.
 If you don't feel like downloading the images and know you'll have Internet,
 you can uncomment the following line in `abstract_scenes_v002_head.js`:
